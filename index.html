@@ -186,10 +186,6 @@
   .presence-avatar{width:18px;height:18px;border-radius:50%;border:1.5px solid #34d399}
   .presence-dot{width:6px;height:6px;border-radius:50%;background:#10B981;animation:pulse 1.5s infinite}
 
-  /* FIREBASE SETUP */
-  .setup-banner{padding:12px 18px;background:rgba(245,158,11,.08);border-bottom:1px solid rgba(245,158,11,.2);text-align:center;font-size:11px;color:#fbbf24;cursor:pointer;transition:background .15s}
-  .setup-banner:hover{background:rgba(245,158,11,.12)}
-  .setup-banner code{background:rgba(0,0,0,.3);padding:1px 6px;border-radius:4px;font-size:10px}
 </style>
 </head>
 <body>
@@ -209,11 +205,6 @@
 <div class="presence-bar" id="presenceBar">
   <span class="presence-dot"></span>
   <span id="presenceText"></span>
-</div>
-
-<!-- SETUP BANNER (Firebase 미설정 시) -->
-<div class="setup-banner" id="setupBanner" style="display:none" onclick="openSetupModal()">
-  ⚠️ Firebase 연동 미설정 — 탭하여 설정하기 (오프라인 모드로 동작 중)
 </div>
 
 <div class="header">
@@ -398,42 +389,6 @@
     <div class="modal-actions" id="dayModalActions">
       <button class="modal-btn modal-btn-cancel" onclick="closeDayModal()">취소</button>
       <button class="modal-btn modal-btn-save" onclick="saveDay()">추가</button>
-    </div>
-  </div>
-</div>
-
-<!-- Firebase 설정 모달 -->
-<div class="modal-overlay" id="setupModalOverlay" onclick="if(event.target===this)closeSetupModal()">
-  <div class="modal">
-    <div class="modal-title">
-      <span>🔧 Firebase 설정</span>
-      <button class="modal-close" onclick="closeSetupModal()">✕</button>
-    </div>
-    <div style="font-size:11px;color:#94a3b8;margin-bottom:14px;line-height:1.7">
-      Firebase Console에서 프로젝트 생성 후 웹 앱 설정값을 입력하세요.<br>
-      <span style="color:#64748b">Authentication → Google 로그인 활성화 필요</span><br>
-      <span style="color:#64748b">Realtime Database → 생성 필요</span>
-    </div>
-    <div class="field-group">
-      <div class="field-label">API Key</div>
-      <input class="field-input" id="s-apiKey" placeholder="AIzaSy...">
-    </div>
-    <div class="field-group">
-      <div class="field-label">Auth Domain</div>
-      <input class="field-input" id="s-authDomain" placeholder="your-project.firebaseapp.com">
-    </div>
-    <div class="field-group">
-      <div class="field-label">Database URL</div>
-      <input class="field-input" id="s-databaseURL" placeholder="https://your-project-default-rtdb.firebaseio.com">
-    </div>
-    <div class="field-group">
-      <div class="field-label">Project ID</div>
-      <input class="field-input" id="s-projectId" placeholder="your-project-id">
-    </div>
-    <div class="modal-actions">
-      <button class="modal-btn modal-btn-cancel" onclick="closeSetupModal()">취소</button>
-      <button class="modal-btn modal-btn-delete" onclick="clearFirebaseConfig()" style="flex:.5">초기화</button>
-      <button class="modal-btn modal-btn-save" onclick="saveFirebaseConfig()">저장 & 연결</button>
     </div>
   </div>
 </div>
@@ -684,20 +639,18 @@ let fbConnected = false;
 let isSyncingFromRemote = false; // 원격 변경 수신 중 플래그 (무한루프 방지)
 let lastSyncTimestamp = 0;
 
-function getFirebaseConfig() {
-  try {
-    const c = localStorage.getItem('travel_fb_config');
-    return c ? JSON.parse(c) : null;
-  } catch(e) { return null; }
-}
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBPPr7VX6VHXAmx-jRdEjVcZzAbra9EbLs",
+  authDomain: "hosing-5913f.firebaseapp.com",
+  databaseURL: "https://hosing-5913f-default-rtdb.firebaseio.com",
+  projectId: "hosing-5913f",
+  storageBucket: "hosing-5913f.firebasestorage.app",
+  messagingSenderId: "445332229155",
+  appId: "1:445332229155:web:eddbe748e4df89769af596"
+};
 
 function initFirebase() {
-  const config = getFirebaseConfig();
-  if (!config) {
-    document.getElementById('setupBanner').style.display = '';
-    updateSyncUI('offline');
-    return false;
-  }
+  const config = FIREBASE_CONFIG;
   try {
     fbApp = firebase.initializeApp(config);
     fbAuth = firebase.auth();
@@ -737,43 +690,6 @@ function initFirebase() {
     updateSyncUI('offline');
     return false;
   }
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  FIREBASE SETUP MODAL
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function openSetupModal() {
-  const config = getFirebaseConfig() || {};
-  document.getElementById('s-apiKey').value = config.apiKey || '';
-  document.getElementById('s-authDomain').value = config.authDomain || '';
-  document.getElementById('s-databaseURL').value = config.databaseURL || '';
-  document.getElementById('s-projectId').value = config.projectId || '';
-  document.getElementById('setupModalOverlay').classList.add('visible');
-}
-function closeSetupModal() {
-  document.getElementById('setupModalOverlay').classList.remove('visible');
-}
-function saveFirebaseConfig() {
-  const config = {
-    apiKey: document.getElementById('s-apiKey').value.trim(),
-    authDomain: document.getElementById('s-authDomain').value.trim(),
-    databaseURL: document.getElementById('s-databaseURL').value.trim(),
-    projectId: document.getElementById('s-projectId').value.trim(),
-  };
-  if (!config.apiKey || !config.databaseURL) {
-    showToast('API Key와 Database URL은 필수입니다');
-    return;
-  }
-  localStorage.setItem('travel_fb_config', JSON.stringify(config));
-  closeSetupModal();
-  showToast('Firebase 설정 저장됨 — 새로고침합니다');
-  setTimeout(() => location.reload(), 800);
-}
-function clearFirebaseConfig() {
-  localStorage.removeItem('travel_fb_config');
-  showToast('Firebase 설정 초기화됨');
-  closeSetupModal();
-  setTimeout(() => location.reload(), 800);
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
