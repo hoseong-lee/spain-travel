@@ -703,7 +703,6 @@ function initFirebase() {
     return true;
   } catch(e) {
     console.error('Firebase init error:', e);
-    document.getElementById('setupBanner').style.display = '';
     updateSyncUI('offline');
     return false;
   }
@@ -713,11 +712,16 @@ function initFirebase() {
 //  AUTH
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function signIn() {
-  if (!fbAuth) { showToast('Firebase 설정을 먼저 해주세요'); openSetupModal(); return; }
+  if (!fbAuth) { showToast('Firebase 연결 실패 — 새로고침 해주세요'); return; }
   const provider = new firebase.auth.GoogleAuthProvider();
   fbAuth.signInWithPopup(provider).catch(e => {
-    console.error('Auth error:', e);
-    showToast('로그인 실패: ' + e.message);
+    // 팝업 차단 시 리다이렉트 방식으로 재시도 (모바일 대응)
+    if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
+      fbAuth.signInWithRedirect(provider);
+    } else {
+      console.error('Auth error:', e);
+      showToast('로그인 실패: ' + e.message);
+    }
   });
 }
 function signOut() {
@@ -918,6 +922,12 @@ function loadFromLocal() {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  TOAST
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
