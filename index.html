@@ -130,9 +130,22 @@
   .presence-bar{display:none;align-items:center;gap:5px;padding:3px 14px;background:rgba(16,185,129,.06);border-bottom:1px solid rgba(16,185,129,.1);font-size:9px;color:#34d399}.presence-bar.visible{display:flex}.presence-avatar{width:16px;height:16px;border-radius:50%;border:1.5px solid #34d399}.presence-dot{width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 1.5s infinite}
   .weather-bar{display:flex;gap:12px;padding:8px 18px;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.04);scrollbar-width:none}.weather-bar::-webkit-scrollbar{display:none}
   .weather-card{flex-shrink:0;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);text-align:center;min-width:100px}.weather-city{font-size:10px;font-weight:700;color:#f1f5f9}.weather-icon{font-size:20px;margin:2px 0}.weather-temp{font-size:10px;color:#F5A623;font-weight:600}.weather-desc{font-size:9px;color:#64748b}
+  .login-gate{position:fixed;inset:0;z-index:9999;background:#0f172a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .3s}.login-gate.hidden{opacity:0;pointer-events:none}
+  .login-gate-icon{font-size:64px}.login-gate-title{font-size:22px;font-weight:800;color:#f1f5f9}.login-gate-sub{font-size:13px;color:#64748b;text-align:center;line-height:1.6}
+  .login-gate-btn{padding:14px 32px;border-radius:14px;border:none;background:linear-gradient(135deg,#3B82F6,#8B5CF6);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 20px rgba(59,130,246,.3)}.login-gate-btn:hover{transform:scale(1.03)}.login-gate-btn:active{transform:scale(.98)}
+  .login-gate-error{font-size:11px;color:#EF4444;min-height:16px}
+  .app-content{display:none}.app-content.visible{display:block}
 </style>
 </head>
 <body>
+<div class="login-gate" id="loginGate">
+  <div class="login-gate-icon">✈️</div>
+  <div class="login-gate-title">스페인 · 포르투갈 여행 플래너</div>
+  <div class="login-gate-sub">2026.09.13 — 09.26 · 14일<br>로그인하여 일정을 확인하세요</div>
+  <button class="login-gate-btn" onclick="signIn()">🔑 Google 로그인</button>
+  <div class="login-gate-error" id="loginError"></div>
+</div>
+<div class="app-content" id="appContent">
 <div class="auth-bar"><div id="authContent"><button class="auth-btn auth-btn-login" onclick="signIn()">🔑 Google 로그인</button></div><div class="sync-status" id="syncStatus"><span class="sync-dot offline" id="syncDot"></span><span id="syncText">오프라인</span></div></div>
 <div class="presence-bar" id="presenceBar"><span class="presence-dot"></span><span id="presenceText"></span></div>
 <div class="header">
@@ -234,6 +247,7 @@
     <div class="modal-actions"><button class="modal-btn modal-btn-cancel" onclick="closeDayModal()">취소</button><button class="modal-btn modal-btn-save" onclick="saveDay()">추가</button></div>
   </div>
 </div>
+</div><!-- /app-content -->
 <div class="toast" id="toast"></div>
 <script>
 // ══════════ DATA ══════════
@@ -272,13 +286,13 @@ function toggleCurrency(){const w=document.getElementById('currencyWidget');w.cl
 function calcCurrency(from){const e=document.getElementById('eurInput'),k=document.getElementById('krwInput');if(from==='eur'){const v=parseFloat(e.value)||0;k.value=v?Math.round(v*EUR_RATE).toLocaleString():''}else{const v=parseFloat(k.value.replace(/,/g,''))||0;e.value=v?(v/EUR_RATE).toFixed(2):''}}
 
 // ══════════ FIREBASE ══════════
-function initFirebase(){try{fbApp=firebase.initializeApp(FIREBASE_CONFIG);fbAuth=firebase.auth();fbDb=firebase.database();fbDb.ref('.info/connected').on('value',s=>{fbConnected=s.val()===true;if(fbConnected&&fbUser){updateSyncUI('online');setupPresence()}else if(!fbConnected)updateSyncUI('offline')});fbAuth.onAuthStateChanged(user=>{if(user&&ALLOWED_EMAILS.length>0&&!ALLOWED_EMAILS.includes(user.email)){fbAuth.signOut();fbUser=null;updateAuthUI();updateSyncUI('offline');showToast('접근 권한이 없는 계정');return}fbUser=user;updateAuthUI();if(user){updateSyncUI(fbConnected?'online':'offline');setupPresence();fetchRemoteThenSync().then(()=>listenForChanges())}else{updateSyncUI('offline');detachListeners()}});return true}catch(e){console.error(e);updateSyncUI('offline');return false}}
-function signIn(){if(!fbAuth){showToast('연결 실패 — 새로고침');return}const p=new firebase.auth.GoogleAuthProvider();fbAuth.signInWithPopup(p).catch(e=>{if(e.code==='auth/popup-blocked'||e.code==='auth/popup-closed-by-user')fbAuth.signInWithRedirect(p);else showToast('로그인 실패')})}
+function initFirebase(){try{fbApp=firebase.initializeApp(FIREBASE_CONFIG);fbAuth=firebase.auth();fbDb=firebase.database();fbDb.ref('.info/connected').on('value',s=>{fbConnected=s.val()===true;if(fbConnected&&fbUser){updateSyncUI('online');setupPresence()}else if(!fbConnected)updateSyncUI('offline')});fbAuth.onAuthStateChanged(user=>{if(user&&ALLOWED_EMAILS.length>0&&!ALLOWED_EMAILS.includes(user.email)){fbAuth.signOut();fbUser=null;updateAuthUI();updateSyncUI('offline');document.getElementById('loginError').textContent='접근 권한이 없는 계정입니다';return}fbUser=user;updateAuthUI();if(user){document.getElementById('loginGate').classList.add('hidden');document.getElementById('appContent').classList.add('visible');document.getElementById('loginError').textContent='';updateSyncUI(fbConnected?'online':'offline');setupPresence();fetchRemoteThenSync().then(()=>{render();listenForChanges()})}else{document.getElementById('loginGate').classList.remove('hidden');document.getElementById('appContent').classList.remove('visible');updateSyncUI('offline');detachListeners()}});return true}catch(e){console.error(e);updateSyncUI('offline');return false}}
+function signIn(){if(!fbAuth){document.getElementById('loginError').textContent='연결 실패 — 새로고침 해주세요';return}document.getElementById('loginError').textContent='';const p=new firebase.auth.GoogleAuthProvider();fbAuth.signInWithPopup(p).catch(e=>{if(e.code==='auth/popup-blocked'||e.code==='auth/popup-closed-by-user')fbAuth.signInWithRedirect(p);else document.getElementById('loginError').textContent='로그인 실패: '+e.message})}
 function signOut(){if(fbAuth)fbAuth.signOut();fbUser=null;updateAuthUI();updateSyncUI('offline');showToast('로그아웃')}
 function updateAuthUI(){const el=document.getElementById('authContent');if(fbUser){const p=fbUser.photoURL||'',n=fbUser.displayName||fbUser.email;el.innerHTML=`<div class="auth-user">${p?`<img class="auth-avatar" src="${p}">`:''}${esc(n)}</div><button class="auth-btn auth-btn-logout" onclick="signOut()">로그아웃</button>`}else el.innerHTML='<button class="auth-btn auth-btn-login" onclick="signIn()">🔑 로그인</button>'}
 function updateSyncUI(s){document.getElementById('syncDot').className='sync-dot '+s;document.getElementById('syncText').textContent={online:'동기화',offline:'오프라인',syncing:'동기화 중...'}[s]||'오프라인'}
 function getDataRef(){return fbDb?fbDb.ref('travel/itinerary'):null}
-async function fetchRemoteThenSync(){const ref=getDataRef();if(!ref)return;updateSyncUI('syncing');try{const snap=await ref.once('value');const r=snap.val();if(r&&r.days&&r.updatedAt){DAYS=r.days;saveToLocalOnly();lastSyncTimestamp=r.updatedAt;if(currentDay>=DAYS.length)currentDay=DAYS.length-1;render();updateSyncUI('online');showToast('클라우드 데이터 로드')}else syncToRemote()}catch(e){updateSyncUI('offline')}}
+async function fetchRemoteThenSync(){const ref=getDataRef();if(!ref)return;updateSyncUI('syncing');try{const snap=await ref.once('value');const r=snap.val();if(r&&r.days&&r.updatedAt){DAYS=r.days;saveToLocalOnly();lastSyncTimestamp=r.updatedAt;if(currentDay>=DAYS.length)currentDay=DAYS.length-1;updateSyncUI('online');showToast('클라우드 데이터 로드')}else{syncToRemote();showToast('초기 데이터 업로드')}}catch(e){updateSyncUI('offline')}}
 function syncToRemote(){if(!fbDb||!fbUser||isSyncingFromRemote)return;const ref=getDataRef();if(!ref)return;updateSyncUI('syncing');ref.set({days:DAYS,updatedBy:fbUser.uid,updatedByName:fbUser.displayName||fbUser.email,updatedAt:firebase.database.ServerValue.TIMESTAMP}).then(()=>{lastSyncTimestamp=Date.now();updateSyncUI('online')}).catch(()=>updateSyncUI('offline'))}
 function listenForChanges(){detachListeners();const ref=getDataRef();if(!ref)return;dataListener=ref.on('value',snap=>{const data=snap.val();if(!data||!data.days)return;if(data.updatedBy===fbUser?.uid)return;if(editMode){pendingRemoteData=data;showToast(`📡 ${data.updatedByName||'상대방'}님 수정 — 편집 후 반영`);return}isSyncingFromRemote=true;DAYS=data.days;saveToLocalOnly();lastSyncTimestamp=data.updatedAt||Date.now();if(currentDay>=DAYS.length)currentDay=DAYS.length-1;render();showToast(`📡 ${data.updatedByName||'상대방'}님이 수정`);isSyncingFromRemote=false})}
 function detachListeners(){if(dataListener){const r=getDataRef();if(r)r.off('value',dataListener);dataListener=null}}
@@ -383,7 +397,7 @@ function selectDay(i){currentDay=i;currentFilter='all';render();if(currentView==
 function setFilter(f){currentFilter=f;renderDayContent()}
 
 // ══════════ INIT ══════════
-loadFromLocal();render();updateDDay();renderWeather();initFirebase();
+updateDDay();renderWeather();initFirebase();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
