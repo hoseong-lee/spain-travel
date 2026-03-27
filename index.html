@@ -688,9 +688,11 @@ function initFirebase() {
       updateAuthUI();
       if (user) {
         updateSyncUI(fbConnected ? 'online' : 'offline');
-        listenForChanges();
         setupPresence();
-        syncToRemote();
+        // 로그인 시 Firebase 데이터를 먼저 확인 후 동기화
+        fetchRemoteThenSync().then(() => {
+          listenForChanges();
+        });
       } else {
         updateSyncUI('offline');
         detachListeners();
@@ -763,6 +765,35 @@ function getDataRef() {
   return fbDb ? fbDb.ref('travel/itinerary') : null;
 }
 
+// 로그인 시 Firebase 데이터를 먼저 가져와서 비교 후 동기화
+async function fetchRemoteThenSync() {
+  const ref = getDataRef();
+  if (!ref) return;
+  updateSyncUI('syncing');
+  try {
+    const snap = await ref.once('value');
+    const remote = snap.val();
+    if (remote && remote.days && remote.updatedAt) {
+      // Firebase에 데이터가 있으면 항상 Firebase 우선 (서버가 진실의 원천)
+      DAYS = remote.days;
+      saveToLocalOnly();
+      lastSyncTimestamp = remote.updatedAt;
+      if (currentDay >= DAYS.length) currentDay = DAYS.length - 1;
+      render();
+      if (currentView === 'map' && map) updateMap();
+      if (currentView === 'route') renderRouteView();
+      updateSyncUI('online');
+      showToast('클라우드에서 최신 데이터를 불러왔어요');
+    } else {
+      // Firebase에 데이터가 없으면 로컬 데이터를 올림
+      syncToRemote();
+    }
+  } catch(e) {
+    console.error('Fetch remote error:', e);
+    updateSyncUI('offline');
+  }
+}
+
 function syncToRemote() {
   if (!fbDb || !fbUser || isSyncingFromRemote) return;
   const ref = getDataRef();
@@ -775,11 +806,11 @@ function syncToRemote() {
     updatedAt: firebase.database.ServerValue.TIMESTAMP
   };
   ref.set(payload).then(() => {
+    lastSyncTimestamp = Date.now();
     updateSyncUI('online');
   }).catch(e => {
     console.error('Sync error:', e);
     updateSyncUI('offline');
-    showToast('동기화 실패 — 오프라인 저장됨');
   });
 }
 
@@ -793,14 +824,13 @@ function listenForChanges() {
     if (!data || !data.days) return;
 
     // 내가 방금 보낸 변경이면 무시
-    if (data.updatedBy === fbUser?.uid && data.updatedAt <= lastSyncTimestamp + 2000) return;
+    if (data.updatedBy === fbUser?.uid && Math.abs((data.updatedAt || 0) - lastSyncTimestamp) < 3000) return;
 
     isSyncingFromRemote = true;
     DAYS = data.days;
     saveToLocalOnly();
     lastSyncTimestamp = data.updatedAt || Date.now();
 
-    // 현재 day가 범위를 벗어나면 보정
     if (currentDay >= DAYS.length) currentDay = DAYS.length - 1;
     render();
     if (currentView === 'map' && map) updateMap();
@@ -869,8 +899,7 @@ function saveToLocalOnly() {
 }
 function saveToLocal() {
   saveToLocalOnly();
-  lastSyncTimestamp = Date.now();
-  syncToRemote(); // localStorage 저장 후 Firebase에도 push
+  syncToRemote();
 }
 function loadFromLocal() {
   try {
