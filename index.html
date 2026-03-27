@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="manifest.json">
 <title>🇪🇸 스페인·포르투갈 여행 플래너</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -14,1395 +16,358 @@
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap');
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:linear-gradient(170deg,#0f172a 0%,#1e293b 40%,#334155 100%);color:#e2e8f0;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-
-  /* HEADER */
   .header{background:linear-gradient(135deg,rgba(232,114,90,.15),rgba(46,134,171,.15),rgba(245,166,35,.15));border-bottom:1px solid rgba(255,255,255,.06);padding:14px 20px 10px;text-align:center;position:sticky;top:0;z-index:100;backdrop-filter:blur(20px)}
   .header-sub{font-size:9px;letter-spacing:3px;color:#64748b;text-transform:uppercase;margin-bottom:2px}
   .header-title{font-size:16px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(135deg,#E8725A,#F5A623,#2E86AB);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
   .header-date{font-size:10px;color:#475569;margin-top:2px}
-  .edit-mode-bar{display:none;background:rgba(245,158,11,0.12);border-top:1px solid rgba(245,158,11,0.3);padding:6px 18px;text-align:center;font-size:11px;color:#fbbf24;font-weight:600;letter-spacing:.5px}
-  .edit-mode-bar.visible{display:block}
-
-  /* VIEW TABS */
+  .dday{display:inline-block;background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);color:#F5A623;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;margin-left:6px}
+  .edit-mode-bar{display:none;background:rgba(245,158,11,0.12);border-top:1px solid rgba(245,158,11,0.3);padding:6px 18px;text-align:center;font-size:11px;color:#fbbf24;font-weight:600}.edit-mode-bar.visible{display:block}
   .view-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.15)}
-  .view-tab{flex:1;padding:10px;text-align:center;font-size:12px;font-weight:700;color:#64748b;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;font-family:inherit;background:none;border-top:none;border-left:none;border-right:none}
-  .view-tab.active{color:#F5A623;border-bottom-color:#F5A623}
-  .view-tab:hover{color:#94a3b8}
-
-  /* DAY SELECTOR */
-  .day-selector{display:flex;overflow-x:auto;gap:6px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.05);-ms-overflow-style:none;scrollbar-width:none}
-  .day-selector::-webkit-scrollbar{display:none}
-  .day-btn{flex-shrink:0;padding:7px 11px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#64748b;font-size:11px;font-weight:500;cursor:pointer;text-align:center;min-width:58px;transition:all .2s;line-height:1.35;font-family:inherit}
-  .day-btn.active{border-width:2px;font-weight:700}
-  .day-btn .day-num{font-size:9px;opacity:.6;margin-bottom:1px}
-
-  /* TOOLBAR */
-  .edit-toolbar{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.05);flex-wrap:wrap}
-  .toolbar-btn{padding:6px 12px;border-radius:10px;border:none;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
-  .btn-edit{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}
-  .btn-edit.active{background:rgba(245,158,11,.25)}
+  .view-tab{flex:1;padding:9px;text-align:center;font-size:11px;font-weight:700;color:#64748b;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;font-family:inherit;background:none;border-top:none;border-left:none;border-right:none}
+  .view-tab.active{color:#F5A623;border-bottom-color:#F5A623}.view-tab:hover{color:#94a3b8}
+  .day-selector{display:flex;overflow-x:auto;gap:6px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.05);scrollbar-width:none}.day-selector::-webkit-scrollbar{display:none}
+  .day-btn{flex-shrink:0;padding:7px 11px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#64748b;font-size:11px;font-weight:500;cursor:pointer;text-align:center;min-width:58px;transition:all .2s;line-height:1.35;font-family:inherit}.day-btn.active{border-width:2px;font-weight:700}.day-btn .day-num{font-size:9px;opacity:.6;margin-bottom:1px}
+  .edit-toolbar{display:flex;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.05);flex-wrap:wrap;font-size:11px}
+  .toolbar-btn{padding:5px 10px;border-radius:8px;border:none;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+  .btn-edit{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}.btn-edit.active{background:rgba(245,158,11,.25)}
   .btn-add{background:rgba(16,185,129,.12);color:#34d399;border:1px solid rgba(16,185,129,.3)}
   .btn-save{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
-  .btn-danger{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.25)}
   .btn-import{background:rgba(139,92,246,.12);color:#c4b5fd;border:1px solid rgba(139,92,246,.3)}
-  .toolbar-sep{width:1px;height:22px;background:rgba(255,255,255,.08);margin:0 2px}
-
-  /* DAY HEADER */
+  .btn-danger{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.25)}
+  .toolbar-sep{width:1px;height:20px;background:rgba(255,255,255,.08)}
   .day-header{padding:14px 18px 6px}
   .day-header-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-  .day-badge{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
-  .day-region{font-size:15px;font-weight:700;color:#f1f5f9}
-  .day-date-sub{font-size:11px;color:#475569;margin-top:2px}
-  .hotel-box{padding:8px 12px;border-radius:10px;background:rgba(139,92,246,.07);border:1px solid rgba(139,92,246,.18);font-size:11px;color:#c4b5fd;margin-bottom:10px;white-space:pre-line;line-height:1.5;cursor:pointer;transition:background .15s}
-  .hotel-box:hover{background:rgba(139,92,246,.13)}
-  .edit-mode .hotel-box{border-color:rgba(245,158,11,.4)}
-
-  /* FILTERS */
+  .day-badge{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+  .day-region{font-size:14px;font-weight:700;color:#f1f5f9}.day-date-sub{font-size:10px;color:#475569;margin-top:2px}
+  .day-weather{font-size:10px;color:#94a3b8;margin-top:1px}
+  .hotel-box{padding:8px 12px;border-radius:10px;background:rgba(139,92,246,.07);border:1px solid rgba(139,92,246,.18);font-size:11px;color:#c4b5fd;margin-bottom:10px;white-space:pre-line;line-height:1.5;cursor:pointer;transition:background .15s}.hotel-box:hover{background:rgba(139,92,246,.13)}.edit-mode .hotel-box{border-color:rgba(245,158,11,.4)}
+  .day-budget{padding:6px 12px;border-radius:8px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.15);font-size:10px;color:#F5A623;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
   .filters{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;padding:0 18px}
-  .filter-btn{padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:transparent;color:#64748b;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
-  .filter-btn.active{font-weight:700}
-
-  /* TIMELINE */
+  .filter-btn{padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:transparent;color:#64748b;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}.filter-btn.active{font-weight:700}
   .timeline{padding:10px 18px 30px}
-  .timeline-item{display:flex;gap:10px;position:relative}
-  .timeline-left{display:flex;flex-direction:column;align-items:center;width:46px;flex-shrink:0;padding-top:2px}
-  .timeline-time{font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px;font-variant-numeric:tabular-nums}
-  .timeline-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-  .timeline-line{width:1.5px;flex:1;min-height:16px}
+  .timeline-item{display:flex;gap:8px;position:relative}
+  .timeline-left{display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0;padding-top:2px}
+  .timeline-time{font-size:10px;font-weight:600;color:#64748b;margin-bottom:4px;font-variant-numeric:tabular-nums}
+  .timeline-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}.timeline-line{width:1.5px;flex:1;min-height:16px}
   .timeline-card{flex:1;border-radius:12px;padding:10px 12px;margin-bottom:8px;border-width:1px;border-style:solid;position:relative;transition:box-shadow .15s}
-  .edit-mode .timeline-card{cursor:pointer}
-  .edit-mode .timeline-card:hover{box-shadow:0 0 0 2px rgba(245,158,11,.5)}
-  .card-title{font-size:13px;font-weight:700;color:#f1f5f9;margin-bottom:3px;line-height:1.4}
-  .card-desc{font-size:11px;color:#94a3b8;line-height:1.65;white-space:pre-line}
-  .card-warn{display:inline-block;background:rgba(239,68,68,.12);color:#f87171;font-size:10px;padding:2px 6px;border-radius:4px;margin-top:4px;font-weight:600}
-  .confirmed{display:inline-block;background:rgba(16,185,129,.12);color:#34d399;font-size:10px;padding:2px 6px;border-radius:4px;margin-left:5px;font-weight:600}
-  .edit-indicator{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:5px;background:rgba(245,158,11,.2);display:none;align-items:center;justify-content:center;font-size:9px}
-  .edit-mode .edit-indicator{display:flex}
-
-  /* ADD ITEM */
-  .add-item-row{display:none;padding:8px 18px}
-  .add-item-row.visible{display:block}
-  .add-item-btn{width:100%;padding:9px;border-radius:10px;border:1.5px dashed rgba(16,185,129,.3);background:rgba(16,185,129,.04);color:#34d399;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
-  .add-item-btn:hover{background:rgba(16,185,129,.09);border-color:rgba(16,185,129,.5)}
-
-  /* MAP */
-  .map-container{display:none;height:calc(100vh - 260px);min-height:400px;position:relative}
-  .map-container.visible{display:block}
+  .timeline-card.checked-item{opacity:.5}
+  .edit-mode .timeline-card{cursor:pointer}.edit-mode .timeline-card:hover{box-shadow:0 0 0 2px rgba(245,158,11,.5)}
+  .card-top{display:flex;align-items:flex-start;gap:6px}
+  .card-checkbox{width:18px;height:18px;border-radius:5px;border:1.5px solid rgba(255,255,255,.2);background:transparent;cursor:pointer;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s;color:transparent}.card-checkbox.checked{background:rgba(16,185,129,.2);border-color:#10B981;color:#10B981}
+  .card-body{flex:1;min-width:0}
+  .card-title{font-size:12.5px;font-weight:700;color:#f1f5f9;margin-bottom:2px;line-height:1.4}.checked-item .card-title{text-decoration:line-through;color:#64748b}
+  .card-desc{font-size:10.5px;color:#94a3b8;line-height:1.6;white-space:pre-line}
+  .card-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;align-items:center}
+  .card-warn{display:inline-block;background:rgba(239,68,68,.12);color:#f87171;font-size:9px;padding:2px 6px;border-radius:4px;font-weight:600}
+  .confirmed{display:inline-block;background:rgba(16,185,129,.12);color:#34d399;font-size:9px;padding:2px 6px;border-radius:4px;font-weight:600}
+  .card-cost{display:inline-block;background:rgba(245,166,35,.1);color:#F5A623;font-size:9px;padding:2px 6px;border-radius:4px;font-weight:600}
+  .card-link{display:inline-flex;align-items:center;gap:3px;background:rgba(59,130,246,.1);color:#60a5fa;font-size:9px;padding:2px 6px;border-radius:4px;font-weight:600;text-decoration:none;cursor:pointer}.card-link:hover{background:rgba(59,130,246,.2)}
+  .card-memo{margin-top:4px;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);font-size:10px;color:#64748b;line-height:1.5;white-space:pre-line}
+  .card-gmaps{display:inline-flex;align-items:center;gap:3px;background:rgba(16,185,129,.1);color:#34d399;font-size:9px;padding:2px 6px;border-radius:4px;font-weight:600;text-decoration:none}.card-gmaps:hover{background:rgba(16,185,129,.2)}
+  .edit-indicator{position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:4px;background:rgba(245,158,11,.2);display:none;align-items:center;justify-content:center;font-size:8px}.edit-mode .edit-indicator{display:flex}
+  .add-item-row{display:none;padding:8px 18px}.add-item-row.visible{display:block}
+  .add-item-btn{width:100%;padding:9px;border-radius:10px;border:1.5px dashed rgba(16,185,129,.3);background:rgba(16,185,129,.04);color:#34d399;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}.add-item-btn:hover{background:rgba(16,185,129,.09)}
+  .map-container{display:none;height:calc(100vh - 220px);min-height:400px;position:relative}.map-container.visible{display:block}
   #map{width:100%;height:100%;z-index:1}
-  .map-legend{position:absolute;bottom:12px;left:12px;z-index:1000;background:rgba(30,41,59,.92);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px;font-size:11px;color:#94a3b8;backdrop-filter:blur(8px);max-width:220px}
-  .map-legend-title{font-weight:700;color:#f1f5f9;margin-bottom:6px;font-size:12px}
-  .map-legend-item{display:flex;align-items:center;gap:6px;margin-bottom:3px}
-  .map-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-  .map-day-info{position:absolute;top:12px;right:12px;z-index:1000;background:rgba(30,41,59,.92);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px;font-size:11px;color:#94a3b8;backdrop-filter:blur(8px)}
-  .map-day-info strong{color:#f1f5f9;font-size:12px}
-
-  /* ROUTE VIEW */
-  .route-container{display:none;padding:18px}
-  .route-container.visible{display:block}
-  .route-day-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;margin-bottom:12px;cursor:pointer;transition:all .2s}
-  .route-day-card:hover{border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.05)}
-  .route-day-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-  .route-day-badge{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
-  .route-day-title{font-size:14px;font-weight:700;color:#f1f5f9}
-  .route-day-date{font-size:11px;color:#475569}
-  .route-stops{display:flex;flex-direction:column;gap:4px}
-  .route-stop{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:11px;color:#94a3b8}
-  .route-stop-num{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0}
-  .route-stop-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .route-stop-time{font-size:10px;color:#64748b;font-variant-numeric:tabular-nums;flex-shrink:0}
-  .route-connector{display:flex;align-items:center;gap:4px;padding:0 0 0 8px;font-size:10px;color:#475569}
-  .route-connector-line{width:1px;height:12px;background:rgba(255,255,255,.1);margin-left:9px}
-  .route-summary{display:flex;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06)}
-  .route-stat{font-size:11px;color:#64748b}
-  .route-stat strong{color:#94a3b8}
-
-  /* MODAL */
-  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;backdrop-filter:blur(4px);align-items:flex-end;justify-content:center}
-  .modal-overlay.visible{display:flex}
-  .modal{background:#1e293b;border:1px solid rgba(255,255,255,.1);border-radius:20px 20px 0 0;padding:22px 20px 36px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto}
-  .modal-title{font-size:15px;font-weight:800;color:#f1f5f9;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
-  .modal-close{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.06);border:none;color:#94a3b8;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-  .field-group{margin-bottom:12px}
-  .field-label{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
-  .field-input,.field-textarea,.field-select{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#f1f5f9;font-family:inherit;font-size:13px;padding:9px 12px;outline:none;transition:border-color .15s}
-  .field-input:focus,.field-textarea:focus,.field-select:focus{border-color:rgba(245,158,11,.5)}
-  .field-textarea{resize:vertical;min-height:70px;line-height:1.6}
-  .field-select option{background:#1e293b}
-  .field-row{display:flex;gap:10px}
-  .field-row .field-group{flex:1}
-  .modal-actions{display:flex;gap:8px;margin-top:18px}
-  .modal-btn{flex:1;padding:11px;border-radius:12px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
-  .modal-btn-save{background:linear-gradient(135deg,#E8725A,#F5A623);color:#fff}
-  .modal-btn-cancel{background:rgba(255,255,255,.06);color:#94a3b8}
-  .modal-btn-delete{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.25)}
-  .checkbox-row{display:flex;gap:8px;align-items:center}
-  .checkbox-row input{width:16px;height:16px;accent-color:#F5A623}
-  .checkbox-row label{font-size:12px;color:#94a3b8}
-
-  /* TIPS */
-  .tips{padding:16px 18px;border-top:1px solid rgba(255,255,255,.05);background:rgba(0,0,0,.15)}
-  .tips-title{font-size:13px;font-weight:700;color:#f1f5f9;margin-bottom:8px}
-  .tips-body{font-size:11px;color:#94a3b8;line-height:1.9}
-  .tips-body .hl-y{color:#F59E0B} .tips-body .hl-p{color:#EC4899} .tips-body .hl-g{color:#10B981} .tips-body .hl-o{color:#F5A623} .tips-body .hl-b{color:#60A5FA}
-
-  /* TOAST */
-  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:#334155;border:1px solid rgba(255,255,255,.1);color:#f1f5f9;padding:10px 20px;border-radius:12px;font-size:12px;font-weight:600;opacity:0;transition:all .3s;z-index:300;white-space:nowrap;pointer-events:none}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
+  .map-controls{position:absolute;top:12px;left:12px;z-index:1000;display:flex;gap:6px}
+  .map-toggle{padding:6px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(30,41,59,.9);color:#94a3b8;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;backdrop-filter:blur(8px)}.map-toggle.active{background:rgba(245,166,35,.2);color:#F5A623;border-color:rgba(245,166,35,.4)}
+  .map-day-info{position:absolute;top:12px;right:12px;z-index:1000;background:rgba(30,41,59,.92);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 12px;font-size:10px;color:#94a3b8;backdrop-filter:blur(8px)}.map-day-info strong{color:#f1f5f9;font-size:11px}
+  .map-legend{position:absolute;bottom:12px;left:12px;z-index:1000;background:rgba(30,41,59,.92);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 12px;font-size:10px;color:#94a3b8;backdrop-filter:blur(8px);max-width:200px}.map-legend-title{font-weight:700;color:#f1f5f9;margin-bottom:4px;font-size:11px}.map-legend-item{display:flex;align-items:center;gap:5px;margin-bottom:2px}.map-legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+  .route-container{display:none;padding:18px}.route-container.visible{display:block}
+  .route-section-title{font-size:15px;font-weight:800;color:#f1f5f9;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+  .route-day-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;margin-bottom:12px;cursor:pointer;transition:all .2s}.route-day-card:hover{border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.05)}
+  .route-day-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .route-day-badge{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}
+  .route-day-title{font-size:13px;font-weight:700;color:#f1f5f9}.route-day-date{font-size:10px;color:#475569}
+  .route-stops{display:flex;flex-direction:column;gap:3px}.route-stop{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:10px;color:#94a3b8}
+  .route-stop-num{width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;flex-shrink:0}.route-stop-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.route-stop-time{font-size:9px;color:#64748b;flex-shrink:0}
+  .route-connector{padding:0 0 0 7px;font-size:9px;color:#475569}.route-connector-line{display:inline-block;width:1px;height:8px;background:rgba(255,255,255,.1);margin-right:4px;vertical-align:middle}
+  .route-summary{display:flex;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)}.route-stat{font-size:10px;color:#64748b}.route-stat strong{color:#94a3b8}
+  .optimize-bar{display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15)}
+  .optimize-btn{padding:5px 12px;border-radius:6px;border:none;background:rgba(59,130,246,.2);color:#60a5fa;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}.optimize-btn:hover{background:rgba(59,130,246,.3)}
+  .optimize-info{font-size:10px;color:#64748b;flex:1}
+  .budget-container{display:none;padding:18px}.budget-container.visible{display:block}
+  .budget-title{font-size:15px;font-weight:800;color:#f1f5f9;margin-bottom:14px}
+  .budget-total{padding:16px;border-radius:14px;background:linear-gradient(135deg,rgba(245,166,35,.08),rgba(232,114,90,.08));border:1px solid rgba(245,166,35,.2);margin-bottom:16px;text-align:center}
+  .budget-total-amount{font-size:28px;font-weight:800;color:#F5A623}.budget-total-label{font-size:11px;color:#94a3b8;margin-top:2px}
+  .budget-cats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+  .budget-cat{padding:10px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}.budget-cat-label{font-size:10px;color:#64748b}.budget-cat-amount{font-size:15px;font-weight:700;color:#f1f5f9;margin-top:2px}
+  .budget-day{padding:10px 14px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}.budget-day-name{font-size:11px;color:#94a3b8}.budget-day-amount{font-size:12px;font-weight:700;color:#f1f5f9}
+  .currency-widget{position:fixed;bottom:20px;right:16px;z-index:150;background:rgba(30,41,59,.95);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px;backdrop-filter:blur(12px);width:180px;display:none;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+  .currency-widget.visible{display:block}
+  .currency-toggle{position:fixed;bottom:20px;right:16px;z-index:149;width:40px;height:40px;border-radius:50%;background:rgba(245,166,35,.2);border:1px solid rgba(245,166,35,.4);color:#F5A623;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(0,0,0,.3)}
+  .currency-title{font-size:11px;font-weight:700;color:#f1f5f9;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+  .currency-close{background:none;border:none;color:#64748b;cursor:pointer;font-size:14px}
+  .currency-row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+  .currency-input{flex:1;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#f1f5f9;font-family:inherit;font-size:12px;outline:none;width:60px}
+  .currency-label{font-size:10px;color:#64748b;width:30px;text-align:center}
+  .currency-rate{font-size:9px;color:#475569;text-align:center;margin-top:4px}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;backdrop-filter:blur(4px);align-items:flex-end;justify-content:center}.modal-overlay.visible{display:flex}
+  .modal{background:#1e293b;border:1px solid rgba(255,255,255,.1);border-radius:20px 20px 0 0;padding:20px 18px 34px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto}
+  .modal-title{font-size:14px;font-weight:800;color:#f1f5f9;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+  .modal-close{width:26px;height:26px;border-radius:7px;background:rgba(255,255,255,.06);border:none;color:#94a3b8;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .field-group{margin-bottom:10px}.field-label{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+  .field-input,.field-textarea,.field-select{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:9px;color:#f1f5f9;font-family:inherit;font-size:12px;padding:8px 10px;outline:none;transition:border-color .15s}.field-input:focus,.field-textarea:focus,.field-select:focus{border-color:rgba(245,158,11,.5)}
+  .field-textarea{resize:vertical;min-height:60px;line-height:1.5}.field-select option{background:#1e293b}
+  .field-row{display:flex;gap:8px}.field-row .field-group{flex:1}
+  .modal-actions{display:flex;gap:8px;margin-top:16px}
+  .modal-btn{flex:1;padding:10px;border-radius:11px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+  .modal-btn-save{background:linear-gradient(135deg,#E8725A,#F5A623);color:#fff}.modal-btn-cancel{background:rgba(255,255,255,.06);color:#94a3b8}.modal-btn-delete{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.25)}
+  .checkbox-row{display:flex;gap:8px;align-items:center}.checkbox-row input{width:16px;height:16px;accent-color:#F5A623}.checkbox-row label{font-size:11px;color:#94a3b8}
+  .tips{padding:14px 18px;border-top:1px solid rgba(255,255,255,.05);background:rgba(0,0,0,.15)}.tips-title{font-size:12px;font-weight:700;color:#f1f5f9;margin-bottom:6px}.tips-body{font-size:10.5px;color:#94a3b8;line-height:1.8}
+  .tips-body .hl-y{color:#F59E0B}.tips-body .hl-p{color:#EC4899}.tips-body .hl-g{color:#10B981}.tips-body .hl-o{color:#F5A623}.tips-body .hl-b{color:#60A5FA}
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:#334155;border:1px solid rgba(255,255,255,.1);color:#f1f5f9;padding:9px 18px;border-radius:12px;font-size:11px;font-weight:600;opacity:0;transition:all .3s;z-index:300;white-space:nowrap;pointer-events:none}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   .safe-bottom{height:env(safe-area-inset-bottom,20px)}
-
-  /* Custom Leaflet marker */
-  .custom-marker{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-size:12px;font-weight:800;color:#fff;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4)}
-
-  /* Leaflet dark popup */
-  .leaflet-popup-content-wrapper{background:#1e293b!important;color:#e2e8f0!important;border-radius:12px!important;border:1px solid rgba(255,255,255,.1)!important;box-shadow:0 4px 20px rgba(0,0,0,.5)!important}
-  .leaflet-popup-tip{background:#1e293b!important}
-  .leaflet-popup-content{margin:10px 14px!important;font-family:'Noto Sans KR',sans-serif!important;font-size:12px!important;line-height:1.5!important}
-  .leaflet-popup-content strong{color:#f1f5f9;font-size:13px}
-  .leaflet-popup-content .popup-type{font-size:10px;color:#64748b;margin-top:2px}
-  .leaflet-popup-content .popup-time{color:#F5A623;font-weight:600}
-
-  /* Hidden file input */
+  .custom-marker{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-size:11px;font-weight:800;color:#fff;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+  .leaflet-popup-content-wrapper{background:#1e293b!important;color:#e2e8f0!important;border-radius:12px!important;border:1px solid rgba(255,255,255,.1)!important;box-shadow:0 4px 20px rgba(0,0,0,.5)!important}.leaflet-popup-tip{background:#1e293b!important}
+  .leaflet-popup-content{margin:8px 12px!important;font-family:'Noto Sans KR',sans-serif!important;font-size:11px!important;line-height:1.4!important}.leaflet-popup-content strong{color:#f1f5f9;font-size:12px}.leaflet-popup-content .popup-type{font-size:9px;color:#64748b;margin-top:1px}.leaflet-popup-content .popup-time{color:#F5A623;font-weight:600}
   #importInput{display:none}
-
-  /* AUTH & SYNC */
-  .auth-bar{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 14px;background:rgba(0,0,0,.2);border-bottom:1px solid rgba(255,255,255,.05);font-size:11px}
-  .auth-btn{padding:5px 14px;border-radius:8px;border:none;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
-  .auth-btn-login{background:rgba(66,133,244,.15);color:#60a5fa;border:1px solid rgba(66,133,244,.3)}
-  .auth-btn-login:hover{background:rgba(66,133,244,.25)}
-  .auth-btn-logout{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2);font-size:10px;padding:3px 10px}
-  .auth-user{display:flex;align-items:center;gap:6px;color:#94a3b8;font-size:11px}
-  .auth-avatar{width:22px;height:22px;border-radius:50%;border:1px solid rgba(255,255,255,.15)}
-  .sync-status{display:flex;align-items:center;gap:4px;font-size:10px;color:#64748b;margin-left:auto}
-  .sync-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-  .sync-dot.online{background:#10B981;box-shadow:0 0 6px #10B98166}
-  .sync-dot.offline{background:#EF4444;box-shadow:0 0 6px #EF444466}
-  .sync-dot.syncing{background:#F59E0B;animation:pulse 1s infinite}
+  .auth-bar{display:flex;align-items:center;justify-content:center;gap:8px;padding:5px 14px;background:rgba(0,0,0,.2);border-bottom:1px solid rgba(255,255,255,.05);font-size:10px}
+  .auth-btn{padding:4px 12px;border-radius:7px;border:none;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit}.auth-btn-login{background:rgba(66,133,244,.15);color:#60a5fa;border:1px solid rgba(66,133,244,.3)}.auth-btn-logout{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2);font-size:9px;padding:3px 8px}
+  .auth-user{display:flex;align-items:center;gap:5px;color:#94a3b8;font-size:10px}.auth-avatar{width:20px;height:20px;border-radius:50%;border:1px solid rgba(255,255,255,.15)}
+  .sync-status{display:flex;align-items:center;gap:4px;font-size:9px;color:#64748b;margin-left:auto}.sync-dot{width:6px;height:6px;border-radius:50%}.sync-dot.online{background:#10B981;box-shadow:0 0 5px #10B98166}.sync-dot.offline{background:#EF4444}.sync-dot.syncing{background:#F59E0B;animation:pulse 1s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-  /* PRESENCE */
-  .presence-bar{display:none;align-items:center;gap:6px;padding:4px 14px;background:rgba(16,185,129,.06);border-bottom:1px solid rgba(16,185,129,.1);font-size:10px;color:#34d399}
-  .presence-bar.visible{display:flex}
-  .presence-avatar{width:18px;height:18px;border-radius:50%;border:1.5px solid #34d399}
-  .presence-dot{width:6px;height:6px;border-radius:50%;background:#10B981;animation:pulse 1.5s infinite}
-
+  .presence-bar{display:none;align-items:center;gap:5px;padding:3px 14px;background:rgba(16,185,129,.06);border-bottom:1px solid rgba(16,185,129,.1);font-size:9px;color:#34d399}.presence-bar.visible{display:flex}.presence-avatar{width:16px;height:16px;border-radius:50%;border:1.5px solid #34d399}.presence-dot{width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 1.5s infinite}
+  .weather-bar{display:flex;gap:12px;padding:8px 18px;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.04);scrollbar-width:none}.weather-bar::-webkit-scrollbar{display:none}
+  .weather-card{flex-shrink:0;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);text-align:center;min-width:100px}.weather-city{font-size:10px;font-weight:700;color:#f1f5f9}.weather-icon{font-size:20px;margin:2px 0}.weather-temp{font-size:10px;color:#F5A623;font-weight:600}.weather-desc{font-size:9px;color:#64748b}
 </style>
 </head>
 <body>
-
-<!-- AUTH BAR -->
-<div class="auth-bar" id="authBar">
-  <div id="authContent">
-    <button class="auth-btn auth-btn-login" onclick="signIn()">🔑 Google 로그인</button>
-  </div>
-  <div class="sync-status" id="syncStatus">
-    <span class="sync-dot offline" id="syncDot"></span>
-    <span id="syncText">오프라인</span>
-  </div>
-</div>
-
-<!-- PRESENCE -->
-<div class="presence-bar" id="presenceBar">
-  <span class="presence-dot"></span>
-  <span id="presenceText"></span>
-</div>
-
+<div class="auth-bar"><div id="authContent"><button class="auth-btn auth-btn-login" onclick="signIn()">🔑 Google 로그인</button></div><div class="sync-status" id="syncStatus"><span class="sync-dot offline" id="syncDot"></span><span id="syncText">오프라인</span></div></div>
+<div class="presence-bar" id="presenceBar"><span class="presence-dot"></span><span id="presenceText"></span></div>
 <div class="header">
   <div class="header-sub">Travel Planner 2026</div>
   <div class="header-title">스페인 · 포르투갈 여행 플래너</div>
-  <div class="header-date">2026.09.13 (일) — 09.26 (토) · 14일</div>
-  <div class="edit-mode-bar" id="editModeBar">✏️ 편집 모드 — 카드를 탭하면 수정할 수 있어요</div>
+  <div class="header-date">2026.09.13 — 09.26 · 14일 <span class="dday" id="ddayBadge"></span></div>
+  <div class="edit-mode-bar" id="editModeBar">✏️ 편집 모드</div>
 </div>
-
+<div class="weather-bar" id="weatherBar"></div>
 <div class="view-tabs">
   <button class="view-tab active" onclick="switchView('timeline')">📋 일정</button>
   <button class="view-tab" onclick="switchView('map')">🗺️ 지도</button>
   <button class="view-tab" onclick="switchView('route')">🧭 동선</button>
+  <button class="view-tab" onclick="switchView('budget')">💰 예산</button>
 </div>
-
 <div class="day-selector" id="daySelector"></div>
-
 <div class="edit-toolbar" id="editToolbar">
   <button class="toolbar-btn btn-edit" id="toggleEditBtn" onclick="toggleEdit()">✏️ 편집</button>
   <button class="toolbar-btn btn-add" onclick="openAddModal()" id="addBtn" style="display:none">+ 추가</button>
   <button class="toolbar-btn btn-add" onclick="openDayModal()" id="addDayBtn" style="display:none">+ 날짜</button>
+  <button class="toolbar-btn btn-danger" onclick="deleteCurrentDay()" id="delDayBtn" style="display:none">날짜삭제</button>
   <div class="toolbar-sep"></div>
-  <button class="toolbar-btn btn-save" onclick="exportData()">💾 내보내기</button>
-  <button class="toolbar-btn btn-import" onclick="document.getElementById('importInput').click()">📂 가져오기</button>
+  <button class="toolbar-btn btn-save" onclick="exportData()">💾</button>
+  <button class="toolbar-btn btn-import" onclick="document.getElementById('importInput').click()">📂</button>
   <input type="file" id="importInput" accept=".json" onchange="importData(event)">
 </div>
-
-<!-- TIMELINE VIEW -->
 <div id="timelineView">
   <div class="day-header" id="dayHeader"></div>
   <div class="filters" id="filters"></div>
-  <div class="add-item-row" id="addItemRow">
-    <button class="add-item-btn" onclick="openAddModal()">+ 이 날에 일정 추가하기</button>
-  </div>
+  <div class="add-item-row" id="addItemRow"><button class="add-item-btn" onclick="openAddModal()">+ 이 날에 일정 추가하기</button></div>
   <div class="timeline" id="timeline"></div>
 </div>
-
-<!-- MAP VIEW -->
 <div class="map-container" id="mapView">
+  <div class="map-controls"><button class="map-toggle active" id="mapDayToggle" onclick="setMapMode('day')">일자별</button><button class="map-toggle" id="mapAllToggle" onclick="setMapMode('all')">전체 여정</button></div>
   <div id="map"></div>
   <div class="map-day-info" id="mapDayInfo"></div>
-  <div class="map-legend">
-    <div class="map-legend-title">카테고리</div>
-    <div class="map-legend-item"><div class="map-legend-dot" style="background:#10B981"></div>관광</div>
-    <div class="map-legend-item"><div class="map-legend-dot" style="background:#F59E0B"></div>맛집</div>
-    <div class="map-legend-item"><div class="map-legend-dot" style="background:#EC4899"></div>쇼핑</div>
-    <div class="map-legend-item"><div class="map-legend-dot" style="background:#3B82F6"></div>항공/이동</div>
-    <div class="map-legend-item"><div class="map-legend-dot" style="background:#8B5CF6"></div>숙소</div>
-    <div class="map-legend-item"><div class="map-legend-dot" style="background:#818CF8"></div>교통</div>
-  </div>
+  <div class="map-legend"><div class="map-legend-title">카테고리</div><div class="map-legend-item"><div class="map-legend-dot" style="background:#10B981"></div>관광</div><div class="map-legend-item"><div class="map-legend-dot" style="background:#F59E0B"></div>맛집</div><div class="map-legend-item"><div class="map-legend-dot" style="background:#EC4899"></div>쇼핑</div><div class="map-legend-item"><div class="map-legend-dot" style="background:#3B82F6"></div>항공</div><div class="map-legend-item"><div class="map-legend-dot" style="background:#8B5CF6"></div>숙소</div></div>
 </div>
-
-<!-- ROUTE VIEW -->
 <div class="route-container" id="routeView"></div>
-
+<div class="budget-container" id="budgetView"></div>
 <div class="tips" id="tipsSection">
-  <div class="tips-title">💡 여행 꿀팁 & 주의사항</div>
+  <div class="tips-title">💡 여행 꿀팁</div>
   <div class="tips-body">
-    • <span class="hl-y">사전 예약 필수</span>: 사그라다파밀리아, 구엘공원, 카사바트요, 라페드레라, 가이아 와이너리<br>
-    • <span class="hl-p">라로카빌리지</span>: 그라시아 거리에서 셔틀버스 예약 필수, 10% 추가 할인 팁 블로그 참고<br>
-    • <span class="hl-g">바르셀로나 교통</span>: 알단테 교통카드 발급 / 숙소↔시내 동키 자전거 참고<br>
-    • <span class="hl-o">마요르카 렌트카</span>: 9/21 or 9/22 소예르 이동 시 결정 필요 (skyscanner 가격비교)<br>
-    • <span class="hl-b">소예르 트램</span>: 사전 예약 권장 (성수기 매진 빠름)<br>
-    • 스페인 식사시간: 점심 14시, 저녁 21시 이후가 현지 문화<br>
-    • 포르투 도시세, 마요르카 숙소 세금은 <span class="hl-y">현장 결제</span> 필요 (현금 준비)
+    • <span class="hl-y">사전 예약 필수</span>: 사그라다파밀리아, 구엘공원, 카사바트요, 가이아 와이너리<br>
+    • <span class="hl-p">라로카빌리지</span>: 셔틀버스 예약 필수, 10% 추가 할인<br>
+    • <span class="hl-g">바르셀로나 교통</span>: 알단테 교통카드 발급<br>
+    • <span class="hl-o">마요르카 렌트카</span>: skyscanner 가격비교<br>
+    • 스페인 식사시간: 점심 14시, 저녁 21시 이후<br>
+    • 포르투 도시세, 마요르카 숙소세 <span class="hl-y">현장 현금 결제</span>
   </div>
 </div>
 <div class="safe-bottom"></div>
-
-<!-- 일정 편집 모달 -->
+<!-- 환율 계산기 -->
+<button class="currency-toggle" id="currencyToggle" onclick="toggleCurrency()">💱</button>
+<div class="currency-widget" id="currencyWidget">
+  <div class="currency-title">💱 환율 계산기 <button class="currency-close" onclick="toggleCurrency()">✕</button></div>
+  <div class="currency-row"><input class="currency-input" id="eurInput" placeholder="0" oninput="calcCurrency('eur')"><span class="currency-label">EUR</span></div>
+  <div class="currency-row"><input class="currency-input" id="krwInput" placeholder="0" oninput="calcCurrency('krw')"><span class="currency-label">KRW</span></div>
+  <div class="currency-rate" id="currencyRate">1 EUR = 1,450 KRW</div>
+</div>
+<!-- 모달들 -->
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
-    <div class="modal-title">
-      <span id="modalTitleText">일정 편집</span>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
+    <div class="modal-title"><span id="modalTitleText">일정 편집</span><button class="modal-close" onclick="closeModal()">✕</button></div>
     <div class="field-row">
-      <div class="field-group">
-        <div class="field-label">시간</div>
-        <input class="field-input" id="f-time" placeholder="예: 09:00">
-      </div>
-      <div class="field-group">
-        <div class="field-label">카테고리</div>
-        <select class="field-select" id="f-type">
-          <option value="spot">📍 관광</option>
-          <option value="food">🍴 맛집</option>
-          <option value="shopping">🛍️ 쇼핑</option>
-          <option value="flight">✈️ 항공/이동</option>
-          <option value="hotel">🏨 숙소</option>
-          <option value="move">🚌 교통</option>
-          <option value="etc">💡 기타</option>
-        </select>
-      </div>
+      <div class="field-group"><div class="field-label">시간</div><input class="field-input" id="f-time" placeholder="09:00"></div>
+      <div class="field-group"><div class="field-label">카테고리</div><select class="field-select" id="f-type"><option value="spot">📍 관광</option><option value="food">🍴 맛집</option><option value="shopping">🛍️ 쇼핑</option><option value="flight">✈️ 항공/이동</option><option value="hotel">🏨 숙소</option><option value="move">🚌 교통</option><option value="etc">💡 기타</option></select></div>
     </div>
-    <div class="field-group">
-      <div class="field-label">제목</div>
-      <input class="field-input" id="f-title" placeholder="예: 🏛️ 사그라다 파밀리아">
-    </div>
-    <div class="field-group">
-      <div class="field-label">설명 (줄바꿈 가능)</div>
-      <textarea class="field-textarea" id="f-desc" placeholder="상세 내용을 입력하세요"></textarea>
-    </div>
-    <div class="field-group">
-      <div class="field-label">주의사항 (선택)</div>
-      <input class="field-input" id="f-warn" placeholder="예: 사전 예약 필수">
-    </div>
+    <div class="field-group"><div class="field-label">제목</div><input class="field-input" id="f-title" placeholder="🏛️ 사그라다 파밀리아"></div>
+    <div class="field-group"><div class="field-label">설명</div><textarea class="field-textarea" id="f-desc" placeholder="상세 내용"></textarea></div>
     <div class="field-row">
-      <div class="field-group">
-        <div class="field-label">위도 (선택)</div>
-        <input class="field-input" id="f-lat" placeholder="예: 41.4036" type="number" step="any">
-      </div>
-      <div class="field-group">
-        <div class="field-label">경도 (선택)</div>
-        <input class="field-input" id="f-lng" placeholder="예: 2.1744" type="number" step="any">
-      </div>
+      <div class="field-group"><div class="field-label">예약/참고 링크</div><input class="field-input" id="f-url" placeholder="https://..."></div>
+      <div class="field-group"><div class="field-label">예상 비용 (원)</div><input class="field-input" id="f-cost" placeholder="0" type="number"></div>
     </div>
-    <div class="field-group">
-      <div class="checkbox-row">
-        <input type="checkbox" id="f-confirmed">
-        <label for="f-confirmed">✓ 예약 확정</label>
-      </div>
+    <div class="field-group"><div class="field-label">메모</div><input class="field-input" id="f-memo" placeholder="개인 메모"></div>
+    <div class="field-group"><div class="field-label">주의사항</div><input class="field-input" id="f-warn" placeholder="사전 예약 필수"></div>
+    <div class="field-row">
+      <div class="field-group"><div class="field-label">위도</div><input class="field-input" id="f-lat" placeholder="41.4036" type="number" step="any"></div>
+      <div class="field-group"><div class="field-label">경도</div><input class="field-input" id="f-lng" placeholder="2.1744" type="number" step="any"></div>
     </div>
-    <div class="modal-actions" id="modalActions">
-      <button class="modal-btn modal-btn-cancel" onclick="closeModal()">취소</button>
-      <button class="modal-btn modal-btn-save" onclick="saveItem()">저장</button>
-    </div>
+    <div class="field-group"><div class="checkbox-row"><input type="checkbox" id="f-confirmed"><label for="f-confirmed">✓ 예약 확정</label></div></div>
+    <div class="modal-actions" id="modalActions"><button class="modal-btn modal-btn-cancel" onclick="closeModal()">취소</button><button class="modal-btn modal-btn-save" onclick="saveItem()">저장</button></div>
   </div>
 </div>
-
-<!-- 숙소 편집 모달 -->
 <div class="modal-overlay" id="hotelModalOverlay" onclick="if(event.target===this)closeHotelModal()">
   <div class="modal">
-    <div class="modal-title">
-      <span>🏨 숙소 정보 편집</span>
-      <button class="modal-close" onclick="closeHotelModal()">✕</button>
-    </div>
-    <div class="field-group">
-      <div class="field-label">숙소 이름 & 예약 정보</div>
-      <textarea class="field-textarea" id="h-hotel" placeholder="숙소명, 예약번호 등"></textarea>
-    </div>
-    <div class="field-group">
-      <div class="field-label">날짜 & 지역 제목</div>
-      <input class="field-input" id="h-region" placeholder="예: 바르셀로나 — 가우디 투어 🏛️">
-    </div>
-    <div class="modal-actions">
-      <button class="modal-btn modal-btn-cancel" onclick="closeHotelModal()">취소</button>
-      <button class="modal-btn modal-btn-save" onclick="saveHotel()">저장</button>
-    </div>
+    <div class="modal-title"><span>🏨 숙소 편집</span><button class="modal-close" onclick="closeHotelModal()">✕</button></div>
+    <div class="field-group"><div class="field-label">숙소 정보</div><textarea class="field-textarea" id="h-hotel" placeholder="숙소명, 예약번호"></textarea></div>
+    <div class="field-group"><div class="field-label">지역 제목</div><input class="field-input" id="h-region" placeholder="바르셀로나 — 가우디 투어 🏛️"></div>
+    <div class="modal-actions"><button class="modal-btn modal-btn-cancel" onclick="closeHotelModal()">취소</button><button class="modal-btn modal-btn-save" onclick="saveHotel()">저장</button></div>
   </div>
 </div>
-
-<!-- 날짜 추가 모달 -->
 <div class="modal-overlay" id="dayModalOverlay" onclick="if(event.target===this)closeDayModal()">
   <div class="modal">
-    <div class="modal-title">
-      <span id="dayModalTitle">📅 날짜 추가</span>
-      <button class="modal-close" onclick="closeDayModal()">✕</button>
-    </div>
-    <div class="field-group">
-      <div class="field-label">날짜</div>
-      <input class="field-input" id="d-date" placeholder="예: 9/27 (일)">
-    </div>
-    <div class="field-group">
-      <div class="field-label">지역 / 테마</div>
-      <input class="field-input" id="d-region" placeholder="예: 바르셀로나 — 가우디 투어 🏛️">
-    </div>
-    <div class="field-group">
-      <div class="field-label">테마 색상</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap" id="colorPicker">
-        <label style="cursor:pointer"><input type="radio" name="d-color" value="#E8725A" checked style="display:none"><span style="display:block;width:32px;height:32px;border-radius:8px;background:#E8725A;border:3px solid transparent" class="color-swatch"></span></label>
-        <label style="cursor:pointer"><input type="radio" name="d-color" value="#2E86AB" style="display:none"><span style="display:block;width:32px;height:32px;border-radius:8px;background:#2E86AB;border:3px solid transparent" class="color-swatch"></span></label>
-        <label style="cursor:pointer"><input type="radio" name="d-color" value="#F5A623" style="display:none"><span style="display:block;width:32px;height:32px;border-radius:8px;background:#F5A623;border:3px solid transparent" class="color-swatch"></span></label>
-        <label style="cursor:pointer"><input type="radio" name="d-color" value="#10B981" style="display:none"><span style="display:block;width:32px;height:32px;border-radius:8px;background:#10B981;border:3px solid transparent" class="color-swatch"></span></label>
-        <label style="cursor:pointer"><input type="radio" name="d-color" value="#8B5CF6" style="display:none"><span style="display:block;width:32px;height:32px;border-radius:8px;background:#8B5CF6;border:3px solid transparent" class="color-swatch"></span></label>
-        <label style="cursor:pointer"><input type="radio" name="d-color" value="#888" style="display:none"><span style="display:block;width:32px;height:32px;border-radius:8px;background:#888;border:3px solid transparent" class="color-swatch"></span></label>
-      </div>
-    </div>
-    <div class="field-group">
-      <div class="field-label">숙소 정보 (선택)</div>
-      <input class="field-input" id="d-hotel" placeholder="숙소명, 예약번호 등">
-    </div>
-    <div class="modal-actions" id="dayModalActions">
-      <button class="modal-btn modal-btn-cancel" onclick="closeDayModal()">취소</button>
-      <button class="modal-btn modal-btn-save" onclick="saveDay()">추가</button>
-    </div>
+    <div class="modal-title"><span>📅 날짜 추가</span><button class="modal-close" onclick="closeDayModal()">✕</button></div>
+    <div class="field-row"><div class="field-group"><div class="field-label">날짜</div><input class="field-input" id="d-date" placeholder="9/27 (일)"></div><div class="field-group"><div class="field-label">테마색상</div><select class="field-select" id="d-color"><option value="#E8725A">바르셀로나</option><option value="#2E86AB">포르투</option><option value="#F5A623">마요르카</option><option value="#10B981">초록</option><option value="#888">회색</option></select></div></div>
+    <div class="field-group"><div class="field-label">지역/테마</div><input class="field-input" id="d-region" placeholder="바르셀로나 — 가우디 투어 🏛️"></div>
+    <div class="field-group"><div class="field-label">숙소 (선택)</div><input class="field-input" id="d-hotel" placeholder="숙소명"></div>
+    <div class="modal-actions"><button class="modal-btn modal-btn-cancel" onclick="closeDayModal()">취소</button><button class="modal-btn modal-btn-save" onclick="saveDay()">추가</button></div>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
-
 <script>
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  DATA
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let DAYS = [
-  {
-    date:"9/13 (일)", region:"한국 → 바르셀로나 ✈️", color:"#E8725A",
-    hotel:"머큐어 바르셀로나 콘도르 (4성급)\n예약번호: 3508557 | 체크인 14시",
-    schedule:[
-      {time:"11:50",title:"✈️ 인천공항 출발",desc:"OZ0511 | 터미널2 | 14시간 비행\n수하물: 23kg (아시아나)",type:"flight",confirmed:true,coords:[37.4602,126.4407]},
-      {time:"19:10",title:"🛬 바르셀로나 도착",desc:"엘프라트 공항 T1 도착\n수하물 수취 & 입국심사",type:"flight",coords:[41.2971,2.0785]},
-      {time:"20:00",title:"🚌 공항 → 호텔 이동",desc:"A2공항버스 → V13버스 환승\n(약 1시간 소요)",type:"move"},
-      {time:"21:00",title:"🏨 호텔 체크인",desc:"머큐어 바르셀로나 콘도르 (4성급)\n예약번호: 3508557",type:"hotel",coords:[41.3920,2.1531]},
-      {time:"21:30",title:"🍽️ 가벼운 첫날 저녁",desc:"호텔 근처에서 간단히 식사\n장거리 비행 후 충분한 휴식",type:"food"},
-    ]
-  },
-  {
-    date:"9/14 (월)", region:"바르셀로나 — 가우디 투어 🏛️", color:"#E8725A",
-    hotel:"머큐어 바르셀로나 콘도르 (4성급)",
-    schedule:[
-      {time:"08:00",title:"☀️ 조식 & 출발 준비",desc:"호텔 체크인 완료 후 출발\n동키 자전거 or 지하철 이용",type:"etc",coords:[41.3920,2.1531]},
-      {time:"09:00",title:"⛪ 사그라다 파밀리아",desc:"가우디의 미완성 걸작\n사전 예약 필수, 오전 방문 추천!",type:"spot",warn:"사전 예약 필수",coords:[41.4036,2.1744]},
-      {time:"11:00",title:"🏠 카사 바트요 / 라 페드레라",desc:"그라시아 거리 가우디 건축물\n카사바트요: 비늘 외관 / 라페드레라: 물결 돌 외관\n옥상 굴뚝 포토존 필수",type:"spot",warn:"사전 예약 권장",coords:[41.3916,2.1649]},
-      {time:"13:00",title:"🍽️ 점심 — Cerveceria Catalana",desc:"바르셀로나 No.1 타파스집\n추천: 꿀대구, 맛조개, 감바스\n⚠️ 웨이팅 있음, 13시 전 도착 추천",type:"food",coords:[41.3932,2.1576]},
-      {time:"15:00",title:"🛍️ 파세이그 데 그라시아 거리 산책",desc:"명품 쇼핑 & 바르셀로나 분위기 감상\n라치나타 (올리브오일 전문점) 방문",type:"shopping",coords:[41.3920,2.1650]},
-      {time:"16:30",title:"🏖️ 보른 지구 / 산타 마리아 성당",desc:"중세 분위기 보른 지구 탐방\n엘 본 지구 카페에서 휴식",type:"spot",coords:[41.3853,2.1836]},
-      {time:"18:00",title:"🌊 바르셀로네타 해변 산책",desc:"지중해 해변 신혼 산책\n석양 감상 포인트",type:"spot",coords:[41.3784,2.1925]},
-      {time:"19:00",title:"🍽️ 저녁 — El Xampanyet",desc:"엘 보른 지구 타파스 & 카바\n현지인 인기 타파스 바",type:"food",coords:[41.3845,2.1820]},
-      {time:"21:00",title:"🌃 바르셀로네타 야경 산책",desc:"해변 야경 감상 & 귀환",type:"spot",coords:[41.3784,2.1925]},
-    ]
-  },
-  {
-    date:"9/15 (화)", region:"바르셀로나 — 고딕지구 & 몬주익 🏰", color:"#E8725A",
-    hotel:"머큐어 바르셀로나 콘도르 (4성급)",
-    schedule:[
-      {time:"08:00",title:"☀️ 조식 & 출발",desc:"일찍 출발해서 시내 관광 시작",type:"etc",coords:[41.3920,2.1531]},
-      {time:"08:30",title:"🛒 보케리아 시장",desc:"바르셀로나의 부엌, 200개+ 점포\n과일주스, 하몽, 해산물 시식",type:"spot",coords:[41.3816,2.1719]},
-      {time:"09:30",title:"🏛️ 고딕지구 산책",desc:"바르셀로나 대성당\n레이알 광장 & 카릴레 델 비스베\n중세 골목길 탐험",type:"spot",coords:[41.3833,2.1761]},
-      {time:"11:00",title:"🎨 피카소 미술관",desc:"바르셀로나 피카소 초기작 소장\n고딕지구 내 위치",type:"spot",warn:"예약 권장",coords:[41.3853,2.1811]},
-      {time:"12:00",title:"🍽️ 점심 — El Paraguayo",desc:"고딕지구 내 추천 식당\nor 보케리아 시장 내 타파스",type:"food",coords:[41.3825,2.1770]},
-      {time:"13:00",title:"🚡 몬주익 언덕 이동",desc:"지하철 + 케이블카 이용\n바르셀로나 시내 + 항구 파노라마",type:"move",coords:[41.3639,2.1592]},
-      {time:"14:00",title:"🏰 몬주익 성 & 전망대",desc:"바르셀로나 전경 최고 뷰\n포토스팟 필수 방문!",type:"spot",coords:[41.3635,2.1660]},
-      {time:"15:30",title:"🏛️ 카탈루냐 국립미술관 외관",desc:"스페인 광장 이동\n계단에서 파노라마 포토타임",type:"spot",coords:[41.3685,2.1533]},
-      {time:"17:00",title:"🍽️ 저녁 — La Pepita",desc:"고딕지구 근처 몬타디토 맛집",type:"food",coords:[41.3978,2.1584]},
-      {time:"18:30",title:"✨ 마법의 분수 쇼 (목/금/토)",desc:"몬주익 야간 분수 — 9월 목/금/토 운영",type:"spot",coords:[41.3712,2.1518]},
-      {time:"20:00",title:"🧳 숙소 복귀 & 이동 준비",desc:"짐 정리 & 체크아웃 준비",type:"hotel",coords:[41.3920,2.1531]},
-    ]
-  },
-  {
-    date:"9/16 (수)", region:"바르셀로나 → 포르투 🌉", color:"#2E86AB",
-    hotel:"레전드 하우스 바이 스위트 포르토\n예약번호: 1694479710 | 체크인 15시 | 체크아웃 11시",
-    schedule:[
-      {time:"08:00",title:"🏨 체크아웃 준비",desc:"머큐어 바르셀로나 콘도르 체크아웃 (12시)\n짐 챙기기",type:"hotel",coords:[41.3920,2.1531]},
-      {time:"09:00",title:"☕ 오전 자유시간",desc:"호텔 근처 카페 브런치\n바르셀로나 마지막 산책",type:"food"},
-      {time:"10:00",title:"🚌 공항 이동",desc:"숙소 → 바르셀로나 엘프라트 공항\n(지하철 약 40분)",type:"move",coords:[41.2971,2.0785]},
-      {time:"17:35",title:"✈️ 바르셀로나 → 포르투",desc:"라이언에어 | 약 1시간 비행\n인당 약 16-17만원 (20kg 수하물 포함)",type:"flight",warn:"예약 확인 필요",coords:[41.2971,2.0785]},
-      {time:"18:35",title:"🛬 포르투 공항 도착",desc:"프란시스쿠 드 사 카르네이루 공항\n→ 메트로 탑승 (알단테 교통카드)",type:"flight",coords:[41.2370,-8.6700]},
-      {time:"19:30",title:"🏨 숙소 체크인",desc:"레전드 하우스 바이 스위트 포르토\n상벤투역 바로 앞 / 루이스강 도보 10분",type:"hotel",coords:[41.1460,-8.6110]},
-      {time:"20:30",title:"🌉 동 루이스 다리 & 리베이라 광장",desc:"포르투 상징 다리 야경 감상\n강변 카페에서 커피 한잔",type:"spot",coords:[41.1403,-8.6098]},
-      {time:"21:00",title:"🐙 저녁 — Botequim da Ribeira",desc:"강가 뽈뽀(문어) 맛집\n포르투갈 첫날 저녁!",type:"food",coords:[41.1407,-8.6126]},
-      {time:"22:00",title:"📸 신문 사진 포즈",desc:"동 루이스 다리 위에서\n신문 사진 포즈 (빌라 노바 데 가이아 전망)",type:"spot",coords:[41.1403,-8.6098]},
-    ]
-  },
-  {
-    date:"9/17 (목)", region:"포르투 — 가이아 와이너리 & 크루즈 🍷", color:"#2E86AB",
-    hotel:"레전드 하우스 바이 스위트 포르토",
-    schedule:[
-      {time:"08:30",title:"☀️ 조식 & 출발",desc:"상벤투 역 아줄레주 감상 🚉",type:"etc",coords:[41.1459,-8.6106]},
-      {time:"09:00",title:"🗼 클레리구스 탑 전망대",desc:"포르투 시내 전경 360도 파노라마\n76m 높이 타워",type:"spot",coords:[41.1458,-8.6145]},
-      {time:"10:00",title:"📚 렐루 서점",desc:"세계에서 가장 아름다운 서점\n해리포터 영감의 붉은 벨벳 계단\n입장료 8유로",type:"spot",warn:"오전 10시 오픈",coords:[41.1467,-8.6153]},
-      {time:"11:00",title:"🚢 도우루강 크루즈",desc:"도우루강 6개교 크루즈 (약 1시간)\n예약 권장, 리베이라 광장 출발",type:"spot",warn:"사전 예약 권장",coords:[41.1407,-8.6126]},
-      {time:"12:30",title:"🍽️ 점심 — Do Norte Café",desc:"숙소 도보 1분, 포르투갈 요리",type:"food",coords:[41.1460,-8.6110]},
-      {time:"14:00",title:"🍷 가이아 와이너리 투어",desc:"동 루이스 다리 건너 가이아 지구\nTaylor's or Graham's 추천\n포트 와인 시음",type:"spot",warn:"예약 권장",coords:[41.1378,-8.6098]},
-      {time:"16:00",title:"🌇 가이아 전망대",desc:"리베이라 전경 파노라마\n포토타임 필수!",type:"spot",coords:[41.1375,-8.6105]},
-      {time:"17:00",title:"💙 카르무 & 카르멜리타스 성당",desc:"아줄레주 타일 외벽 포토스팟",type:"spot",coords:[41.1479,-8.6163]},
-      {time:"18:00",title:"🥚 만테이가리아 에그타르트",desc:"포르투 1호점 에그타르트 맛집\n갓 구운 파스텔 드 나따!",type:"food",coords:[41.1458,-8.6126]},
-      {time:"19:30",title:"🍽️ 저녁 — Taberna Dos Mercadores",desc:"포르투갈 전통 음식\n문어밥, 농어구이 강력 추천",type:"food",coords:[41.1418,-8.6114]},
-      {time:"21:00",title:"🌃 리베이라 야경 산책",desc:"도우루 강변 + 다리 조명 야경",type:"spot",coords:[41.1407,-8.6126]},
-    ]
-  },
-  {
-    date:"9/18 (금)", region:"포르투 — 도우로 밸리 당일투어 🍇", color:"#2E86AB",
-    hotel:"레전드 하우스 바이 스위트 포르토",
-    schedule:[
-      {time:"08:00",title:"☀️ 조식 & 투어 집결",desc:"도우로 밸리 투어 출발 준비\n(가이드 투어 추천 - GetYourGuide)",type:"etc",coords:[41.1460,-8.6110]},
-      {time:"09:00",title:"🚌 도우로 밸리 투어 출발",desc:"약 8시간 풀데이 투어\n포르투에서 약 1시간 이동",type:"move",coords:[41.1460,-8.6110]},
-      {time:"10:30",title:"🍇 도우루 강변 드라이브",desc:"포도밭 뷰 감상\n트라스오스몬테스 지방 절경",type:"spot",coords:[41.1631,-7.7917]},
-      {time:"11:30",title:"🏰 킨타 와이너리 방문",desc:"도우로 밸리 대표 와이너리\n포트 와인 생산 현장 & 시음 🍷",type:"spot",coords:[41.1600,-7.7800]},
-      {time:"13:00",title:"🍽️ 투어 포함 점심",desc:"현지 레스토랑 or 투어 포함 식사",type:"food",coords:[41.1550,-7.7750]},
-      {time:"14:30",title:"🚤 도우로 강 보트 투어",desc:"포도밭 사이 강 유람 (옵션)",type:"spot",coords:[41.1600,-7.7850]},
-      {time:"16:00",title:"🏘️ 레구아 or 피냥 마을 산책",desc:"도우로 밸리 소도시 구경\n현지 기념품 쇼핑",type:"spot",coords:[41.1623,-7.7905]},
-      {time:"17:30",title:"🚌 포르투 귀환",desc:"포르투로 돌아오기 (약 1시간 30분)",type:"move",coords:[41.1460,-8.6110]},
-      {time:"19:30",title:"🍽️ 저녁 — 포르투 시내",desc:"포르투 중심 타파스바\nor 숙소 근처 현지 음식점",type:"food",coords:[41.1460,-8.6110]},
-      {time:"21:00",title:"🧳 숙소 복귀 & 휴식",desc:"내일 근교 투어 준비",type:"hotel",coords:[41.1460,-8.6110]},
-    ]
-  },
-  {
-    date:"9/19 (토)", region:"포르투 — 마투지뉴스 & 아베이루 🏖️", color:"#2E86AB",
-    hotel:"레전드 하우스 바이 스위트 포르토\n체크아웃 11시 | 포르투 → 마요르카 21:00",
-    schedule:[
-      {time:"08:30",title:"☀️ 조식 & 출발",desc:"마지막 포르투 아침!\n수영복 챙겨서 출발",type:"etc",coords:[41.1460,-8.6110]},
-      {time:"09:00",title:"🏖️ 마투지뉴스 해변",desc:"포르투 근교 최고 해변 (약 30분)\n9월이라 수영 가능!\n에메랄드빛 대서양 바다",type:"spot",coords:[41.1829,-8.6886]},
-      {time:"11:00",title:"🦞 점심 — O Gaveto",desc:"마투지뉴스 해산물 맛집\n랍스터, 문어 해산물 추천",type:"food",coords:[41.1825,-8.6880]},
-      {time:"13:00",title:"🛶 아베이루 당일치기",desc:"포르투갈의 작은 베네치아\n상 벤투역에서 기차 약 40분",type:"move",coords:[40.6443,-8.6455]},
-      {time:"14:00",title:"🚣 몰리세이루 보트 탑승",desc:"알록달록한 전통 곤돌라 투어\n운하 따라 아베이루 구경",type:"spot",coords:[40.6405,-8.6538]},
-      {time:"15:00",title:"🍮 오부스 몰레스",desc:"아베이루 전통 디저트\n달걀 노른자 크림 과자 맛보기",type:"food",coords:[40.6443,-8.6455]},
-      {time:"15:30",title:"🏘️ 아베이루 시내 산책",desc:"아줄레주 역사 지구 구경\n코스타노바 줄무늬 집 포토스팟",type:"spot",coords:[40.6200,-8.7500]},
-      {time:"17:00",title:"🚂 포르투 귀환",desc:"아베이루역 → 포르투 상벤투역",type:"move",coords:[41.1459,-8.6106]},
-      {time:"18:00",title:"🛍️ 마지막 포르투 쇼핑",desc:"- 푸타 비치타올\n- 성물방 기념품\n- 유리아쥬 / 쟈크폰크림\n산타 카테리나 거리",type:"shopping",coords:[41.1490,-8.6095]},
-      {time:"19:30",title:"🌉 리베이라 광장 마지막 야경",desc:"포르투 이별 야경 감상\n내일 마요르카로!",type:"spot",coords:[41.1407,-8.6126]},
-      {time:"21:00",title:"✈️ 포르투 → 마요르카 팔마",desc:"라이언에어\n인당 약 16-18만원 (20kg 수하물 포함)",type:"flight",warn:"예약 확인 필요",coords:[41.2370,-8.6700]},
-    ]
-  },
-  {
-    date:"9/20 (일)", region:"마요르카 — 팔마 도착 🌴", color:"#F5A623",
-    hotel:"엘리오스 마요르카 호텔 앤 아파트먼트\n예약번호: 1694459164 | 공항 바로 근처",
-    schedule:[
-      {time:"—",title:"🛬 팔마 공항 도착 (밤 12시)",desc:"포르투 출발 21:00 → 팔마 23:59 도착\n공항버스 A2 (5유로, 현금 필요!) → 숙소\n택시 약 10분, 2만원",type:"flight",coords:[39.5517,2.7388]},
-      {time:"—",title:"🏨 엘리오스 마요르카 체크인",desc:"익스프레스 체크인 / 아웃\n공항 바로 근처, 조식 포함 예약\n수영장, 호텔바 시설 좋음",type:"hotel",coords:[39.5550,2.7350]},
-      {time:"—",title:"😴 늦은 도착 후 충분한 휴식",desc:"밤 늦게 도착이므로 바로 취침\n내일 팔마 & 칼로데스모로 투어!",type:"etc"},
-    ]
-  },
-  {
-    date:"9/21 (월)", region:"마요르카 — 팔마 & 칼로데스모로 🏖️", color:"#F5A623",
-    hotel:"엘리오스 마요르카 호텔 앤 아파트먼트",
-    schedule:[
-      {time:"08:00",title:"🍳 호텔 조식",desc:"조식 포함 예약\n수영복 챙겨서 출발 준비",type:"food",coords:[39.5550,2.7350]},
-      {time:"09:00",title:"🌊 칼로데스모로 해변",desc:"에메랄드빛 바다 포토스팟\n마요르카 최고 투명도 해변!\n버스 or 렌트카 이동",type:"spot",coords:[39.3340,3.1190]},
-      {time:"11:00",title:"🏊 수영 & 해변 휴식",desc:"마요르카 에메랄드빛 바다에서 수영\n절벽 뷰 포토타임 📸",type:"spot",coords:[39.3340,3.1190]},
-      {time:"13:00",title:"🍽️ 점심 — Es Caragol",desc:"해변 근처 해산물 레스토랑\n신선한 지중해 해산물",type:"food",coords:[39.3350,3.1200]},
-      {time:"15:00",title:"🚌 팔마 시내 이동",desc:"차는 숙소에 두고 가기\n팔마까지 버스 한번에 약 30분",type:"move",coords:[39.5696,2.6502]},
-      {time:"16:00",title:"🏛️ 팔마 대성당 외관",desc:"지중해 앞 고딕 양식 대성당\n가우디가 내부 장식 참여\n주변 구시가지 산책",type:"spot",coords:[39.5674,2.6486]},
-      {time:"17:00",title:"🏰 알무다이나 왕궁 & 구시가지",desc:"아랍+고딕 양식 궁전\n팔마 구시가지 골목 산책",type:"spot",coords:[39.5683,2.6478]},
-      {time:"18:30",title:"🌇 팔마 항구 석양",desc:"지중해 항구 석양 감상\n요트 배경 포토타임",type:"spot",coords:[39.5630,2.6350]},
-      {time:"19:30",title:"🍽️ 저녁 — Celler Sa Premsa",desc:"팔마 전통 마요르카 음식\n소브라사다, 엔사이마다 체험",type:"food",coords:[39.5720,2.6520]},
-      {time:"21:00",title:"🚌 숙소 귀환",desc:"팔마 시내 → 호텔로 복귀",type:"move",coords:[39.5550,2.7350]},
-    ]
-  },
-  {
-    date:"9/22 (화)", region:"마요르카 — 발데모사 & 소예르 🏔️", color:"#F5A623",
-    hotel:"그란 호텔 소예르 (5성급) ⭐\n예약번호: 3510267 | 조식+스파 포함",
-    schedule:[
-      {time:"08:00",title:"🍳 조식 & 체크아웃 준비",desc:"렌트카로 이동 준비",type:"food",coords:[39.5550,2.7350]},
-      {time:"09:00",title:"🚗 발데모사로 출발",desc:"팔마에서 렌트카 약 25분\n트라문타나 산맥 드라이브",type:"move",coords:[39.7108,2.6224]},
-      {time:"10:00",title:"⛪ 발데모사 수도원",desc:"카르투지오 수도원\n쇼팽 & 조르주 상드 기념관\n마요르카 하이라이트!",type:"spot",coords:[39.7108,2.6224]},
-      {time:"11:00",title:"🥐 발데모사 마을 산책",desc:"돌담길 + 꽃 장식 골목\n엔사이마다 빵 맛보기",type:"spot",coords:[39.7115,2.6230]},
-      {time:"12:00",title:"🚗 데이아 마을 이동",desc:"발데모사 → 데이아 약 20분\n절벽 해안 뷰 드라이브 🌊",type:"move",coords:[39.7482,2.6494]},
-      {time:"12:30",title:"🍽️ 점심 — Café Sa Fonda (데이아)",desc:"데이아 마을 내 추천 레스토랑\n테라스에서 산 전망 식사",type:"food",coords:[39.7482,2.6494]},
-      {time:"14:00",title:"🏘️ 데이아 마을 산책",desc:"예술가의 마을\n절벽 위 점토색 주택 골목 포토타임 📸",type:"spot",coords:[39.7482,2.6494]},
-      {time:"15:00",title:"🚗 소예르로 이동 & 체크인",desc:"데이아 → 소예르 약 15분\n그란 호텔 소예르 체크인 (15시)",type:"hotel",coords:[39.7660,2.7155]},
-      {time:"16:00",title:"🧖 호텔 스파 & 수영장",desc:"5성급 스파 포함 예약\n트라문타나 산맥 뷰 수영장",type:"etc",coords:[39.7660,2.7155]},
-      {time:"17:30",title:"🍊 소예르 구시가지 산책",desc:"오렌지 향 가득한 산간 마을\n오렌지 광장 카페에서 휴식 ☕",type:"spot",coords:[39.7655,2.7148]},
-      {time:"19:00",title:"🍽️ 저녁 — Brises del Mar",desc:"소예르 항구 빠에야 맛집\nor 호텔 레스토랑 이용",type:"food",coords:[39.7952,2.6908]},
-      {time:"21:00",title:"🌙 소예르 항구 야경 산책",desc:"항구까지 도보 약 20분\n신혼 야경 산책",type:"spot",coords:[39.7952,2.6908]},
-    ]
-  },
-  {
-    date:"9/23 (수)", region:"마요르카 — 소예르 & 트램 🚃", color:"#F5A623",
-    hotel:"그란 호텔 소예르 (5성급)\n체크아웃 12시 | 오후 팔마 공항으로 이동",
-    schedule:[
-      {time:"08:30",title:"☀️ 조식",desc:"그란 호텔 소예르 조식\n테라스에서 산맥 뷰 감상",type:"food",coords:[39.7660,2.7155]},
-      {time:"09:30",title:"🚃 소예르 트램 탑승",desc:"소예르 → 포르트 데 소예르 약 20분\n창밖 오렌지 밭 뷰 감상",type:"spot",warn:"사전 예약 권장",coords:[39.7655,2.7148]},
-      {time:"10:30",title:"🏖️ 포르트 데 소예르 해변",desc:"잔잔한 바다, 수영 & 스노클링",type:"spot",coords:[39.7952,2.6908]},
-      {time:"12:00",title:"⚓ 소예르 항구 브런치",desc:"항구 카페에서 여유로운 브런치",type:"food",coords:[39.7952,2.6908]},
-      {time:"13:00",title:"🍽️ 점심 — Nautilus Soller",desc:"절벽 레스토랑 (예약 필수!)\n절벽 위에서 먹는 빠에야\n인생 뷰 레스토랑",type:"food",warn:"예약 필수",coords:[39.7952,2.6908]},
-      {time:"14:30",title:"🍊 소예르 오렌지 광장 산책",desc:"오렌지 셔벗 아이스크림\n로컬 마켓 구경",type:"spot",coords:[39.7655,2.7148]},
-      {time:"16:00",title:"🚗 팔마 공항으로 이동",desc:"소예르 → 팔마 공항 약 40분\n렌트카 주유 & 반납",type:"move",coords:[39.5517,2.7388]},
-      {time:"17:30",title:"🏟️ 팔마 공항 탑승 준비",desc:"체크인 카운터\n부엘링 항공 탑승",type:"flight",coords:[39.5517,2.7388]},
-      {time:"—",title:"✈️ 팔마 → 바르셀로나",desc:"부엘링 항공 예약번호: IHHNHP\n오후 4:30 출발 → 5:30 도착\n25kg 수하물 포함",type:"flight",confirmed:true,coords:[39.5517,2.7388]},
-      {time:"19:00",title:"🏨 H10 메트로폴리탄 체크인",desc:"예약번호: 1694841847\n테라스 있음 / 무취 가능\n체크인 15시~",type:"hotel",coords:[41.3887,2.1640]},
-    ]
-  },
-  {
-    date:"9/24 (목)", region:"바르셀로나 — 라로카빌리지 쇼핑 🛍️", color:"#E8725A",
-    hotel:"H10 메트로폴리탄 호텔\n예약번호: 1694841847",
-    schedule:[
-      {time:"08:00",title:"☀️ 조식 & 쇼핑 준비",desc:"라로카빌리지 쇼핑 준비\n아웃렛 셔틀버스 예약 확인",type:"etc",coords:[41.3887,2.1640]},
-      {time:"09:00",title:"🚌 라로카빌리지 셔틀버스",desc:"그라시아 거리 → 라로카빌리지\n셔틀버스 예약 필수!\n10% 추가 할인 팁 블로그 참고",type:"move",warn:"셔틀버스 사전 예약 필수",coords:[41.6103,2.3422]},
-      {time:"10:00",title:"🛍️ 라로카빌리지 쇼핑",desc:"150개+ 명품 부티크, 최대 60% 할인\n구찌 / 프라다 / 버버리 / 몽클레어",type:"shopping",coords:[41.6103,2.3422]},
-      {time:"13:00",title:"🍽️ 아울렛 점심",desc:"아울렛 내 레스토랑에서 점심",type:"food",coords:[41.6103,2.3422]},
-      {time:"15:00",title:"🚌 바르셀로나 복귀",desc:"셔틀버스로 그라시아 거리 귀환",type:"move",coords:[41.3920,2.1650]},
-      {time:"16:00",title:"🏡 구엘공원",desc:"가우디의 모자이크 공원\n도마뱀 분수, 모자이크 테라스 포토타임\n예약 필수!",type:"spot",warn:"사전 예약 필수",coords:[41.4145,2.1527]},
-      {time:"17:30",title:"🛍️ 고딕지구 마지막 쇼핑",desc:"바르셀로나 기념품 쇼핑\n라치나타 올리브오일 / 사바테즈 / 오이소잠옷",type:"shopping",coords:[41.3833,2.1761]},
-      {time:"19:00",title:"🌇 바르셀로나 야경 & 타파스",desc:"마지막 바르셀로나 저녁\n고딕지구 타파스바",type:"food",coords:[41.3833,2.1761]},
-      {time:"21:00",title:"🧳 숙소 복귀 & 귀국 준비",desc:"짐 정리 & 택스리펀 서류 확인",type:"hotel",coords:[41.3887,2.1640]},
-    ]
-  },
-  {
-    date:"9/25 (금)", region:"바르셀로나 → 한국 ✈️🇰🇷", color:"#888",
-    hotel:"귀국일 | H10 메트로폴리탄 체크아웃 12시",
-    schedule:[
-      {time:"08:00",title:"☀️ 조식 & 마지막 아침",desc:"마지막 바르셀로나 아침!\n호텔 체크아웃 준비",type:"food",coords:[41.3887,2.1640]},
-      {time:"09:00",title:"🏡 구엘공원 (미방문 시)",desc:"아직 못 갔다면 오전 방문",type:"spot",coords:[41.4145,2.1527]},
-      {time:"10:00",title:"🛍️ 마지막 쇼핑",desc:"바르셀로나 기념품 마무리\n고딕지구 / 라치나타 / mercadona 마트",type:"shopping",coords:[41.3833,2.1761]},
-      {time:"12:00",title:"🏨 호텔 체크아웃 & 짐 보관",desc:"체크아웃 후 짐 호텔에 맡기기",type:"hotel",coords:[41.3887,2.1640]},
-      {time:"13:00",title:"🍽️ 마지막 점심",desc:"좋아하는 타파스집 한번 더\nor La Pepita / El Xampanyet",type:"food",coords:[41.3845,2.1820]},
-      {time:"15:00",title:"🧳 호텔로 귀환 & 짐 찾기",desc:"공항 이동 준비",type:"hotel",coords:[41.3887,2.1640]},
-      {time:"16:00",title:"🚌 바르셀로나 공항 이동",desc:"지하철 + 에어로버스 약 40분\n터미널1 도착 (아시아나 OZ0512)",type:"move",coords:[41.2971,2.0785]},
-      {time:"17:30",title:"🛫 공항 도착 & 체크인",desc:"3시간 전 도착 권장\n수하물 23kg 아시아나",type:"flight",coords:[41.2971,2.0785]},
-      {time:"18:30",title:"🛍️ 면세점 & 출국 심사",desc:"면세 쇼핑 마무리\n택스리펀 수속 필수!",type:"shopping",coords:[41.2971,2.0785]},
-      {time:"20:00",title:"🥂 신혼여행 마지막 乾杯",desc:"탑승 전 마지막 카바 한잔\n14일간의 여행 피날레",type:"food",coords:[41.2971,2.0785]},
-      {time:"20:50",title:"✈️ 바르셀로나 출발",desc:"OZ0512 | 터미널1 | 12시간 비행\n인천 9/26(토) 16:20 도착",type:"flight",confirmed:true,coords:[41.2971,2.0785]},
-    ]
-  },
-  {
-    date:"9/26 (토)", region:"한국 도착 🇰🇷💕", color:"#888",
-    hotel:"—",
-    schedule:[
-      {time:"16:20",title:"🛬 인천공항 도착",desc:"OZ0512 | 터미널2 도착\n14일간의 신혼여행 무사 귀환!\n수고하셨어요 💕",type:"flight",coords:[37.4602,126.4407]},
-    ]
-  },
-];
-
-const TYPE_STYLES = {
-  flight:{bg:"rgba(59,130,246,.1)",border:"rgba(59,130,246,.25)",dot:"#3B82F6",label:"항공/이동"},
-  hotel:{bg:"rgba(139,92,246,.1)",border:"rgba(139,92,246,.25)",dot:"#8B5CF6",label:"숙소"},
-  spot:{bg:"rgba(16,185,129,.1)",border:"rgba(16,185,129,.25)",dot:"#10B981",label:"관광"},
-  food:{bg:"rgba(245,158,11,.1)",border:"rgba(245,158,11,.25)",dot:"#F59E0B",label:"맛집"},
-  shopping:{bg:"rgba(236,72,153,.1)",border:"rgba(236,72,153,.25)",dot:"#EC4899",label:"쇼핑"},
-  move:{bg:"rgba(99,102,241,.08)",border:"rgba(99,102,241,.2)",dot:"#818CF8",label:"교통"},
-  etc:{bg:"rgba(107,114,128,.08)",border:"rgba(107,114,128,.2)",dot:"#6B7280",label:"기타"},
-};
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  STATE
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let currentDay = 0;
-let currentFilter = 'all';
-let editMode = false;
-let editingIdx = null;
-let currentView = 'timeline'; // timeline | map | route
-let map = null;
-let mapMarkers = [];
-let mapRoute = null;
-let pendingRemoteData = null; // 편집 중 수신된 원격 데이터 보류
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  FIREBASE CONFIG
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let fbApp = null, fbAuth = null, fbDb = null;
-let fbUser = null;
-let fbConnected = false;
-let isSyncingFromRemote = false; // 원격 변경 수신 중 플래그 (무한루프 방지)
-let lastSyncTimestamp = 0;
-
-// 허용된 이메일 목록 (여기에 본인과 배우자 이메일 추가)
-const ALLOWED_EMAILS = [
-  '3hosungo@gmail.com',
-  'rachel506wnsgk@gmail.com',
-];
-
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyBPPr7VX6VHXAmx-jRdEjVcZzAbra9EbLs",
-  authDomain: "hosing-5913f.firebaseapp.com",
-  databaseURL: "https://hosing-5913f-default-rtdb.firebaseio.com",
-  projectId: "hosing-5913f",
-  storageBucket: "hosing-5913f.firebasestorage.app",
-  messagingSenderId: "445332229155",
-  appId: "1:445332229155:web:eddbe748e4df89769af596"
-};
-
-function initFirebase() {
-  const config = FIREBASE_CONFIG;
-  try {
-    fbApp = firebase.initializeApp(config);
-    fbAuth = firebase.auth();
-    fbDb = firebase.database();
-
-    // 연결 상태 감지
-    fbDb.ref('.info/connected').on('value', (snap) => {
-      fbConnected = snap.val() === true;
-      if (fbConnected && fbUser) {
-        updateSyncUI('online');
-        setupPresence();
-      } else if (!fbConnected) {
-        updateSyncUI('offline');
-      }
-    });
-
-    // 인증 상태 변경 감지
-    fbAuth.onAuthStateChanged((user) => {
-      if (user && ALLOWED_EMAILS.length > 0 && !ALLOWED_EMAILS.includes(user.email)) {
-        // 허용되지 않은 이메일 → 강제 로그아웃
-        fbAuth.signOut();
-        fbUser = null;
-        updateAuthUI();
-        updateSyncUI('offline');
-        showToast('접근 권한이 없는 계정입니다');
-        return;
-      }
-      fbUser = user;
-      updateAuthUI();
-      if (user) {
-        updateSyncUI(fbConnected ? 'online' : 'offline');
-        setupPresence();
-        // 로그인 시 Firebase 데이터를 먼저 확인 후 동기화
-        fetchRemoteThenSync().then(() => {
-          listenForChanges();
-        });
-      } else {
-        updateSyncUI('offline');
-        detachListeners();
-      }
-    });
-
-    return true;
-  } catch(e) {
-    console.error('Firebase init error:', e);
-    updateSyncUI('offline');
-    return false;
-  }
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  AUTH
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function signIn() {
-  if (!fbAuth) { showToast('Firebase 연결 실패 — 새로고침 해주세요'); return; }
-  const provider = new firebase.auth.GoogleAuthProvider();
-  fbAuth.signInWithPopup(provider).catch(e => {
-    // 팝업 차단 시 리다이렉트 방식으로 재시도 (모바일 대응)
-    if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
-      fbAuth.signInWithRedirect(provider);
-    } else {
-      console.error('Auth error:', e);
-      showToast('로그인 실패: ' + e.message);
-    }
-  });
-}
-function signOut() {
-  if (fbAuth) fbAuth.signOut();
-  fbUser = null;
-  updateAuthUI();
-  updateSyncUI('offline');
-  showToast('로그아웃 완료');
-}
-function updateAuthUI() {
-  const el = document.getElementById('authContent');
-  if (fbUser) {
-    const photo = fbUser.photoURL || '';
-    const name = fbUser.displayName || fbUser.email || '사용자';
-    el.innerHTML = `
-      <div class="auth-user">
-        ${photo ? `<img class="auth-avatar" src="${photo}" alt="">` : ''}
-        <span>${name}</span>
-      </div>
-      <button class="auth-btn auth-btn-logout" onclick="signOut()">로그아웃</button>
-    `;
-  } else {
-    el.innerHTML = `<button class="auth-btn auth-btn-login" onclick="signIn()">🔑 Google 로그인</button>`;
-  }
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  SYNC UI
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function updateSyncUI(status) {
-  const dot = document.getElementById('syncDot');
-  const text = document.getElementById('syncText');
-  dot.className = 'sync-dot ' + (status === 'syncing' ? 'syncing' : status === 'online' ? 'online' : 'offline');
-  const labels = { online: '실시간 동기화', offline: '오프라인', syncing: '동기화 중...' };
-  text.textContent = labels[status] || '오프라인';
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  REALTIME SYNC (offline-first)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let dataListener = null;
-
-function getDataRef() {
-  // 모든 로그인 사용자가 같은 경로를 공유 → 2인 공동 편집
-  // projectId 기반이므로 같은 Firebase 프로젝트 사용자끼리 공유
-  return fbDb ? fbDb.ref('travel/itinerary') : null;
-}
-
-// 로그인 시 Firebase 데이터를 먼저 가져와서 비교 후 동기화
-async function fetchRemoteThenSync() {
-  const ref = getDataRef();
-  if (!ref) return;
-  updateSyncUI('syncing');
-  try {
-    const snap = await ref.once('value');
-    const remote = snap.val();
-    if (remote && remote.days && remote.updatedAt) {
-      // Firebase에 데이터가 있으면 항상 Firebase 우선 (서버가 진실의 원천)
-      DAYS = remote.days;
-      saveToLocalOnly();
-      lastSyncTimestamp = remote.updatedAt;
-      if (currentDay >= DAYS.length) currentDay = DAYS.length - 1;
-      render();
-      if (currentView === 'map' && map) updateMap();
-      if (currentView === 'route') renderRouteView();
-      updateSyncUI('online');
-      showToast('클라우드에서 최신 데이터를 불러왔어요');
-    } else {
-      // Firebase에 데이터가 없으면 로컬 데이터를 올림
-      syncToRemote();
-    }
-  } catch(e) {
-    console.error('Fetch remote error:', e);
-    updateSyncUI('offline');
-  }
-}
-
-function syncToRemote() {
-  if (!fbDb || !fbUser || isSyncingFromRemote) return;
-  const ref = getDataRef();
-  if (!ref) return;
-  updateSyncUI('syncing');
-  const payload = {
-    days: DAYS,
-    updatedBy: fbUser.uid,
-    updatedByName: fbUser.displayName || fbUser.email,
-    updatedAt: firebase.database.ServerValue.TIMESTAMP
-  };
-  ref.set(payload).then(() => {
-    lastSyncTimestamp = Date.now();
-    updateSyncUI('online');
-  }).catch(e => {
-    console.error('Sync error:', e);
-    updateSyncUI('offline');
-  });
-}
-
-function listenForChanges() {
-  detachListeners();
-  const ref = getDataRef();
-  if (!ref) return;
-
-  dataListener = ref.on('value', (snap) => {
-    const data = snap.val();
-    if (!data || !data.days) return;
-
-    // 내가 보낸 변경이면 무시 (본인 저장 후 리스너 재호출 방지)
-    if (data.updatedBy === fbUser?.uid) return;
-
-    // 편집 모드 중이면 데이터만 저장하고 화면은 건드리지 않음
-    if (editMode) {
-      // 백그라운드로 저장만 해두고, 편집 완료 후 반영
-      pendingRemoteData = data;
-      showToast(`📡 ${data.updatedByName || '상대방'}님이 수정 — 편집 완료 후 반영됩니다`);
-      return;
-    }
-
-    isSyncingFromRemote = true;
-    DAYS = data.days;
-    saveToLocalOnly();
-    lastSyncTimestamp = data.updatedAt || Date.now();
-
-    if (currentDay >= DAYS.length) currentDay = DAYS.length - 1;
-    render();
-    if (currentView === 'map' && map) updateMap();
-    if (currentView === 'route') renderRouteView();
-
-    showToast(`📡 ${data.updatedByName || '상대방'}님이 일정을 수정했어요`);
-    isSyncingFromRemote = false;
-  });
-}
-
-function detachListeners() {
-  if (dataListener) {
-    const ref = getDataRef();
-    if (ref) ref.off('value', dataListener);
-    dataListener = null;
-  }
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  PRESENCE (누가 접속 중인지)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let presenceListener = null;
-
-function setupPresence() {
-  if (!fbDb || !fbUser) return;
-  const myPresRef = fbDb.ref('travel/presence/' + fbUser.uid);
-  const allPresRef = fbDb.ref('travel/presence');
-
-  // 내 접속 정보 기록
-  myPresRef.set({
-    name: fbUser.displayName || fbUser.email || '사용자',
-    photo: fbUser.photoURL || '',
-    online: true,
-    lastSeen: firebase.database.ServerValue.TIMESTAMP
-  });
-  myPresRef.onDisconnect().update({ online: false, lastSeen: firebase.database.ServerValue.TIMESTAMP });
-
-  // 다른 사용자 접속 감지
-  if (presenceListener) allPresRef.off('value', presenceListener);
-  presenceListener = allPresRef.on('value', (snap) => {
-    const users = snap.val() || {};
-    const others = Object.entries(users)
-      .filter(([uid, u]) => uid !== fbUser.uid && u.online)
-      .map(([, u]) => u);
-
-    const bar = document.getElementById('presenceBar');
-    const text = document.getElementById('presenceText');
-    if (others.length > 0) {
-      bar.classList.add('visible');
-      const avatars = others.map(u => u.photo ? `<img class="presence-avatar" src="${u.photo}" alt="">` : '').join('');
-      const names = others.map(u => u.name).join(', ');
-      text.innerHTML = `${avatars} <span>${names}님도 접속 중</span>`;
-    } else {
-      bar.classList.remove('visible');
-    }
-  });
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  PERSISTENCE (offline-first)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function saveToLocalOnly() {
-  try { localStorage.setItem('travel_planner_days', JSON.stringify(DAYS)); } catch(e) {}
-}
-function saveToLocal() {
-  saveToLocalOnly();
-  syncToRemote();
-}
-function loadFromLocal() {
-  try {
-    const d = localStorage.getItem('travel_planner_days');
-    if (d) DAYS = JSON.parse(d);
-  } catch(e) {}
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  TOAST
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function esc(str) {
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  VIEW SWITCHING
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function switchView(view) {
-  currentView = view;
-  document.querySelectorAll('.view-tab').forEach((tab, i) => {
-    const views = ['timeline','map','route'];
-    tab.classList.toggle('active', views[i] === view);
-  });
-  document.getElementById('timelineView').style.display = view === 'timeline' ? '' : 'none';
-  document.getElementById('mapView').classList.toggle('visible', view === 'map');
-  document.getElementById('routeView').classList.toggle('visible', view === 'route');
-  document.getElementById('tipsSection').style.display = view === 'timeline' ? '' : 'none';
-  document.getElementById('editToolbar').style.display = view === 'timeline' ? '' : 'none';
-  document.getElementById('daySelector').style.display = view === 'route' ? 'none' : '';
-
-  if (view === 'map') {
-    setTimeout(() => {
-      if (!map) initMap();
-      else map.invalidateSize();
-      updateMap();
-    }, 100);
-  }
-  if (view === 'route') renderRouteView();
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  EDIT MODE
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function toggleEdit() {
-  editMode = !editMode;
-  document.body.classList.toggle('edit-mode', editMode);
-  document.getElementById('editModeBar').classList.toggle('visible', editMode);
-  document.getElementById('addBtn').style.display = editMode ? '' : 'none';
-  document.getElementById('addDayBtn').style.display = editMode ? '' : 'none';
-  document.getElementById('addItemRow').classList.toggle('visible', editMode);
-  const btn = document.getElementById('toggleEditBtn');
-  btn.textContent = editMode ? '✅ 완료' : '✏️ 편집';
-  btn.classList.toggle('active', editMode);
-
-  // 편집 완료 시, 보류된 원격 데이터가 있으면 반영
-  if (!editMode && pendingRemoteData) {
-    DAYS = pendingRemoteData.days;
-    saveToLocalOnly();
-    lastSyncTimestamp = pendingRemoteData.updatedAt || Date.now();
-    pendingRemoteData = null;
-    if (currentDay >= DAYS.length) currentDay = DAYS.length - 1;
-    showToast('보류된 변경사항이 반영되었어요');
-  }
-
-  renderDayContent();
-  showToast(editMode ? '편집 모드 ON' : '편집 완료!');
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  RENDER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function render() { renderDaySelector(); renderDayContent(); }
-
-function renderDaySelector() {
-  const el = document.getElementById('daySelector');
-  el.innerHTML = DAYS.map((d, i) => {
-    const active = i === currentDay;
-    return `<button class="day-btn ${active?'active':''}" onclick="selectDay(${i})"
-      style="border:${active?`2px solid ${d.color}`:'1px solid rgba(255,255,255,.08)'};background:${active?d.color+'22':'rgba(255,255,255,.02)'};color:${active?d.color:'#64748b'}">
-      <div class="day-num">DAY ${i+1}</div>${d.date}
-    </button>`;
-  }).join('');
-  setTimeout(() => {
-    const a = el.querySelector('.active');
-    if (a) a.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-  }, 50);
-}
-
-function renderDayContent() {
-  const day = DAYS[currentDay];
-  const filtered = currentFilter === 'all' ? day.schedule.map((s,i)=>({...s,_idx:i}))
-    : day.schedule.map((s,i)=>({...s,_idx:i})).filter(s=>s.type===currentFilter);
-
-  document.getElementById('dayHeader').innerHTML = `
-    <div class="day-header-top">
-      <div class="day-badge" style="background:${day.color}18;border:2px solid ${day.color};color:${day.color}">D${currentDay+1}</div>
-      <div>
-        <div class="day-region">${day.region}</div>
-        <div class="day-date-sub">${day.date} · ${day.schedule.length}개 일정</div>
-      </div>
-    </div>
-    ${day.hotel !== '—' ? `<div class="hotel-box" onclick="${editMode?'openHotelModal()':''}">🏨 ${day.hotel}${editMode?' <span style="color:#fbbf24;font-size:10px;">✏️</span>':''}</div>` : ''}
-  `;
-
-  const filters = [
-    {key:'all',label:'전체'},{key:'spot',label:'📍 관광'},{key:'food',label:'🍴 맛집'},
-    {key:'shopping',label:'🛍️ 쇼핑'},{key:'flight',label:'✈️ 이동'},{key:'hotel',label:'🏨 숙소'}
-  ];
-  document.getElementById('filters').innerHTML = filters.map(f => {
-    const active = f.key === currentFilter;
-    return `<button class="filter-btn ${active?'active':''}" onclick="setFilter('${f.key}')"
-      style="${active?`border-color:${day.color};background:${day.color}18;color:${day.color}`:''}">
-      ${f.label}</button>`;
-  }).join('');
-
-  if (filtered.length === 0) {
-    document.getElementById('timeline').innerHTML = '<div style="text-align:center;padding:40px 20px;color:#475569;font-size:13px">해당 카테고리의 일정이 없습니다</div>';
-    return;
-  }
-
-  document.getElementById('timeline').innerHTML = filtered.map((item, i) => {
-    const t = TYPE_STYLES[item.type] || TYPE_STYLES.etc;
-    const isLast = i === filtered.length - 1;
-    const confirmed = item.confirmed ? '<span class="confirmed">✓ 예약확정</span>' : '';
-    const warn = item.warn ? `<div class="card-warn">⚠️ ${item.warn}</div>` : '';
-    const coordsBadge = item.coords ? `<span style="display:inline-block;background:rgba(59,130,246,.1);color:#60a5fa;font-size:9px;padding:1px 5px;border-radius:3px;margin-left:4px">📍</span>` : '';
-    const editClick = editMode ? `onclick="openEditModal(${item._idx})"` : '';
-    const editHint = editMode ? `<span class="edit-indicator">✏️</span>` : '';
-    const deleteBtn = editMode ? `<button onclick="event.stopPropagation();deleteItem(${item._idx})" style="position:absolute;top:6px;right:28px;width:20px;height:20px;border-radius:6px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.25);color:#f87171;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>` : '';
-    return `
-      <div class="timeline-item">
-        <div class="timeline-left">
-          <div class="timeline-time">${item.time}</div>
-          <div class="timeline-dot" style="background:${t.dot};box-shadow:0 0 8px ${t.dot}44"></div>
-          ${!isLast?`<div class="timeline-line" style="background:linear-gradient(to bottom,${t.dot}44,transparent)"></div>`:''}
-        </div>
-        <div class="timeline-card" style="background:${t.bg};border-color:${t.border}" ${editClick}>
-          ${editHint}${deleteBtn}
-          <div class="card-title">${item.title}${confirmed}${coordsBadge}</div>
-          <div class="card-desc">${item.desc}</div>
-          ${warn}
-        </div>
-      </div>`;
-  }).join('');
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  MAP
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function initMap() {
-  map = L.map('map', {
-    zoomControl: true,
-    attributionControl: false
-  }).setView([41.3851, 2.1734], 13);
-
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19
-  }).addTo(map);
-
-  L.control.attribution({prefix:false, position:'bottomright'})
-    .addAttribution('&copy; <a href="https://carto.com/" style="color:#64748b">CARTO</a>')
-    .addTo(map);
-}
-
-function updateMap() {
-  if (!map) return;
-  const day = DAYS[currentDay];
-
-  // Clear
-  mapMarkers.forEach(m => map.removeLayer(m));
-  mapMarkers = [];
-  if (mapRoute) { map.removeLayer(mapRoute); mapRoute = null; }
-
-  const coords = [];
-  let num = 1;
-
-  day.schedule.forEach((item, i) => {
-    if (!item.coords) return;
-    const [lat, lng] = item.coords;
-    coords.push([lat, lng]);
-
-    const t = TYPE_STYLES[item.type] || TYPE_STYLES.etc;
-    const icon = L.divIcon({
-      className: '',
-      html: `<div class="custom-marker" style="background:${t.dot}">${num}</div>`,
-      iconSize: [28, 28],
-      iconAnchor: [14, 14]
-    });
-
-    const marker = L.marker([lat, lng], {icon})
-      .bindPopup(`
-        <strong>${item.title}</strong>
-        <div class="popup-type">${TYPE_STYLES[item.type]?.label || '기타'}</div>
-        <div class="popup-time">${item.time !== '—' ? item.time : ''}</div>
-        <div style="margin-top:4px;color:#94a3b8;font-size:11px;white-space:pre-line">${item.desc}</div>
-      `, {maxWidth: 250})
-      .addTo(map);
-
-    mapMarkers.push(marker);
-    num++;
-  });
-
-  // Draw route
-  if (coords.length >= 2) {
-    mapRoute = L.polyline(coords, {
-      color: day.color,
-      weight: 3,
-      opacity: 0.7,
-      dashArray: '8,8',
-      smoothFactor: 1
-    }).addTo(map);
-  }
-
-  // Fit bounds
-  if (coords.length > 0) {
-    const bounds = L.latLngBounds(coords);
-    map.fitBounds(bounds, {padding:[40,40], maxZoom:15});
-  }
-
-  // Day info
-  document.getElementById('mapDayInfo').innerHTML = `
-    <strong>DAY ${currentDay+1} — ${day.date}</strong><br>
-    <span style="color:#94a3b8">${day.region}</span><br>
-    <span style="color:${day.color}">📍 ${coords.length}개 위치</span>
-  `;
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  ROUTE VIEW
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const dLat = (lat2-lat1)*Math.PI/180;
-  const dLon = (lon2-lon1)*Math.PI/180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
-function renderRouteView() {
-  const el = document.getElementById('routeView');
-  el.innerHTML = '<div style="font-size:16px;font-weight:800;color:#f1f5f9;margin-bottom:16px">🧭 전체 동선 요약</div>' +
-    DAYS.map((day, di) => {
-      const withCoords = day.schedule.filter(s => s.coords);
-      if (withCoords.length === 0) {
-        return `<div class="route-day-card" onclick="selectDay(${di});switchView('timeline')">
-          <div class="route-day-header">
-            <div class="route-day-badge" style="background:${day.color}22;border:2px solid ${day.color};color:${day.color}">D${di+1}</div>
-            <div><div class="route-day-title">${day.region}</div><div class="route-day-date">${day.date}</div></div>
-          </div>
-          <div style="font-size:11px;color:#475569;padding:4px 0">위치 정보 없음</div>
-        </div>`;
-      }
-
-      let totalDist = 0;
-      const stops = withCoords.map((item, i) => {
-        const t = TYPE_STYLES[item.type] || TYPE_STYLES.etc;
-        let distInfo = '';
-        if (i > 0 && withCoords[i-1].coords) {
-          const d = haversine(withCoords[i-1].coords[0], withCoords[i-1].coords[1], item.coords[0], item.coords[1]);
-          totalDist += d;
-          distInfo = `<div class="route-connector"><div class="route-connector-line"></div> ↓ ${d < 1 ? (d*1000).toFixed(0) + 'm' : d.toFixed(1) + 'km'}</div>`;
-        }
-        return `${distInfo}<div class="route-stop">
-          <div class="route-stop-num" style="background:${t.dot}33;color:${t.dot}">${i+1}</div>
-          <div class="route-stop-name">${item.title}</div>
-          <div class="route-stop-time">${item.time}</div>
-        </div>`;
-      }).join('');
-
-      return `<div class="route-day-card" onclick="selectDay(${di});switchView('map')">
-        <div class="route-day-header">
-          <div class="route-day-badge" style="background:${day.color}22;border:2px solid ${day.color};color:${day.color}">D${di+1}</div>
-          <div><div class="route-day-title">${day.region}</div><div class="route-day-date">${day.date}</div></div>
-        </div>
-        <div class="route-stops">${stops}</div>
-        <div class="route-summary">
-          <div class="route-stat">📍 <strong>${withCoords.length}</strong>개 장소</div>
-          <div class="route-stat">📏 총 <strong>${totalDist < 1 ? (totalDist*1000).toFixed(0) + 'm' : totalDist.toFixed(1) + 'km'}</strong></div>
-          <div class="route-stat">🕐 <strong>${day.schedule.length}</strong>개 일정</div>
-        </div>
-      </div>`;
-    }).join('');
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  EDIT MODALS
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function openEditModal(idx) {
-  if (!editMode) return;
-  editingIdx = idx;
-  const item = DAYS[currentDay].schedule[idx];
-  document.getElementById('modalTitleText').textContent = '✏️ 일정 수정';
-  document.getElementById('f-time').value = item.time || '';
-  document.getElementById('f-type').value = item.type || 'etc';
-  document.getElementById('f-title').value = item.title || '';
-  document.getElementById('f-desc').value = item.desc || '';
-  document.getElementById('f-warn').value = item.warn || '';
-  document.getElementById('f-lat').value = item.coords ? item.coords[0] : '';
-  document.getElementById('f-lng').value = item.coords ? item.coords[1] : '';
-  document.getElementById('f-confirmed').checked = !!item.confirmed;
-  document.getElementById('modalActions').innerHTML = `
-    <button class="modal-btn modal-btn-delete" onclick="deleteItem(${idx});closeModal()">삭제</button>
-    <button class="modal-btn modal-btn-cancel" onclick="closeModal()">취소</button>
-    <button class="modal-btn modal-btn-save" onclick="saveItem()">저장</button>
-  `;
-  document.getElementById('modalOverlay').classList.add('visible');
-}
-
-function openAddModal() {
-  editingIdx = null;
-  document.getElementById('modalTitleText').textContent = '➕ 일정 추가';
-  document.getElementById('f-time').value = '';
-  document.getElementById('f-type').value = 'spot';
-  document.getElementById('f-title').value = '';
-  document.getElementById('f-desc').value = '';
-  document.getElementById('f-warn').value = '';
-  document.getElementById('f-lat').value = '';
-  document.getElementById('f-lng').value = '';
-  document.getElementById('f-confirmed').checked = false;
-  document.getElementById('modalActions').innerHTML = `
-    <button class="modal-btn modal-btn-cancel" onclick="closeModal()">취소</button>
-    <button class="modal-btn modal-btn-save" onclick="saveItem()">추가</button>
-  `;
-  document.getElementById('modalOverlay').classList.add('visible');
-}
-
-function saveItem() {
-  const item = {
-    time: document.getElementById('f-time').value.trim() || '—',
-    type: document.getElementById('f-type').value,
-    title: document.getElementById('f-title').value.trim(),
-    desc: document.getElementById('f-desc').value.trim(),
-  };
-  const w = document.getElementById('f-warn').value.trim();
-  if (w) item.warn = w;
-  if (document.getElementById('f-confirmed').checked) item.confirmed = true;
-  const lat = parseFloat(document.getElementById('f-lat').value);
-  const lng = parseFloat(document.getElementById('f-lng').value);
-  if (!isNaN(lat) && !isNaN(lng)) item.coords = [lat, lng];
-  if (!item.title) { showToast('제목을 입력해주세요'); return; }
-
-  if (editingIdx !== null) {
-    DAYS[currentDay].schedule[editingIdx] = item;
-    showToast('수정 완료!');
-  } else {
-    DAYS[currentDay].schedule.push(item);
-    showToast('일정이 추가됐어요!');
-  }
-  // 시간 순 정렬 ('—'는 맨 뒤로)
-  DAYS[currentDay].schedule.sort((a, b) => {
-    if (a.time === '—' && b.time === '—') return 0;
-    if (a.time === '—') return 1;
-    if (b.time === '—') return -1;
-    return a.time.localeCompare(b.time);
-  });
-  saveToLocal();
-  closeModal();
-  renderDayContent();
-}
-
-function deleteItem(idx) {
-  DAYS[currentDay].schedule.splice(idx, 1);
-  saveToLocal();
-  renderDayContent();
-  showToast('삭제했어요');
-}
-
-function closeModal() { document.getElementById('modalOverlay').classList.remove('visible'); }
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  HOTEL MODAL
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function openHotelModal() {
-  if (!editMode) return;
-  document.getElementById('h-hotel').value = DAYS[currentDay].hotel || '';
-  document.getElementById('h-region').value = DAYS[currentDay].region || '';
-  document.getElementById('hotelModalOverlay').classList.add('visible');
-}
-function saveHotel() {
-  DAYS[currentDay].hotel = document.getElementById('h-hotel').value.trim() || '—';
-  DAYS[currentDay].region = document.getElementById('h-region').value.trim() || DAYS[currentDay].region;
-  saveToLocal();
-  closeHotelModal();
-  renderDayContent();
-  renderDaySelector();
-  showToast('숙소 정보 수정 완료!');
-}
-function closeHotelModal() { document.getElementById('hotelModalOverlay').classList.remove('visible'); }
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  DAY MODAL
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function openDayModal() {
-  document.getElementById('d-date').value = '';
-  document.getElementById('d-region').value = '';
-  document.getElementById('d-hotel').value = '';
-  document.querySelectorAll('input[name="d-color"]')[0].checked = true;
-  updateColorSwatches();
-  document.getElementById('dayModalOverlay').classList.add('visible');
-}
-function saveDay() {
-  const date = document.getElementById('d-date').value.trim();
-  const region = document.getElementById('d-region').value.trim();
-  if (!date || !region) { showToast('날짜와 지역을 입력해주세요'); return; }
-  const color = document.querySelector('input[name="d-color"]:checked').value;
-  const hotel = document.getElementById('d-hotel').value.trim() || '—';
-  DAYS.push({ date, region, color, hotel, schedule: [] });
-  saveToLocal();
-  closeDayModal();
-  currentDay = DAYS.length - 1;
-  render();
-  showToast('새 날짜가 추가됐어요!');
-}
-function closeDayModal() { document.getElementById('dayModalOverlay').classList.remove('visible'); }
-
-// Color swatch selection
-document.querySelectorAll('input[name="d-color"]').forEach(input => {
-  input.addEventListener('change', updateColorSwatches);
-});
-function updateColorSwatches() {
-  document.querySelectorAll('#colorPicker .color-swatch').forEach(swatch => {
-    const radio = swatch.parentElement.querySelector('input');
-    swatch.style.borderColor = radio.checked ? '#fff' : 'transparent';
-  });
-}
-updateColorSwatches();
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  IMPORT / EXPORT
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function exportData() {
-  const blob = new Blob([JSON.stringify(DAYS, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = '여행일정_' + new Date().toISOString().slice(0,10) + '.json';
-  a.click();
-  URL.revokeObjectURL(a.href);
-  showToast('JSON 저장 완료!');
-}
-
-function importData(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (Array.isArray(data) && data.length > 0) {
-        DAYS = data;
-        currentDay = 0;
-        saveToLocal();
-        render();
-        showToast('데이터를 불러왔어요!');
-      } else {
-        showToast('유효한 JSON 파일이 아닙니다');
-      }
-    } catch(err) {
-      showToast('JSON 파싱 오류');
-    }
-  };
-  reader.readAsText(file);
-  event.target.value = '';
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  NAVIGATION
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function selectDay(i) {
-  currentDay = i;
-  currentFilter = 'all';
-  render();
-  if (currentView === 'map') updateMap();
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-function setFilter(f) { currentFilter = f; renderDayContent(); }
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  INIT
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-loadFromLocal();   // 1. 로컬 데이터 먼저 로드 (오프라인 우선)
-render();          // 2. 즉시 화면 렌더링
-initFirebase();    // 3. Firebase 연결 (비동기, 실패해도 앱은 동작)
+// ══════════ DATA ══════════
+let DAYS=[{date:"9/13 (일)",region:"한국 → 바르셀로나 ✈️",color:"#E8725A",hotel:"머큐어 바르셀로나 콘도르 (4성급)\n예약번호: 3508557 | 체크인 14시",schedule:[{time:"11:50",title:"✈️ 인천공항 출발",desc:"OZ0511 | 터미널2 | 14시간 비행\n수하물: 23kg",type:"flight",confirmed:true,coords:[37.4602,126.4407]},{time:"19:10",title:"🛬 바르셀로나 도착",desc:"엘프라트 공항 T1",type:"flight",coords:[41.2971,2.0785]},{time:"20:00",title:"🚌 공항→호텔",desc:"A2공항버스→V13 환승 (약 1시간)",type:"move"},{time:"21:00",title:"🏨 호텔 체크인",desc:"머큐어 바르셀로나 콘도르",type:"hotel",coords:[41.3920,2.1531]},{time:"21:30",title:"🍽️ 가벼운 첫날 저녁",desc:"호텔 근처 간단히 식사",type:"food"}]},{date:"9/14 (월)",region:"바르셀로나 — 가우디 투어 🏛️",color:"#E8725A",hotel:"머큐어 바르셀로나 콘도르",schedule:[{time:"08:00",title:"☀️ 조식 & 출발",desc:"동키 자전거 or 지하철",type:"etc",coords:[41.3920,2.1531]},{time:"09:00",title:"⛪ 사그라다 파밀리아",desc:"가우디의 미완성 걸작\n오전 방문 추천",type:"spot",warn:"사전 예약 필수",coords:[41.4036,2.1744],url:"https://sagradafamilia.org/tickets"},{time:"11:00",title:"🏠 카사 바트요 / 라 페드레라",desc:"그라시아 거리 가우디 건축물\n옥상 포토존 필수",type:"spot",warn:"사전 예약 권장",coords:[41.3916,2.1649]},{time:"13:00",title:"🍽️ Cerveceria Catalana",desc:"No.1 타파스집\n꿀대구, 감바스 추천\n13시 전 도착",type:"food",coords:[41.3932,2.1576],cost:50000},{time:"15:00",title:"🛍️ 파세이그 데 그라시아",desc:"명품 쇼핑 & 라치나타",type:"shopping",coords:[41.3920,2.1650]},{time:"16:30",title:"🏖️ 보른 지구",desc:"중세 분위기 탐방\n카페에서 휴식",type:"spot",coords:[41.3853,2.1836]},{time:"18:00",title:"🌊 바르셀로네타 해변",desc:"지중해 석양 감상",type:"spot",coords:[41.3784,2.1925]},{time:"19:00",title:"🍽️ El Xampanyet",desc:"보른 지구 타파스 & 카바",type:"food",coords:[41.3845,2.1820],cost:40000},{time:"21:00",title:"🌃 야경 산책",desc:"해변 야경 & 귀환",type:"spot",coords:[41.3784,2.1925]}]},{date:"9/15 (화)",region:"바르셀로나 — 고딕지구 & 몬주익 🏰",color:"#E8725A",hotel:"머큐어 바르셀로나 콘도르",schedule:[{time:"08:00",title:"☀️ 조식 & 출발",desc:"시내 관광 시작",type:"etc",coords:[41.3920,2.1531]},{time:"08:30",title:"🛒 보케리아 시장",desc:"200개+ 점포\n과일주스, 하몽 시식",type:"spot",coords:[41.3816,2.1719]},{time:"09:30",title:"🏛️ 고딕지구 산책",desc:"대성당, 레이알 광장",type:"spot",coords:[41.3833,2.1761]},{time:"11:00",title:"🎨 피카소 미술관",desc:"피카소 초기작 소장",type:"spot",warn:"예약 권장",coords:[41.3853,2.1811]},{time:"12:00",title:"🍽️ El Paraguayo",desc:"고딕지구 추천 식당",type:"food",coords:[41.3825,2.1770],cost:35000},{time:"13:00",title:"🚡 몬주익 이동",desc:"지하철+케이블카",type:"move",coords:[41.3639,2.1592]},{time:"14:00",title:"🏰 몬주익 성",desc:"바르셀로나 전경 최고 뷰",type:"spot",coords:[41.3635,2.1660]},{time:"15:30",title:"🏛️ 카탈루냐 국립미술관",desc:"스페인 광장 파노라마",type:"spot",coords:[41.3685,2.1533]},{time:"17:00",title:"🍽️ La Pepita",desc:"몬타디토 맛집",type:"food",coords:[41.3978,2.1584],cost:30000},{time:"18:30",title:"✨ 마법의 분수 쇼",desc:"9월 목/금/토 운영",type:"spot",coords:[41.3712,2.1518]},{time:"20:00",title:"🧳 숙소 복귀",desc:"체크아웃 준비",type:"hotel",coords:[41.3920,2.1531]}]},{date:"9/16 (수)",region:"바르셀로나 → 포르투 🌉",color:"#2E86AB",hotel:"레전드 하우스 바이 스위트 포르토\n예약번호: 1694479710",schedule:[{time:"08:00",title:"🏨 체크아웃",desc:"머큐어 콘도르 체크아웃",type:"hotel",coords:[41.3920,2.1531]},{time:"09:00",title:"☕ 브런치",desc:"바르셀로나 마지막 아침",type:"food"},{time:"10:00",title:"🚌 공항 이동",desc:"지하철 약 40분",type:"move",coords:[41.2971,2.0785]},{time:"17:35",title:"✈️ 바르셀로나→포르투",desc:"라이언에어 | 약 1시간",type:"flight",warn:"예약 확인",coords:[41.2971,2.0785]},{time:"18:35",title:"🛬 포르투 도착",desc:"메트로 탑승 (알단테 카드)",type:"flight",coords:[41.2370,-8.6700]},{time:"19:30",title:"🏨 숙소 체크인",desc:"레전드 하우스\n상벤투역 앞",type:"hotel",coords:[41.1460,-8.6110]},{time:"20:30",title:"🌉 동 루이스 다리",desc:"야경 감상 & 강변 카페",type:"spot",coords:[41.1403,-8.6098]},{time:"21:00",title:"🐙 Botequim da Ribeira",desc:"문어 맛집, 첫날 저녁",type:"food",coords:[41.1407,-8.6126],cost:40000}]},{date:"9/17 (목)",region:"포르투 — 가이아 & 크루즈 🍷",color:"#2E86AB",hotel:"레전드 하우스 바이 스위트 포르토",schedule:[{time:"08:30",title:"☀️ 조식",desc:"상벤투역 아줄레주 감상",type:"etc",coords:[41.1459,-8.6106]},{time:"09:00",title:"🗼 클레리구스 탑",desc:"360도 파노라마",type:"spot",coords:[41.1458,-8.6145]},{time:"10:00",title:"📚 렐루 서점",desc:"해리포터 영감 서점\n입장료 8유로",type:"spot",warn:"10시 오픈",coords:[41.1467,-8.6153],cost:12000},{time:"11:00",title:"🚢 도우루강 크루즈",desc:"6개교 크루즈 약 1시간",type:"spot",warn:"사전 예약",coords:[41.1407,-8.6126],cost:25000},{time:"12:30",title:"🍽️ Do Norte Café",desc:"숙소 도보 1분",type:"food",coords:[41.1460,-8.6110],cost:25000},{time:"14:00",title:"🍷 가이아 와이너리",desc:"Taylor's or Graham's\n포트 와인 시음",type:"spot",warn:"예약 권장",coords:[41.1378,-8.6098],cost:20000},{time:"16:00",title:"🌇 가이아 전망대",desc:"리베이라 파노라마",type:"spot",coords:[41.1375,-8.6105]},{time:"17:00",title:"💙 카르무 성당",desc:"아줄레주 타일 포토스팟",type:"spot",coords:[41.1479,-8.6163]},{time:"18:00",title:"🥚 만테이가리아",desc:"에그타르트 맛집",type:"food",coords:[41.1458,-8.6126],cost:5000},{time:"19:30",title:"🍽️ Taberna Dos Mercadores",desc:"문어밥, 농어구이",type:"food",coords:[41.1418,-8.6114],cost:45000},{time:"21:00",title:"🌃 리베이라 야경",desc:"도우루 강변 야경",type:"spot",coords:[41.1407,-8.6126]}]},{date:"9/18 (금)",region:"포르투 — 도우로 밸리 🍇",color:"#2E86AB",hotel:"레전드 하우스 바이 스위트 포르토",schedule:[{time:"08:00",title:"☀️ 투어 집결",desc:"도우로 밸리 풀데이 투어",type:"etc",coords:[41.1460,-8.6110]},{time:"09:00",title:"🚌 투어 출발",desc:"약 8시간, 포르투에서 1시간",type:"move",coords:[41.1460,-8.6110],cost:80000},{time:"10:30",title:"🍇 도우루 강변",desc:"포도밭 절경",type:"spot",coords:[41.1631,-7.7917]},{time:"11:30",title:"🏰 킨타 와이너리",desc:"포트 와인 시음",type:"spot",coords:[41.1600,-7.7800]},{time:"13:00",title:"🍽️ 투어 점심",desc:"투어 포함 식사",type:"food",coords:[41.1550,-7.7750]},{time:"14:30",title:"🚤 도우로 보트",desc:"포도밭 강 유람",type:"spot",coords:[41.1600,-7.7850]},{time:"17:30",title:"🚌 포르투 귀환",desc:"약 1.5시간",type:"move",coords:[41.1460,-8.6110]},{time:"19:30",title:"🍽️ 저녁",desc:"숙소 근처 음식점",type:"food",coords:[41.1460,-8.6110],cost:35000}]},{date:"9/19 (토)",region:"포르투 — 마투지뉴스 & 아베이루 🏖️",color:"#2E86AB",hotel:"레전드 하우스\n체크아웃 11시",schedule:[{time:"08:30",title:"☀️ 출발",desc:"수영복 챙기기!",type:"etc",coords:[41.1460,-8.6110]},{time:"09:00",title:"🏖️ 마투지뉴스 해변",desc:"포르투 근교 해변 (30분)",type:"spot",coords:[41.1829,-8.6886]},{time:"11:00",title:"🦞 O Gaveto",desc:"해산물 맛집",type:"food",coords:[41.1825,-8.6880],cost:55000},{time:"13:00",title:"🛶 아베이루 이동",desc:"기차 약 40분",type:"move",coords:[40.6443,-8.6455]},{time:"14:00",title:"🚣 몰리세이루 보트",desc:"전통 곤돌라 투어",type:"spot",coords:[40.6405,-8.6538],cost:15000},{time:"15:00",title:"🍮 오부스 몰레스",desc:"아베이루 전통 디저트",type:"food",coords:[40.6443,-8.6455],cost:5000},{time:"17:00",title:"🚂 포르투 귀환",desc:"상벤투역",type:"move",coords:[41.1459,-8.6106]},{time:"18:00",title:"🛍️ 마지막 쇼핑",desc:"산타 카테리나 거리",type:"shopping",coords:[41.1490,-8.6095]},{time:"21:00",title:"✈️ 포르투→마요르카",desc:"라이언에어",type:"flight",warn:"예약 확인",coords:[41.2370,-8.6700]}]},{date:"9/20 (일)",region:"마요르카 — 팔마 도착 🌴",color:"#F5A623",hotel:"엘리오스 마요르카\n예약번호: 1694459164",schedule:[{time:"—",title:"🛬 팔마 도착 (밤 12시)",desc:"택시 약 10분",type:"flight",coords:[39.5517,2.7388]},{time:"—",title:"🏨 체크인",desc:"공항 근처, 조식 포함",type:"hotel",coords:[39.5550,2.7350]},{time:"—",title:"😴 휴식",desc:"바로 취침",type:"etc"}]},{date:"9/21 (월)",region:"마요르카 — 팔마 & 칼로데스모로 🏖️",color:"#F5A623",hotel:"엘리오스 마요르카",schedule:[{time:"08:00",title:"🍳 호텔 조식",desc:"수영복 준비",type:"food",coords:[39.5550,2.7350]},{time:"09:00",title:"🌊 칼로데스모로",desc:"마요르카 최고 해변",type:"spot",coords:[39.3340,3.1190]},{time:"11:00",title:"🏊 수영 & 휴식",desc:"절벽 뷰 포토타임",type:"spot",coords:[39.3340,3.1190]},{time:"13:00",title:"🍽️ Es Caragol",desc:"해변 해산물",type:"food",coords:[39.3350,3.1200],cost:45000},{time:"15:00",title:"🚌 팔마 이동",desc:"버스 약 30분",type:"move",coords:[39.5696,2.6502]},{time:"16:00",title:"🏛️ 팔마 대성당",desc:"고딕 양식, 가우디 참여",type:"spot",coords:[39.5674,2.6486]},{time:"17:00",title:"🏰 알무다이나 왕궁",desc:"아랍+고딕 궁전",type:"spot",coords:[39.5683,2.6478]},{time:"18:30",title:"🌇 팔마 항구 석양",desc:"요트 배경 포토",type:"spot",coords:[39.5630,2.6350]},{time:"19:30",title:"🍽️ Celler Sa Premsa",desc:"마요르카 전통 음식",type:"food",coords:[39.5720,2.6520],cost:40000}]},{date:"9/22 (화)",region:"마요르카 — 발데모사 & 소예르 🏔️",color:"#F5A623",hotel:"그란 호텔 소예르 ⭐\n예약번호: 3510267 | 조식+스파",schedule:[{time:"08:00",title:"🍳 조식 & 체크아웃",desc:"렌트카 준비",type:"food",coords:[39.5550,2.7350]},{time:"09:00",title:"🚗 발데모사",desc:"렌트카 25분, 트라문타나 드라이브",type:"move",coords:[39.7108,2.6224]},{time:"10:00",title:"⛪ 발데모사 수도원",desc:"쇼팽 기념관",type:"spot",coords:[39.7108,2.6224],cost:15000},{time:"11:00",title:"🥐 마을 산책",desc:"엔사이마다 빵",type:"spot",coords:[39.7115,2.6230]},{time:"12:00",title:"🚗 데이아 이동",desc:"절벽 해안 드라이브 20분",type:"move",coords:[39.7482,2.6494]},{time:"12:30",title:"🍽️ Café Sa Fonda",desc:"테라스 산 전망",type:"food",coords:[39.7482,2.6494],cost:35000},{time:"14:00",title:"🏘️ 데이아 산책",desc:"예술가의 마을",type:"spot",coords:[39.7482,2.6494]},{time:"15:00",title:"🚗 소예르 체크인",desc:"그란 호텔 소예르",type:"hotel",coords:[39.7660,2.7155]},{time:"16:00",title:"🧖 호텔 스파",desc:"트라문타나 뷰 수영장",type:"etc",coords:[39.7660,2.7155]},{time:"17:30",title:"🍊 소예르 구시가지",desc:"오렌지 광장 카페",type:"spot",coords:[39.7655,2.7148]},{time:"19:00",title:"🍽️ Brises del Mar",desc:"소예르 항구 빠에야",type:"food",coords:[39.7952,2.6908],cost:50000}]},{date:"9/23 (수)",region:"마요르카 — 소예르 & 트램 🚃",color:"#F5A623",hotel:"그란 호텔 소예르\n체크아웃 12시",schedule:[{time:"08:30",title:"☀️ 조식",desc:"테라스 산맥 뷰",type:"food",coords:[39.7660,2.7155]},{time:"09:30",title:"🚃 소예르 트램",desc:"오렌지 밭 뷰 20분",type:"spot",warn:"사전 예약",coords:[39.7655,2.7148],cost:10000},{time:"10:30",title:"🏖️ 포르트 데 소예르",desc:"수영 & 스노클링",type:"spot",coords:[39.7952,2.6908]},{time:"13:00",title:"🍽️ Nautilus Soller",desc:"절벽 위 빠에야 인생뷰",type:"food",warn:"예약 필수",coords:[39.7952,2.6908],cost:60000},{time:"14:30",title:"🍊 오렌지 광장",desc:"셔벗 아이스크림",type:"spot",coords:[39.7655,2.7148]},{time:"16:00",title:"🚗 팔마 공항",desc:"렌트카 반납 40분",type:"move",coords:[39.5517,2.7388]},{time:"—",title:"✈️ 팔마→바르셀로나",desc:"부엘링 IHHNHP\n25kg 수하물",type:"flight",confirmed:true,coords:[39.5517,2.7388]},{time:"19:00",title:"🏨 H10 메트로폴리탄",desc:"예약번호: 1694841847",type:"hotel",coords:[41.3887,2.1640]}]},{date:"9/24 (목)",region:"바르셀로나 — 라로카빌리지 🛍️",color:"#E8725A",hotel:"H10 메트로폴리탄\n예약번호: 1694841847",schedule:[{time:"08:00",title:"☀️ 쇼핑 준비",desc:"셔틀버스 예약 확인",type:"etc",coords:[41.3887,2.1640]},{time:"09:00",title:"🚌 라로카빌리지",desc:"셔틀버스",type:"move",warn:"사전 예약 필수",coords:[41.6103,2.3422]},{time:"10:00",title:"🛍️ 라로카빌리지",desc:"150개+ 부티크 60% 할인",type:"shopping",coords:[41.6103,2.3422],cost:500000},{time:"13:00",title:"🍽️ 아울렛 점심",desc:"아울렛 내 레스토랑",type:"food",coords:[41.6103,2.3422],cost:25000},{time:"15:00",title:"🚌 복귀",desc:"그라시아 거리",type:"move",coords:[41.3920,2.1650]},{time:"16:00",title:"🏡 구엘공원",desc:"모자이크 테라스",type:"spot",warn:"사전 예약 필수",coords:[41.4145,2.1527],cost:15000},{time:"17:30",title:"🛍️ 고딕지구 쇼핑",desc:"라치나타, 기념품",type:"shopping",coords:[41.3833,2.1761]},{time:"19:00",title:"🌇 마지막 타파스",desc:"고딕지구 타파스바",type:"food",coords:[41.3833,2.1761],cost:40000},{time:"21:00",title:"🧳 귀국 준비",desc:"택스리펀 서류 확인",type:"hotel",coords:[41.3887,2.1640]}]},{date:"9/25 (금)",region:"바르셀로나 → 한국 ✈️🇰🇷",color:"#888",hotel:"귀국일 | H10 체크아웃 12시",schedule:[{time:"08:00",title:"☀️ 마지막 아침",desc:"체크아웃 준비",type:"food",coords:[41.3887,2.1640]},{time:"10:00",title:"🛍️ 마지막 쇼핑",desc:"mercadona 마트",type:"shopping",coords:[41.3833,2.1761]},{time:"12:00",title:"🏨 체크아웃",desc:"짐 호텔에 보관",type:"hotel",coords:[41.3887,2.1640]},{time:"13:00",title:"🍽️ 마지막 점심",desc:"La Pepita or El Xampanyet",type:"food",coords:[41.3845,2.1820],cost:40000},{time:"16:00",title:"🚌 공항 이동",desc:"에어로버스 40분",type:"move",coords:[41.2971,2.0785]},{time:"18:30",title:"🛍️ 면세점",desc:"택스리펀 수속 필수!",type:"shopping",coords:[41.2971,2.0785]},{time:"20:50",title:"✈️ 바르셀로나 출발",desc:"OZ0512 | 12시간\n인천 9/26 16:20 도착",type:"flight",confirmed:true,coords:[41.2971,2.0785]}]},{date:"9/26 (토)",region:"한국 도착 🇰🇷",color:"#888",hotel:"—",schedule:[{time:"16:20",title:"🛬 인천공항 도착",desc:"14일간의 여행 무사 귀환!",type:"flight",coords:[37.4602,126.4407]}]}];
+
+const TYPE_STYLES={flight:{bg:"rgba(59,130,246,.1)",border:"rgba(59,130,246,.25)",dot:"#3B82F6",label:"항공"},hotel:{bg:"rgba(139,92,246,.1)",border:"rgba(139,92,246,.25)",dot:"#8B5CF6",label:"숙소"},spot:{bg:"rgba(16,185,129,.1)",border:"rgba(16,185,129,.25)",dot:"#10B981",label:"관광"},food:{bg:"rgba(245,158,11,.1)",border:"rgba(245,158,11,.25)",dot:"#F59E0B",label:"맛집"},shopping:{bg:"rgba(236,72,153,.1)",border:"rgba(236,72,153,.25)",dot:"#EC4899",label:"쇼핑"},move:{bg:"rgba(99,102,241,.08)",border:"rgba(99,102,241,.2)",dot:"#818CF8",label:"교통"},etc:{bg:"rgba(107,114,128,.08)",border:"rgba(107,114,128,.2)",dot:"#6B7280",label:"기타"}};
+const WEATHER_DATA=[{city:"바르셀로나",icon:"☀️",temp:"22-28°C",desc:"맑음"},{city:"포르투",icon:"⛅",temp:"17-24°C",desc:"구름 약간"},{city:"마요르카",icon:"☀️",temp:"23-29°C",desc:"맑음"},{city:"도우로밸리",icon:"🌤️",temp:"20-30°C",desc:"맑음/더움"}];
+const EUR_RATE=1450;
+const TRIP_START=new Date(2026,8,13);const TRIP_END=new Date(2026,8,26);
+
+// ══════════ STATE ══════════
+let currentDay=0,currentFilter='all',editMode=false,editingIdx=null,currentView='timeline';
+let map=null,mapMarkers=[],mapRoutes=[],mapMode='day';
+let pendingRemoteData=null;
+let fbApp=null,fbAuth=null,fbDb=null,fbUser=null,fbConnected=false,isSyncingFromRemote=false,lastSyncTimestamp=0;
+let dataListener=null,presenceListener=null;
+
+const ALLOWED_EMAILS=['3hosungo@gmail.com','rachel506wnsgk@gmail.com'];
+const FIREBASE_CONFIG={apiKey:"AIzaSyBPPr7VX6VHXAmx-jRdEjVcZzAbra9EbLs",authDomain:"hosing-5913f.firebaseapp.com",databaseURL:"https://hosing-5913f-default-rtdb.firebaseio.com",projectId:"hosing-5913f",storageBucket:"hosing-5913f.firebasestorage.app",messagingSenderId:"445332229155",appId:"1:445332229155:web:eddbe748e4df89769af596"};
+
+// ══════════ UTILS ══════════
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function fmt(n){return n?n.toLocaleString('ko-KR')+'원':''}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function haversine(a,b,c,d){const R=6371,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))}
+function gmapsUrl(coords,title){return coords?`https://www.google.com/maps/search/?api=1&query=${coords[0]},${coords[1]}`:null}
+
+// ══════════ D-DAY ══════════
+function updateDDay(){const now=new Date();now.setHours(0,0,0,0);const el=document.getElementById('ddayBadge');if(now<TRIP_START){const d=Math.ceil((TRIP_START-now)/864e5);el.textContent=`D-${d}`;el.style.background='rgba(245,166,35,.15)';el.style.color='#F5A623'}else if(now<=TRIP_END){const d=Math.floor((now-TRIP_START)/864e5)+1;el.textContent=`DAY ${d} 진행중`;el.style.background='rgba(16,185,129,.15)';el.style.color='#10B981'}else{el.textContent='여행 완료!';el.style.background='rgba(139,92,246,.15)';el.style.color='#c4b5fd'}}
+
+// ══════════ WEATHER ══════════
+function renderWeather(){document.getElementById('weatherBar').innerHTML=WEATHER_DATA.map(w=>`<div class="weather-card"><div class="weather-city">${w.city}</div><div class="weather-icon">${w.icon}</div><div class="weather-temp">${w.temp}</div><div class="weather-desc">${w.desc}</div></div>`).join('')}
+
+// ══════════ CURRENCY ══════════
+function toggleCurrency(){const w=document.getElementById('currencyWidget');w.classList.toggle('visible');document.getElementById('currencyToggle').style.display=w.classList.contains('visible')?'none':'flex'}
+function calcCurrency(from){const e=document.getElementById('eurInput'),k=document.getElementById('krwInput');if(from==='eur'){const v=parseFloat(e.value)||0;k.value=v?Math.round(v*EUR_RATE).toLocaleString():''}else{const v=parseFloat(k.value.replace(/,/g,''))||0;e.value=v?(v/EUR_RATE).toFixed(2):''}}
+
+// ══════════ FIREBASE ══════════
+function initFirebase(){try{fbApp=firebase.initializeApp(FIREBASE_CONFIG);fbAuth=firebase.auth();fbDb=firebase.database();fbDb.ref('.info/connected').on('value',s=>{fbConnected=s.val()===true;if(fbConnected&&fbUser){updateSyncUI('online');setupPresence()}else if(!fbConnected)updateSyncUI('offline')});fbAuth.onAuthStateChanged(user=>{if(user&&ALLOWED_EMAILS.length>0&&!ALLOWED_EMAILS.includes(user.email)){fbAuth.signOut();fbUser=null;updateAuthUI();updateSyncUI('offline');showToast('접근 권한이 없는 계정');return}fbUser=user;updateAuthUI();if(user){updateSyncUI(fbConnected?'online':'offline');setupPresence();fetchRemoteThenSync().then(()=>listenForChanges())}else{updateSyncUI('offline');detachListeners()}});return true}catch(e){console.error(e);updateSyncUI('offline');return false}}
+function signIn(){if(!fbAuth){showToast('연결 실패 — 새로고침');return}const p=new firebase.auth.GoogleAuthProvider();fbAuth.signInWithPopup(p).catch(e=>{if(e.code==='auth/popup-blocked'||e.code==='auth/popup-closed-by-user')fbAuth.signInWithRedirect(p);else showToast('로그인 실패')})}
+function signOut(){if(fbAuth)fbAuth.signOut();fbUser=null;updateAuthUI();updateSyncUI('offline');showToast('로그아웃')}
+function updateAuthUI(){const el=document.getElementById('authContent');if(fbUser){const p=fbUser.photoURL||'',n=fbUser.displayName||fbUser.email;el.innerHTML=`<div class="auth-user">${p?`<img class="auth-avatar" src="${p}">`:''}${esc(n)}</div><button class="auth-btn auth-btn-logout" onclick="signOut()">로그아웃</button>`}else el.innerHTML='<button class="auth-btn auth-btn-login" onclick="signIn()">🔑 로그인</button>'}
+function updateSyncUI(s){document.getElementById('syncDot').className='sync-dot '+s;document.getElementById('syncText').textContent={online:'동기화',offline:'오프라인',syncing:'동기화 중...'}[s]||'오프라인'}
+function getDataRef(){return fbDb?fbDb.ref('travel/itinerary'):null}
+async function fetchRemoteThenSync(){const ref=getDataRef();if(!ref)return;updateSyncUI('syncing');try{const snap=await ref.once('value');const r=snap.val();if(r&&r.days&&r.updatedAt){DAYS=r.days;saveToLocalOnly();lastSyncTimestamp=r.updatedAt;if(currentDay>=DAYS.length)currentDay=DAYS.length-1;render();updateSyncUI('online');showToast('클라우드 데이터 로드')}else syncToRemote()}catch(e){updateSyncUI('offline')}}
+function syncToRemote(){if(!fbDb||!fbUser||isSyncingFromRemote)return;const ref=getDataRef();if(!ref)return;updateSyncUI('syncing');ref.set({days:DAYS,updatedBy:fbUser.uid,updatedByName:fbUser.displayName||fbUser.email,updatedAt:firebase.database.ServerValue.TIMESTAMP}).then(()=>{lastSyncTimestamp=Date.now();updateSyncUI('online')}).catch(()=>updateSyncUI('offline'))}
+function listenForChanges(){detachListeners();const ref=getDataRef();if(!ref)return;dataListener=ref.on('value',snap=>{const data=snap.val();if(!data||!data.days)return;if(data.updatedBy===fbUser?.uid)return;if(editMode){pendingRemoteData=data;showToast(`📡 ${data.updatedByName||'상대방'}님 수정 — 편집 후 반영`);return}isSyncingFromRemote=true;DAYS=data.days;saveToLocalOnly();lastSyncTimestamp=data.updatedAt||Date.now();if(currentDay>=DAYS.length)currentDay=DAYS.length-1;render();showToast(`📡 ${data.updatedByName||'상대방'}님이 수정`);isSyncingFromRemote=false})}
+function detachListeners(){if(dataListener){const r=getDataRef();if(r)r.off('value',dataListener);dataListener=null}}
+function setupPresence(){if(!fbDb||!fbUser)return;const my=fbDb.ref('travel/presence/'+fbUser.uid);my.set({name:fbUser.displayName||fbUser.email||'사용자',photo:fbUser.photoURL||'',online:true,lastSeen:firebase.database.ServerValue.TIMESTAMP});my.onDisconnect().update({online:false,lastSeen:firebase.database.ServerValue.TIMESTAMP});const all=fbDb.ref('travel/presence');if(presenceListener)all.off('value',presenceListener);presenceListener=all.on('value',snap=>{const u=snap.val()||{};const o=Object.entries(u).filter(([k,v])=>k!==fbUser.uid&&v.online).map(([,v])=>v);const bar=document.getElementById('presenceBar'),txt=document.getElementById('presenceText');if(o.length){bar.classList.add('visible');txt.innerHTML=o.map(x=>x.photo?`<img class="presence-avatar" src="${x.photo}">`:''). join('')+` <span>${o.map(x=>x.name).join(', ')}님도 접속</span>`}else bar.classList.remove('visible')})}
+
+// ══════════ PERSISTENCE ══════════
+function saveToLocalOnly(){try{localStorage.setItem('travel_planner_days',JSON.stringify(DAYS))}catch(e){}}
+function saveToLocal(){saveToLocalOnly();syncToRemote()}
+function loadFromLocal(){try{const d=localStorage.getItem('travel_planner_days');if(d)DAYS=JSON.parse(d)}catch(e){}}
+
+// ══════════ VIEW ══════════
+function switchView(v){currentView=v;document.querySelectorAll('.view-tab').forEach((t,i)=>t.classList.toggle('active',['timeline','map','route','budget'][i]===v));document.getElementById('timelineView').style.display=v==='timeline'?'':'none';document.getElementById('mapView').classList.toggle('visible',v==='map');document.getElementById('routeView').classList.toggle('visible',v==='route');document.getElementById('budgetView').classList.toggle('visible',v==='budget');document.getElementById('tipsSection').style.display=v==='timeline'?'':'none';document.getElementById('editToolbar').style.display=v==='timeline'?'':'none';document.getElementById('daySelector').style.display=v==='route'||v==='budget'?'none':'';if(v==='map')setTimeout(()=>{if(!map)initMap();else map.invalidateSize();updateMap()},100);if(v==='route')renderRouteView();if(v==='budget')renderBudgetView()}
+
+// ══════════ EDIT MODE ══════════
+function toggleEdit(){editMode=!editMode;document.body.classList.toggle('edit-mode',editMode);document.getElementById('editModeBar').classList.toggle('visible',editMode);['addBtn','addDayBtn','delDayBtn'].forEach(id=>document.getElementById(id).style.display=editMode?'':'none');document.getElementById('addItemRow').classList.toggle('visible',editMode);const btn=document.getElementById('toggleEditBtn');btn.textContent=editMode?'✅ 완료':'✏️ 편집';btn.classList.toggle('active',editMode);if(!editMode&&pendingRemoteData){DAYS=pendingRemoteData.days;saveToLocalOnly();pendingRemoteData=null;if(currentDay>=DAYS.length)currentDay=DAYS.length-1;showToast('보류된 변경 반영')}renderDayContent();if(!editMode)showToast('편집 완료')}
+
+// ══════════ RENDER ══════════
+function render(){renderDaySelector();renderDayContent()}
+function renderDaySelector(){const el=document.getElementById('daySelector');el.innerHTML=DAYS.map((d,i)=>{const a=i===currentDay;return`<button class="day-btn ${a?'active':''}" onclick="selectDay(${i})" style="border:${a?`2px solid ${d.color}`:'1px solid rgba(255,255,255,.08)'};background:${a?d.color+'22':'rgba(255,255,255,.02)'};color:${a?d.color:'#64748b'}"><div class="day-num">DAY ${i+1}</div>${d.date}</button>`}).join('');setTimeout(()=>{const a=el.querySelector('.active');if(a)a.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'})},50)}
+function renderDayContent(){const day=DAYS[currentDay];const filtered=currentFilter==='all'?day.schedule.map((s,i)=>({...s,_idx:i})):day.schedule.map((s,i)=>({...s,_idx:i})).filter(s=>s.type===currentFilter);
+const dayCost=day.schedule.reduce((s,i)=>s+(i.cost||0),0);const checkedCount=day.schedule.filter(i=>i.checked).length;
+// header
+const weatherMatch=day.region.includes('바르셀로나')||day.region.includes('한국→')||day.region.includes('라로카')?WEATHER_DATA[0]:day.region.includes('포르투')||day.region.includes('도우로')||day.region.includes('마투지')||day.region.includes('아베이루')?WEATHER_DATA[1]:day.region.includes('마요르카')||day.region.includes('발데모사')||day.region.includes('소예르')||day.region.includes('팔마')?WEATHER_DATA[2]:null;
+document.getElementById('dayHeader').innerHTML=`<div class="day-header-top"><div class="day-badge" style="background:${day.color}18;border:2px solid ${day.color};color:${day.color}">D${currentDay+1}</div><div><div class="day-region">${esc(day.region)}</div><div class="day-date-sub">${day.date} · ${day.schedule.length}개 일정 · ${checkedCount}/${day.schedule.length} 완료</div>${weatherMatch?`<div class="day-weather">${weatherMatch.icon} ${weatherMatch.temp} ${weatherMatch.desc}</div>`:''}</div></div>${day.hotel!=='—'?`<div class="hotel-box" onclick="${editMode?'openHotelModal()':''}">🏨 ${esc(day.hotel)}${editMode?' <span style="color:#fbbf24;font-size:9px">✏️</span>':''}</div>`:''}${dayCost?`<div class="day-budget"><span>💰 이 날 예상 비용</span><strong>${fmt(dayCost)}</strong></div>`:''}`;
+// filters
+const filters=[{key:'all',label:'전체'},{key:'spot',label:'📍 관광'},{key:'food',label:'🍴 맛집'},{key:'shopping',label:'🛍️ 쇼핑'},{key:'flight',label:'✈️ 이동'},{key:'hotel',label:'🏨 숙소'}];
+document.getElementById('filters').innerHTML=filters.map(f=>`<button class="filter-btn ${f.key===currentFilter?'active':''}" onclick="setFilter('${f.key}')" style="${f.key===currentFilter?`border-color:${day.color};background:${day.color}18;color:${day.color}`:''}">${f.label}</button>`).join('');
+if(!filtered.length){document.getElementById('timeline').innerHTML='<div style="text-align:center;padding:40px;color:#475569;font-size:12px">일정이 없습니다</div>';return}
+document.getElementById('timeline').innerHTML=filtered.map((item,i)=>{const t=TYPE_STYLES[item.type]||TYPE_STYLES.etc;const isLast=i===filtered.length-1;const checked=item.checked?'checked':'';const checkedClass=item.checked?'checked-item':'';
+let meta='';if(item.confirmed)meta+='<span class="confirmed">✓ 예약확정</span>';if(item.warn)meta+=`<div class="card-warn">⚠️ ${esc(item.warn)}</div>`;if(item.cost)meta+=`<span class="card-cost">${fmt(item.cost)}</span>`;if(item.url)meta+=`<a class="card-link" href="${esc(item.url)}" target="_blank" onclick="event.stopPropagation()">🔗 예약</a>`;if(item.coords)meta+=`<a class="card-gmaps" href="${gmapsUrl(item.coords)}" target="_blank" onclick="event.stopPropagation()">📍 지도</a>`;
+const memoHtml=item.memo?`<div class="card-memo">${esc(item.memo)}</div>`:'';
+const editClick=editMode?`onclick="openEditModal(${item._idx})"`:'';const editHint=editMode?'<span class="edit-indicator">✏️</span>':'';const delBtn=editMode?`<button onclick="event.stopPropagation();deleteItem(${item._idx})" style="position:absolute;top:5px;right:24px;width:18px;height:18px;border-radius:5px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.25);color:#f87171;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>`:'';
+return`<div class="timeline-item"><div class="timeline-left"><div class="timeline-time">${item.time}</div><div class="timeline-dot" style="background:${t.dot};box-shadow:0 0 6px ${t.dot}44"></div>${!isLast?`<div class="timeline-line" style="background:linear-gradient(to bottom,${t.dot}44,transparent)"></div>`:''}</div><div class="timeline-card ${checkedClass}" style="background:${t.bg};border-color:${t.border}" ${editClick}>${editHint}${delBtn}<div class="card-top"><button class="card-checkbox ${checked}" onclick="event.stopPropagation();toggleCheck(${item._idx})">${item.checked?'✓':''}</button><div class="card-body"><div class="card-title">${esc(item.title)}</div><div class="card-desc">${esc(item.desc)}</div><div class="card-meta">${meta}</div>${memoHtml}</div></div></div></div>`}).join('')}
+
+// ══════════ CHECK ══════════
+function toggleCheck(idx){DAYS[currentDay].schedule[idx].checked=!DAYS[currentDay].schedule[idx].checked;saveToLocal();renderDayContent()}
+
+// ══════════ MAP ══════════
+function initMap(){map=L.map('map',{zoomControl:true,attributionControl:false}).setView([41.3851,2.1734],13);L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map)}
+function setMapMode(m){mapMode=m;document.getElementById('mapDayToggle').classList.toggle('active',m==='day');document.getElementById('mapAllToggle').classList.toggle('active',m==='all');document.getElementById('daySelector').style.display=m==='all'?'none':'';updateMap()}
+function updateMap(){if(!map)return;mapMarkers.forEach(m=>map.removeLayer(m));mapMarkers=[];mapRoutes.forEach(r=>map.removeLayer(r));mapRoutes=[];
+if(mapMode==='day'){const day=DAYS[currentDay];const coords=[];let num=1;day.schedule.forEach(item=>{if(!item.coords)return;const[lat,lng]=item.coords;coords.push([lat,lng]);const t=TYPE_STYLES[item.type]||TYPE_STYLES.etc;const icon=L.divIcon({className:'',html:`<div class="custom-marker" style="background:${t.dot}">${num}</div>`,iconSize:[26,26],iconAnchor:[13,13]});const mk=L.marker([lat,lng],{icon}).bindPopup(`<strong>${esc(item.title)}</strong><div class="popup-type">${t.label}</div><div class="popup-time">${item.time!=='—'?item.time:''}</div><div style="margin-top:3px;color:#94a3b8;font-size:10px;white-space:pre-line">${esc(item.desc)}</div>${item.coords?`<a href="${gmapsUrl(item.coords)}" target="_blank" style="color:#60a5fa;font-size:10px">Google Maps 열기</a>`:''}`,{maxWidth:230}).addTo(map);mapMarkers.push(mk);num++});if(coords.length>=2){const route=L.polyline(coords,{color:day.color,weight:3,opacity:.7,dashArray:'8,8'}).addTo(map);mapRoutes.push(route)}if(coords.length)map.fitBounds(L.latLngBounds(coords),{padding:[40,40],maxZoom:15});document.getElementById('mapDayInfo').innerHTML=`<strong>DAY ${currentDay+1} — ${day.date}</strong><br><span style="color:#94a3b8">${esc(day.region)}</span><br><span style="color:${day.color}">📍 ${coords.length}곳</span>`
+}else{// all days
+const allCoords=[];const DAY_COLORS=['#E8725A','#E8725A','#E8725A','#2E86AB','#2E86AB','#2E86AB','#2E86AB','#F5A623','#F5A623','#F5A623','#F5A623','#E8725A','#888','#888'];
+DAYS.forEach((day,di)=>{const coords=[];day.schedule.forEach(item=>{if(!item.coords)return;const[lat,lng]=item.coords;if(lat>38&&lat<43){coords.push([lat,lng]);allCoords.push([lat,lng])}});if(coords.length>=2){const route=L.polyline(coords,{color:day.color,weight:2.5,opacity:.5,dashArray:'6,6'}).addTo(map);mapRoutes.push(route)}if(coords.length){const first=coords[0];const icon=L.divIcon({className:'',html:`<div class="custom-marker" style="background:${day.color};font-size:9px">D${di+1}</div>`,iconSize:[26,26],iconAnchor:[13,13]});const mk=L.marker(first,{icon}).bindPopup(`<strong>DAY ${di+1}</strong><br>${esc(day.region)}<br><span style="color:#64748b">${day.date}</span>`).addTo(map);mapMarkers.push(mk)}});if(allCoords.length)map.fitBounds(L.latLngBounds(allCoords),{padding:[30,30],maxZoom:8});document.getElementById('mapDayInfo').innerHTML=`<strong>전체 여정</strong><br><span style="color:#94a3b8">14일 · 3개국</span>`}}
+
+// ══════════ ROUTE + OPTIMIZE ══════════
+function optimizeRoute(items){const wc=items.filter(i=>i.coords);if(wc.length<3)return null;const n=wc.length;const visited=[0];const remaining=new Set([...Array(n).keys()].slice(1));while(remaining.size){const last=visited[visited.length-1];let best=-1,bestD=Infinity;for(const r of remaining){const d=haversine(wc[last].coords[0],wc[last].coords[1],wc[r].coords[0],wc[r].coords[1]);if(d<bestD){bestD=d;best=r}}visited.push(best);remaining.delete(best)}return visited.map(i=>wc[i])}
+function calcTotalDist(items){let d=0;const wc=items.filter(i=>i.coords);for(let i=1;i<wc.length;i++)d+=haversine(wc[i-1].coords[0],wc[i-1].coords[1],wc[i].coords[0],wc[i].coords[1]);return d}
+function applyOptimizedRoute(di){const day=DAYS[di];const opt=optimizeRoute(day.schedule);if(!opt)return;const withoutCoords=day.schedule.filter(i=>!i.coords);DAYS[di].schedule=[...opt,...withoutCoords];saveToLocal();if(currentView==='route')renderRouteView();else renderDayContent();showToast(`DAY ${di+1} 동선 최적화 완료!`)}
+
+function renderRouteView(){const el=document.getElementById('routeView');let totalTripDist=0;
+el.innerHTML='<div class="route-section-title">🧭 전체 동선</div>'+DAYS.map((day,di)=>{const wc=day.schedule.filter(s=>s.coords);const currentDist=calcTotalDist(day.schedule);totalTripDist+=currentDist;const opt=optimizeRoute(day.schedule);const optDist=opt?calcTotalDist(opt):currentDist;const saving=currentDist-optDist;const dayCost=day.schedule.reduce((s,i)=>s+(i.cost||0),0);
+if(!wc.length)return`<div class="route-day-card" onclick="selectDay(${di});switchView('timeline')"><div class="route-day-header"><div class="route-day-badge" style="background:${day.color}22;border:2px solid ${day.color};color:${day.color}">D${di+1}</div><div><div class="route-day-title">${esc(day.region)}</div><div class="route-day-date">${day.date}</div></div></div><div style="font-size:10px;color:#475569">위치 정보 없음</div></div>`;
+const stops=wc.map((item,i)=>{const t=TYPE_STYLES[item.type]||TYPE_STYLES.etc;let dist='';if(i>0){const d=haversine(wc[i-1].coords[0],wc[i-1].coords[1],item.coords[0],item.coords[1]);dist=`<span class="route-connector"><span class="route-connector-line"></span>↓ ${d<1?(d*1000).toFixed(0)+'m':d.toFixed(1)+'km'}</span>`}return`${dist}<div class="route-stop"><div class="route-stop-num" style="background:${t.dot}33;color:${t.dot}">${i+1}</div><div class="route-stop-name">${esc(item.title)}</div><div class="route-stop-time">${item.time}</div></div>`}).join('');
+const optBar=saving>0.1?`<div class="optimize-bar"><div class="optimize-info">🔄 최적화 시 <strong style="color:#60a5fa">${saving.toFixed(1)}km</strong> 절약 가능 (${currentDist.toFixed(1)}→${optDist.toFixed(1)}km)</div><button class="optimize-btn" onclick="event.stopPropagation();applyOptimizedRoute(${di})">적용</button></div>`:'';
+return`<div class="route-day-card" onclick="selectDay(${di});switchView('map')"><div class="route-day-header"><div class="route-day-badge" style="background:${day.color}22;border:2px solid ${day.color};color:${day.color}">D${di+1}</div><div><div class="route-day-title">${esc(day.region)}</div><div class="route-day-date">${day.date}</div></div></div><div class="route-stops">${stops}</div><div class="route-summary"><div class="route-stat">📍 <strong>${wc.length}</strong>곳</div><div class="route-stat">📏 <strong>${currentDist<1?(currentDist*1000).toFixed(0)+'m':currentDist.toFixed(1)+'km'}</strong></div>${dayCost?`<div class="route-stat">💰 <strong>${fmt(dayCost)}</strong></div>`:''}</div>${optBar}</div>`}).join('')+`<div style="text-align:center;padding:16px;font-size:12px;color:#64748b">총 이동거리 약 <strong style="color:#f1f5f9">${totalTripDist.toFixed(0)}km</strong></div>`}
+
+// ══════════ BUDGET ══════════
+function renderBudgetView(){const el=document.getElementById('budgetView');let total=0;const byCat={};
+DAYS.forEach(day=>day.schedule.forEach(item=>{if(!item.cost)return;total+=item.cost;const cat=TYPE_STYLES[item.type]?.label||'기타';byCat[cat]=(byCat[cat]||0)+item.cost}));
+el.innerHTML=`<div class="budget-title">💰 예산 관리</div><div class="budget-total"><div class="budget-total-amount">${total.toLocaleString('ko-KR')}원</div><div class="budget-total-label">총 예상 비용 · 약 €${Math.round(total/EUR_RATE).toLocaleString()}</div></div><div class="budget-cats">${Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="budget-cat"><div class="budget-cat-label">${k}</div><div class="budget-cat-amount">${v.toLocaleString('ko-KR')}원</div></div>`).join('')}</div><div style="font-size:12px;font-weight:700;color:#f1f5f9;margin-bottom:8px">일별 상세</div>${DAYS.map((day,di)=>{const dc=day.schedule.reduce((s,i)=>s+(i.cost||0),0);if(!dc)return'';return`<div class="budget-day" onclick="selectDay(${di});switchView('timeline')"><div class="budget-day-name" style="color:${day.color}">D${di+1} ${day.date}</div><div class="budget-day-amount">${fmt(dc)}</div></div>`}).join('')}`}
+
+// ══════════ EDIT MODALS ══════════
+function openEditModal(idx){if(!editMode)return;editingIdx=idx;const item=DAYS[currentDay].schedule[idx];document.getElementById('modalTitleText').textContent='✏️ 수정';document.getElementById('f-time').value=item.time||'';document.getElementById('f-type').value=item.type||'etc';document.getElementById('f-title').value=item.title||'';document.getElementById('f-desc').value=item.desc||'';document.getElementById('f-url').value=item.url||'';document.getElementById('f-cost').value=item.cost||'';document.getElementById('f-memo').value=item.memo||'';document.getElementById('f-warn').value=item.warn||'';document.getElementById('f-lat').value=item.coords?item.coords[0]:'';document.getElementById('f-lng').value=item.coords?item.coords[1]:'';document.getElementById('f-confirmed').checked=!!item.confirmed;document.getElementById('modalActions').innerHTML=`<button class="modal-btn modal-btn-delete" onclick="deleteItem(${idx});closeModal()">삭제</button><button class="modal-btn modal-btn-cancel" onclick="closeModal()">취소</button><button class="modal-btn modal-btn-save" onclick="saveItem()">저장</button>`;document.getElementById('modalOverlay').classList.add('visible')}
+function openAddModal(){editingIdx=null;document.getElementById('modalTitleText').textContent='➕ 추가';['f-time','f-title','f-desc','f-url','f-cost','f-memo','f-warn','f-lat','f-lng'].forEach(id=>document.getElementById(id).value='');document.getElementById('f-type').value='spot';document.getElementById('f-confirmed').checked=false;document.getElementById('modalActions').innerHTML='<button class="modal-btn modal-btn-cancel" onclick="closeModal()">취소</button><button class="modal-btn modal-btn-save" onclick="saveItem()">추가</button>';document.getElementById('modalOverlay').classList.add('visible')}
+function saveItem(){const item={time:document.getElementById('f-time').value.trim()||'—',type:document.getElementById('f-type').value,title:document.getElementById('f-title').value.trim(),desc:document.getElementById('f-desc').value.trim()};if(!item.title){showToast('제목 필수');return}const w=document.getElementById('f-warn').value.trim();if(w)item.warn=w;const url=document.getElementById('f-url').value.trim();if(url)item.url=url;const cost=parseInt(document.getElementById('f-cost').value);if(cost>0)item.cost=cost;const memo=document.getElementById('f-memo').value.trim();if(memo)item.memo=memo;if(document.getElementById('f-confirmed').checked)item.confirmed=true;const lat=parseFloat(document.getElementById('f-lat').value),lng=parseFloat(document.getElementById('f-lng').value);if(!isNaN(lat)&&!isNaN(lng))item.coords=[lat,lng];
+if(editingIdx!==null){DAYS[currentDay].schedule[editingIdx]=item;showToast('수정 완료')}else{DAYS[currentDay].schedule.push(item);showToast('추가 완료')}DAYS[currentDay].schedule.sort((a,b)=>{if(a.time==='—'&&b.time==='—')return 0;if(a.time==='—')return 1;if(b.time==='—')return -1;return a.time.localeCompare(b.time)});saveToLocal();closeModal();renderDayContent()}
+function deleteItem(idx){DAYS[currentDay].schedule.splice(idx,1);saveToLocal();renderDayContent();showToast('삭제')}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('visible')}
+function openHotelModal(){if(!editMode)return;document.getElementById('h-hotel').value=DAYS[currentDay].hotel||'';document.getElementById('h-region').value=DAYS[currentDay].region||'';document.getElementById('hotelModalOverlay').classList.add('visible')}
+function saveHotel(){DAYS[currentDay].hotel=document.getElementById('h-hotel').value.trim()||'—';DAYS[currentDay].region=document.getElementById('h-region').value.trim()||DAYS[currentDay].region;saveToLocal();closeHotelModal();render();showToast('숙소 수정 완료')}
+function closeHotelModal(){document.getElementById('hotelModalOverlay').classList.remove('visible')}
+function openDayModal(){['d-date','d-region','d-hotel'].forEach(id=>document.getElementById(id).value='');document.getElementById('dayModalOverlay').classList.add('visible')}
+function saveDay(){const date=document.getElementById('d-date').value.trim(),region=document.getElementById('d-region').value.trim();if(!date||!region){showToast('날짜와 지역 필수');return}DAYS.push({date,region,color:document.getElementById('d-color').value,hotel:document.getElementById('d-hotel').value.trim()||'—',schedule:[]});saveToLocal();closeDayModal();currentDay=DAYS.length-1;render();showToast('날짜 추가')}
+function closeDayModal(){document.getElementById('dayModalOverlay').classList.remove('visible')}
+function deleteCurrentDay(){if(DAYS.length<=1){showToast('최소 1일 필요');return}if(!confirm(`DAY ${currentDay+1} (${DAYS[currentDay].date})를 삭제할까요?`))return;DAYS.splice(currentDay,1);if(currentDay>=DAYS.length)currentDay=DAYS.length-1;saveToLocal();render();showToast('날짜 삭제')}
+
+// ══════════ IMPORT/EXPORT ══════════
+function exportData(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(DAYS,null,2)],{type:'application/json'}));a.download='여행일정_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href);showToast('저장 완료')}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=x=>{try{const d=JSON.parse(x.target.result);if(Array.isArray(d)&&d.length){DAYS=d;currentDay=0;saveToLocal();render();showToast('불러오기 완료')}}catch(e){showToast('파싱 오류')}};r.readAsText(f);e.target.value=''}
+
+// ══════════ NAV ══════════
+function selectDay(i){currentDay=i;currentFilter='all';render();if(currentView==='map')updateMap();window.scrollTo({top:0,behavior:'smooth'})}
+function setFilter(f){currentFilter=f;renderDayContent()}
+
+// ══════════ INIT ══════════
+loadFromLocal();render();updateDDay();renderWeather();initFirebase();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
