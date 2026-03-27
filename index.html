@@ -7,6 +7,9 @@
 <title>🇪🇸 스페인·포르투갈 여행 플래너</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap');
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -161,9 +164,57 @@
 
   /* Hidden file input */
   #importInput{display:none}
+
+  /* AUTH & SYNC */
+  .auth-bar{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 14px;background:rgba(0,0,0,.2);border-bottom:1px solid rgba(255,255,255,.05);font-size:11px}
+  .auth-btn{padding:5px 14px;border-radius:8px;border:none;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+  .auth-btn-login{background:rgba(66,133,244,.15);color:#60a5fa;border:1px solid rgba(66,133,244,.3)}
+  .auth-btn-login:hover{background:rgba(66,133,244,.25)}
+  .auth-btn-logout{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2);font-size:10px;padding:3px 10px}
+  .auth-user{display:flex;align-items:center;gap:6px;color:#94a3b8;font-size:11px}
+  .auth-avatar{width:22px;height:22px;border-radius:50%;border:1px solid rgba(255,255,255,.15)}
+  .sync-status{display:flex;align-items:center;gap:4px;font-size:10px;color:#64748b;margin-left:auto}
+  .sync-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+  .sync-dot.online{background:#10B981;box-shadow:0 0 6px #10B98166}
+  .sync-dot.offline{background:#EF4444;box-shadow:0 0 6px #EF444466}
+  .sync-dot.syncing{background:#F59E0B;animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+  /* PRESENCE */
+  .presence-bar{display:none;align-items:center;gap:6px;padding:4px 14px;background:rgba(16,185,129,.06);border-bottom:1px solid rgba(16,185,129,.1);font-size:10px;color:#34d399}
+  .presence-bar.visible{display:flex}
+  .presence-avatar{width:18px;height:18px;border-radius:50%;border:1.5px solid #34d399}
+  .presence-dot{width:6px;height:6px;border-radius:50%;background:#10B981;animation:pulse 1.5s infinite}
+
+  /* FIREBASE SETUP */
+  .setup-banner{padding:12px 18px;background:rgba(245,158,11,.08);border-bottom:1px solid rgba(245,158,11,.2);text-align:center;font-size:11px;color:#fbbf24;cursor:pointer;transition:background .15s}
+  .setup-banner:hover{background:rgba(245,158,11,.12)}
+  .setup-banner code{background:rgba(0,0,0,.3);padding:1px 6px;border-radius:4px;font-size:10px}
 </style>
 </head>
 <body>
+
+<!-- AUTH BAR -->
+<div class="auth-bar" id="authBar">
+  <div id="authContent">
+    <button class="auth-btn auth-btn-login" onclick="signIn()">🔑 Google 로그인</button>
+  </div>
+  <div class="sync-status" id="syncStatus">
+    <span class="sync-dot offline" id="syncDot"></span>
+    <span id="syncText">오프라인</span>
+  </div>
+</div>
+
+<!-- PRESENCE -->
+<div class="presence-bar" id="presenceBar">
+  <span class="presence-dot"></span>
+  <span id="presenceText"></span>
+</div>
+
+<!-- SETUP BANNER (Firebase 미설정 시) -->
+<div class="setup-banner" id="setupBanner" style="display:none" onclick="openSetupModal()">
+  ⚠️ Firebase 연동 미설정 — 탭하여 설정하기 (오프라인 모드로 동작 중)
+</div>
 
 <div class="header">
   <div class="header-sub">Travel Planner 2026</div>
@@ -347,6 +398,42 @@
     <div class="modal-actions" id="dayModalActions">
       <button class="modal-btn modal-btn-cancel" onclick="closeDayModal()">취소</button>
       <button class="modal-btn modal-btn-save" onclick="saveDay()">추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase 설정 모달 -->
+<div class="modal-overlay" id="setupModalOverlay" onclick="if(event.target===this)closeSetupModal()">
+  <div class="modal">
+    <div class="modal-title">
+      <span>🔧 Firebase 설정</span>
+      <button class="modal-close" onclick="closeSetupModal()">✕</button>
+    </div>
+    <div style="font-size:11px;color:#94a3b8;margin-bottom:14px;line-height:1.7">
+      Firebase Console에서 프로젝트 생성 후 웹 앱 설정값을 입력하세요.<br>
+      <span style="color:#64748b">Authentication → Google 로그인 활성화 필요</span><br>
+      <span style="color:#64748b">Realtime Database → 생성 필요</span>
+    </div>
+    <div class="field-group">
+      <div class="field-label">API Key</div>
+      <input class="field-input" id="s-apiKey" placeholder="AIzaSy...">
+    </div>
+    <div class="field-group">
+      <div class="field-label">Auth Domain</div>
+      <input class="field-input" id="s-authDomain" placeholder="your-project.firebaseapp.com">
+    </div>
+    <div class="field-group">
+      <div class="field-label">Database URL</div>
+      <input class="field-input" id="s-databaseURL" placeholder="https://your-project-default-rtdb.firebaseio.com">
+    </div>
+    <div class="field-group">
+      <div class="field-label">Project ID</div>
+      <input class="field-input" id="s-projectId" placeholder="your-project-id">
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeSetupModal()">취소</button>
+      <button class="modal-btn modal-btn-delete" onclick="clearFirebaseConfig()" style="flex:.5">초기화</button>
+      <button class="modal-btn modal-btn-save" onclick="saveFirebaseConfig()">저장 & 연결</button>
     </div>
   </div>
 </div>
@@ -589,10 +676,271 @@ let mapMarkers = [];
 let mapRoute = null;
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  PERSISTENCE
+//  FIREBASE CONFIG
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function saveToLocal() {
+let fbApp = null, fbAuth = null, fbDb = null;
+let fbUser = null;
+let fbConnected = false;
+let isSyncingFromRemote = false; // 원격 변경 수신 중 플래그 (무한루프 방지)
+let lastSyncTimestamp = 0;
+
+function getFirebaseConfig() {
+  try {
+    const c = localStorage.getItem('travel_fb_config');
+    return c ? JSON.parse(c) : null;
+  } catch(e) { return null; }
+}
+
+function initFirebase() {
+  const config = getFirebaseConfig();
+  if (!config) {
+    document.getElementById('setupBanner').style.display = '';
+    updateSyncUI('offline');
+    return false;
+  }
+  try {
+    fbApp = firebase.initializeApp(config);
+    fbAuth = firebase.auth();
+    fbDb = firebase.database();
+
+    // 연결 상태 감지
+    fbDb.ref('.info/connected').on('value', (snap) => {
+      fbConnected = snap.val() === true;
+      if (fbConnected && fbUser) {
+        updateSyncUI('online');
+        setupPresence();
+      } else if (!fbConnected) {
+        updateSyncUI('offline');
+      }
+    });
+
+    // 인증 상태 변경 감지
+    fbAuth.onAuthStateChanged((user) => {
+      fbUser = user;
+      updateAuthUI();
+      if (user) {
+        updateSyncUI(fbConnected ? 'online' : 'offline');
+        listenForChanges();
+        setupPresence();
+        syncToRemote(); // 로그인 시 로컬 데이터 push
+      } else {
+        updateSyncUI('offline');
+        detachListeners();
+      }
+    });
+
+    document.getElementById('setupBanner').style.display = 'none';
+    return true;
+  } catch(e) {
+    console.error('Firebase init error:', e);
+    document.getElementById('setupBanner').style.display = '';
+    updateSyncUI('offline');
+    return false;
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  FIREBASE SETUP MODAL
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function openSetupModal() {
+  const config = getFirebaseConfig() || {};
+  document.getElementById('s-apiKey').value = config.apiKey || '';
+  document.getElementById('s-authDomain').value = config.authDomain || '';
+  document.getElementById('s-databaseURL').value = config.databaseURL || '';
+  document.getElementById('s-projectId').value = config.projectId || '';
+  document.getElementById('setupModalOverlay').classList.add('visible');
+}
+function closeSetupModal() {
+  document.getElementById('setupModalOverlay').classList.remove('visible');
+}
+function saveFirebaseConfig() {
+  const config = {
+    apiKey: document.getElementById('s-apiKey').value.trim(),
+    authDomain: document.getElementById('s-authDomain').value.trim(),
+    databaseURL: document.getElementById('s-databaseURL').value.trim(),
+    projectId: document.getElementById('s-projectId').value.trim(),
+  };
+  if (!config.apiKey || !config.databaseURL) {
+    showToast('API Key와 Database URL은 필수입니다');
+    return;
+  }
+  localStorage.setItem('travel_fb_config', JSON.stringify(config));
+  closeSetupModal();
+  showToast('Firebase 설정 저장됨 — 새로고침합니다');
+  setTimeout(() => location.reload(), 800);
+}
+function clearFirebaseConfig() {
+  localStorage.removeItem('travel_fb_config');
+  showToast('Firebase 설정 초기화됨');
+  closeSetupModal();
+  setTimeout(() => location.reload(), 800);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  AUTH
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function signIn() {
+  if (!fbAuth) { showToast('Firebase 설정을 먼저 해주세요'); openSetupModal(); return; }
+  const provider = new firebase.auth.GoogleAuthProvider();
+  fbAuth.signInWithPopup(provider).catch(e => {
+    console.error('Auth error:', e);
+    showToast('로그인 실패: ' + e.message);
+  });
+}
+function signOut() {
+  if (fbAuth) fbAuth.signOut();
+  fbUser = null;
+  updateAuthUI();
+  updateSyncUI('offline');
+  showToast('로그아웃 완료');
+}
+function updateAuthUI() {
+  const el = document.getElementById('authContent');
+  if (fbUser) {
+    const photo = fbUser.photoURL || '';
+    const name = fbUser.displayName || fbUser.email || '사용자';
+    el.innerHTML = `
+      <div class="auth-user">
+        ${photo ? `<img class="auth-avatar" src="${photo}" alt="">` : ''}
+        <span>${name}</span>
+      </div>
+      <button class="auth-btn auth-btn-logout" onclick="signOut()">로그아웃</button>
+    `;
+  } else {
+    el.innerHTML = `<button class="auth-btn auth-btn-login" onclick="signIn()">🔑 Google 로그인</button>`;
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  SYNC UI
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function updateSyncUI(status) {
+  const dot = document.getElementById('syncDot');
+  const text = document.getElementById('syncText');
+  dot.className = 'sync-dot ' + (status === 'syncing' ? 'syncing' : status === 'online' ? 'online' : 'offline');
+  const labels = { online: '실시간 동기화', offline: '오프라인', syncing: '동기화 중...' };
+  text.textContent = labels[status] || '오프라인';
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  REALTIME SYNC (offline-first)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let dataListener = null;
+
+function getDataRef() {
+  // 모든 로그인 사용자가 같은 경로를 공유 → 2인 공동 편집
+  // projectId 기반이므로 같은 Firebase 프로젝트 사용자끼리 공유
+  return fbDb ? fbDb.ref('travel/itinerary') : null;
+}
+
+function syncToRemote() {
+  if (!fbDb || !fbUser || isSyncingFromRemote) return;
+  const ref = getDataRef();
+  if (!ref) return;
+  updateSyncUI('syncing');
+  const payload = {
+    days: DAYS,
+    updatedBy: fbUser.uid,
+    updatedByName: fbUser.displayName || fbUser.email,
+    updatedAt: firebase.database.ServerValue.TIMESTAMP
+  };
+  ref.set(payload).then(() => {
+    updateSyncUI('online');
+  }).catch(e => {
+    console.error('Sync error:', e);
+    updateSyncUI('offline');
+    showToast('동기화 실패 — 오프라인 저장됨');
+  });
+}
+
+function listenForChanges() {
+  detachListeners();
+  const ref = getDataRef();
+  if (!ref) return;
+
+  dataListener = ref.on('value', (snap) => {
+    const data = snap.val();
+    if (!data || !data.days) return;
+
+    // 내가 방금 보낸 변경이면 무시
+    if (data.updatedBy === fbUser?.uid && data.updatedAt <= lastSyncTimestamp + 2000) return;
+
+    isSyncingFromRemote = true;
+    DAYS = data.days;
+    saveToLocalOnly();
+    lastSyncTimestamp = data.updatedAt || Date.now();
+
+    // 현재 day가 범위를 벗어나면 보정
+    if (currentDay >= DAYS.length) currentDay = DAYS.length - 1;
+    render();
+    if (currentView === 'map' && map) updateMap();
+    if (currentView === 'route') renderRouteView();
+
+    if (data.updatedByName && data.updatedBy !== fbUser?.uid) {
+      showToast(`📡 ${data.updatedByName}님이 일정을 수정했어요`);
+    }
+    isSyncingFromRemote = false;
+  });
+}
+
+function detachListeners() {
+  if (dataListener) {
+    const ref = getDataRef();
+    if (ref) ref.off('value', dataListener);
+    dataListener = null;
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  PRESENCE (누가 접속 중인지)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let presenceListener = null;
+
+function setupPresence() {
+  if (!fbDb || !fbUser) return;
+  const myPresRef = fbDb.ref('travel/presence/' + fbUser.uid);
+  const allPresRef = fbDb.ref('travel/presence');
+
+  // 내 접속 정보 기록
+  myPresRef.set({
+    name: fbUser.displayName || fbUser.email || '사용자',
+    photo: fbUser.photoURL || '',
+    online: true,
+    lastSeen: firebase.database.ServerValue.TIMESTAMP
+  });
+  myPresRef.onDisconnect().update({ online: false, lastSeen: firebase.database.ServerValue.TIMESTAMP });
+
+  // 다른 사용자 접속 감지
+  if (presenceListener) allPresRef.off('value', presenceListener);
+  presenceListener = allPresRef.on('value', (snap) => {
+    const users = snap.val() || {};
+    const others = Object.entries(users)
+      .filter(([uid, u]) => uid !== fbUser.uid && u.online)
+      .map(([, u]) => u);
+
+    const bar = document.getElementById('presenceBar');
+    const text = document.getElementById('presenceText');
+    if (others.length > 0) {
+      bar.classList.add('visible');
+      const avatars = others.map(u => u.photo ? `<img class="presence-avatar" src="${u.photo}" alt="">` : '').join('');
+      const names = others.map(u => u.name).join(', ');
+      text.innerHTML = `${avatars} <span>${names}님도 접속 중</span>`;
+    } else {
+      bar.classList.remove('visible');
+    }
+  });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  PERSISTENCE (offline-first)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function saveToLocalOnly() {
   try { localStorage.setItem('travel_planner_days', JSON.stringify(DAYS)); } catch(e) {}
+}
+function saveToLocal() {
+  saveToLocalOnly();
+  lastSyncTimestamp = Date.now();
+  syncToRemote(); // localStorage 저장 후 Firebase에도 push
 }
 function loadFromLocal() {
   try {
@@ -1058,8 +1406,9 @@ function setFilter(f) { currentFilter = f; renderDayContent(); }
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  INIT
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-loadFromLocal();
-render();
+loadFromLocal();   // 1. 로컬 데이터 먼저 로드 (오프라인 우선)
+render();          // 2. 즉시 화면 렌더링
+initFirebase();    // 3. Firebase 연결 (비동기, 실패해도 앱은 동작)
 </script>
 </body>
 </html>
