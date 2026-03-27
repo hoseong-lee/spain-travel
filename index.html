@@ -629,6 +629,7 @@ let currentView = 'timeline'; // timeline | map | route
 let map = null;
 let mapMarkers = [];
 let mapRoute = null;
+let pendingRemoteData = null; // 편집 중 수신된 원격 데이터 보류
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  FIREBASE CONFIG
@@ -823,8 +824,16 @@ function listenForChanges() {
     const data = snap.val();
     if (!data || !data.days) return;
 
-    // 내가 방금 보낸 변경이면 무시
-    if (data.updatedBy === fbUser?.uid && Math.abs((data.updatedAt || 0) - lastSyncTimestamp) < 3000) return;
+    // 내가 보낸 변경이면 무시 (본인 저장 후 리스너 재호출 방지)
+    if (data.updatedBy === fbUser?.uid) return;
+
+    // 편집 모드 중이면 데이터만 저장하고 화면은 건드리지 않음
+    if (editMode) {
+      // 백그라운드로 저장만 해두고, 편집 완료 후 반영
+      pendingRemoteData = data;
+      showToast(`📡 ${data.updatedByName || '상대방'}님이 수정 — 편집 완료 후 반영됩니다`);
+      return;
+    }
 
     isSyncingFromRemote = true;
     DAYS = data.days;
@@ -836,9 +845,7 @@ function listenForChanges() {
     if (currentView === 'map' && map) updateMap();
     if (currentView === 'route') renderRouteView();
 
-    if (data.updatedByName && data.updatedBy !== fbUser?.uid) {
-      showToast(`📡 ${data.updatedByName}님이 일정을 수정했어요`);
-    }
+    showToast(`📡 ${data.updatedByName || '상대방'}님이 일정을 수정했어요`);
     isSyncingFromRemote = false;
   });
 }
@@ -957,6 +964,17 @@ function toggleEdit() {
   const btn = document.getElementById('toggleEditBtn');
   btn.textContent = editMode ? '✅ 완료' : '✏️ 편집';
   btn.classList.toggle('active', editMode);
+
+  // 편집 완료 시, 보류된 원격 데이터가 있으면 반영
+  if (!editMode && pendingRemoteData) {
+    DAYS = pendingRemoteData.days;
+    saveToLocalOnly();
+    lastSyncTimestamp = pendingRemoteData.updatedAt || Date.now();
+    pendingRemoteData = null;
+    if (currentDay >= DAYS.length) currentDay = DAYS.length - 1;
+    showToast('보류된 변경사항이 반영되었어요');
+  }
+
   renderDayContent();
   showToast(editMode ? '편집 모드 ON' : '편집 완료!');
 }
