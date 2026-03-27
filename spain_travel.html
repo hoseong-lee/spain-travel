@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🇪🇸 신혼여행 일정표</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:'Noto Sans KR',-apple-system,sans-serif; background:linear-gradient(170deg,#0f172a 0%,#1e293b 40%,#334155 100%); color:#e2e8f0; min-height:100vh; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+
+  /* HEADER */
+  .header { background:linear-gradient(135deg,rgba(232,114,90,.15),rgba(46,134,171,.15),rgba(245,166,35,.15)); border-bottom:1px solid rgba(255,255,255,.06); padding:32px 20px 22px; text-align:center; position:sticky; top:0; z-index:100; backdrop-filter:blur(20px); }
+  .header-sub { font-size:11px; letter-spacing:4px; color:#64748b; text-transform:uppercase; margin-bottom:6px; }
+  .header-title { font-size:24px; font-weight:800; letter-spacing:-.5px; background:linear-gradient(135deg,#E8725A,#F5A623,#2E86AB); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .header-date { font-size:12px; color:#475569; margin-top:5px; }
+  .region-tags { display:flex; justify-content:center; gap:8px; margin-top:14px; flex-wrap:wrap; }
+  .region-tag { padding:4px 13px; border-radius:20px; font-size:11px; font-weight:700; }
+  .edit-mode-bar { display:none; background:rgba(245,158,11,0.12); border-top:1px solid rgba(245,158,11,0.3); padding:8px 18px; text-align:center; font-size:11px; color:#fbbf24; font-weight:600; letter-spacing:.5px; }
+  .edit-mode-bar.visible { display:block; }
+
+  /* DAY SELECTOR */
+  .day-selector { display:flex; overflow-x:auto; gap:6px; padding:12px 14px; border-bottom:1px solid rgba(255,255,255,.05); -ms-overflow-style:none; scrollbar-width:none; }
+  .day-selector::-webkit-scrollbar { display:none; }
+  .day-btn { flex-shrink:0; padding:8px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.02); color:#64748b; font-size:11px; font-weight:500; cursor:pointer; text-align:center; min-width:60px; transition:all .2s; line-height:1.35; font-family:inherit; }
+  .day-btn.active { border-width:2px; font-weight:700; }
+  .day-btn .day-num { font-size:9px; opacity:.6; margin-bottom:1px; }
+
+  /* DAY HEADER */
+  .day-header { padding:16px 18px 6px; }
+  .day-header-top { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .day-badge { width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; }
+  .day-region { font-size:16px; font-weight:700; color:#f1f5f9; }
+  .day-date-sub { font-size:11px; color:#475569; margin-top:2px; }
+  .hotel-box { padding:9px 13px; border-radius:10px; background:rgba(139,92,246,.07); border:1px solid rgba(139,92,246,.18); font-size:11.5px; color:#c4b5fd; margin-bottom:12px; white-space:pre-line; line-height:1.5; cursor:pointer; transition:background .15s; }
+  .hotel-box:hover { background:rgba(139,92,246,.13); }
+  .edit-mode .hotel-box { border-color:rgba(245,158,11,.4); }
+
+  /* FILTERS */
+  .filters { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px; padding:0 18px; }
+  .filter-btn { padding:5px 11px; border-radius:8px; border:1px solid rgba(255,255,255,.08); background:transparent; color:#64748b; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; }
+  .filter-btn.active { font-weight:700; }
+
+  /* TIMELINE */
+  .timeline { padding:10px 18px 30px; }
+  .timeline-item { display:flex; gap:10px; position:relative; }
+  .timeline-left { display:flex; flex-direction:column; align-items:center; width:48px; flex-shrink:0; padding-top:2px; }
+  .timeline-time { font-size:10.5px; font-weight:600; color:#64748b; margin-bottom:4px; font-variant-numeric:tabular-nums; }
+  .timeline-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .timeline-line { width:1.5px; flex:1; min-height:16px; }
+  .timeline-card { flex:1; border-radius:12px; padding:11px 13px; margin-bottom:8px; border-width:1px; border-style:solid; position:relative; transition:box-shadow .15s; }
+  .edit-mode .timeline-card { cursor:pointer; }
+  .edit-mode .timeline-card:hover { box-shadow:0 0 0 2px rgba(245,158,11,.5); }
+  .card-title { font-size:13.5px; font-weight:700; color:#f1f5f9; margin-bottom:3px; line-height:1.4; }
+  .card-desc { font-size:11.5px; color:#94a3b8; line-height:1.65; white-space:pre-line; }
+  .card-warn { display:inline-block; background:rgba(239,68,68,.12); color:#f87171; font-size:10px; padding:2px 6px; border-radius:4px; margin-top:4px; font-weight:600; }
+  .confirmed { display:inline-block; background:rgba(16,185,129,.12); color:#34d399; font-size:10px; padding:2px 6px; border-radius:4px; margin-left:5px; font-weight:600; }
+
+  /* EDIT CONTROLS */
+  .edit-toolbar { display:none; align-items:center; gap:8px; padding:10px 18px; border-bottom:1px solid rgba(255,255,255,.05); flex-wrap:wrap; }
+  .edit-toolbar.visible { display:flex; }
+  .toolbar-btn { padding:7px 14px; border-radius:10px; border:none; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .15s; }
+  .btn-edit { background:rgba(245,158,11,.15); color:#fbbf24; border:1px solid rgba(245,158,11,.3); }
+  .btn-edit.active { background:rgba(245,158,11,.25); }
+  .btn-add { background:rgba(16,185,129,.12); color:#34d399; border:1px solid rgba(16,185,129,.3); }
+  .btn-save { background:rgba(59,130,246,.15); color:#60a5fa; border:1px solid rgba(59,130,246,.3); }
+  .btn-danger { background:rgba(239,68,68,.12); color:#f87171; border:1px solid rgba(239,68,68,.25); }
+  .toolbar-sep { width:1px; height:24px; background:rgba(255,255,255,.08); margin:0 2px; }
+
+  /* ADD ITEM ROW */
+  .add-item-row { display:none; padding:8px 18px; }
+  .add-item-row.visible { display:block; }
+  .add-item-btn { width:100%; padding:10px; border-radius:10px; border:1.5px dashed rgba(16,185,129,.3); background:rgba(16,185,129,.04); color:#34d399; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; }
+  .add-item-btn:hover { background:rgba(16,185,129,.09); border-color:rgba(16,185,129,.5); }
+
+  /* MODAL OVERLAY */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:200; backdrop-filter:blur(4px); align-items:flex-end; justify-content:center; }
+  .modal-overlay.visible { display:flex; }
+  .modal { background:#1e293b; border:1px solid rgba(255,255,255,.1); border-radius:20px 20px 0 0; padding:24px 20px 40px; width:100%; max-width:600px; max-height:90vh; overflow-y:auto; }
+  .modal-title { font-size:15px; font-weight:800; color:#f1f5f9; margin-bottom:18px; display:flex; align-items:center; justify-content:space-between; }
+  .modal-close { width:28px; height:28px; border-radius:8px; background:rgba(255,255,255,.06); border:none; color:#94a3b8; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .field-group { margin-bottom:14px; }
+  .field-label { font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+  .field-input, .field-textarea, .field-select { width:100%; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:10px; color:#f1f5f9; font-family:inherit; font-size:13px; padding:10px 12px; outline:none; transition:border-color .15s; }
+  .field-input:focus, .field-textarea:focus, .field-select:focus { border-color:rgba(245,158,11,.5); }
+  .field-textarea { resize:vertical; min-height:80px; line-height:1.6; }
+  .field-select option { background:#1e293b; }
+  .field-row { display:flex; gap:10px; }
+  .field-row .field-group { flex:1; }
+  .modal-actions { display:flex; gap:8px; margin-top:20px; }
+  .modal-btn { flex:1; padding:12px; border-radius:12px; border:none; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .modal-btn-save { background:linear-gradient(135deg,#E8725A,#F5A623); color:#fff; }
+  .modal-btn-cancel { background:rgba(255,255,255,.06); color:#94a3b8; }
+  .modal-btn-delete { background:rgba(239,68,68,.15); color:#f87171; border:1px solid rgba(239,68,68,.25); }
+  .checkbox-row { display:flex; gap:8px; align-items:center; }
+  .checkbox-row input { width:16px; height:16px; accent-color:#F5A623; }
+  .checkbox-row label { font-size:12px; color:#94a3b8; }
+
+  /* TIPS */
+  .tips { padding:18px; border-top:1px solid rgba(255,255,255,.05); background:rgba(0,0,0,.15); }
+  .tips-title { font-size:13px; font-weight:700; color:#f1f5f9; margin-bottom:10px; }
+  .tips-body { font-size:11.5px; color:#94a3b8; line-height:1.9; }
+  .tips-body .hl-y{color:#F59E0B} .tips-body .hl-p{color:#EC4899} .tips-body .hl-g{color:#10B981} .tips-body .hl-o{color:#F5A623} .tips-body .hl-b{color:#60A5FA}
+  .safe-bottom { height:env(safe-area-inset-bottom,20px); }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px); background:#334155; border:1px solid rgba(255,255,255,.1); color:#f1f5f9; padding:10px 20px; border-radius:12px; font-size:12px; font-weight:600; opacity:0; transition:all .3s; z-index:300; white-space:nowrap; pointer-events:none; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* EDIT INDICATOR */
+  .edit-indicator { position:absolute; top:8px; right:8px; width:18px; height:18px; border-radius:5px; background:rgba(245,158,11,.2); display:none; align-items:center; justify-content:center; font-size:9px; }
+  .edit-mode .edit-indicator { display:flex; }
+  .drag-handle { display:none; align-items:center; justify-content:center; width:20px; color:#475569; font-size:14px; cursor:grab; flex-shrink:0; padding-top:14px; }
+  .edit-mode .drag-handle { display:flex; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-sub">Honeymoon Itinerary 2026</div>
+  <div class="header-title">스페인 · 포르투갈 신혼여행 💕</div>
+  <div class="header-date">2026.09.13 (일) — 09.26 (토) · 14일</div>
+  <div class="region-tags">
+    <span class="region-tag" style="background:rgba(232,114,90,.15);border:1px solid rgba(232,114,90,.4);color:#E8725A">✈️ 아시아나 OZ0511/12</span>
+    <span class="region-tag" style="background:rgba(232,114,90,.15);border:1px solid rgba(232,114,90,.4);color:#E8725A">🏙️ 바르셀로나</span>
+    <span class="region-tag" style="background:rgba(46,134,171,.15);border:1px solid rgba(46,134,171,.4);color:#2E86AB">🌊 포르투</span>
+    <span class="region-tag" style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.4);color:#F5A623">🏖️ 마요르카</span>
+  </div>
+  <div class="edit-mode-bar" id="editModeBar">✏️ 편집 모드 — 카드를 탭하면 수정할 수 있어요</div>
+</div>
+
+<div class="day-selector" id="daySelector"></div>
+
+<div class="edit-toolbar" id="editToolbar">
+  <button class="toolbar-btn btn-edit" id="toggleEditBtn" onclick="toggleEdit()">✏️ 편집 모드</button>
+  <div class="toolbar-sep"></div>
+  <button class="toolbar-btn btn-add" onclick="openAddModal()" id="addBtn" style="display:none">+ 일정 추가</button>
+  <button class="toolbar-btn btn-save" onclick="exportData()" id="exportBtn" style="display:none">💾 저장 (JSON)</button>
+</div>
+
+<div class="day-header" id="dayHeader"></div>
+<div class="filters" id="filters"></div>
+<div class="add-item-row" id="addItemRow">
+  <button class="add-item-btn" onclick="openAddModal()">+ 이 날에 일정 추가하기</button>
+</div>
+<div class="timeline" id="timeline"></div>
+
+<div class="tips">
+  <div class="tips-title">💡 여행 꿀팁 & 주의사항</div>
+  <div class="tips-body">
+    • <span class="hl-y">사전 예약 필수</span>: 사그라다파밀리아, 구엘공원, 카사바트요, 라페드레라, 가이아 와이너리<br>
+    • <span class="hl-p">라로카빌리지</span>: 그라시아 거리에서 셔틀버스 예약 필수, 10% 추가 할인 팁 블로그 참고<br>
+    • <span class="hl-g">바르셀로나 교통</span>: 알단테 교통카드 발급 / 숙소↔시내 동키 자전거 참고<br>
+    • <span class="hl-o">마요르카 렌트카</span>: 9/21 or 9/22 소예르 이동 시 결정 필요 (skyscanner 가격비교)<br>
+    • <span class="hl-b">소예르 트램</span>: 사전 예약 권장 (성수기 매진 빠름)<br>
+    • 스페인 식사시간: 점심 14시, 저녁 21시 이후가 현지 문화<br>
+    • 포르투 도시세, 마요르카 숙소 세금은 <span class="hl-y">현장 결제</span> 필요 (현금 준비)
+  </div>
+</div>
+<div class="safe-bottom"></div>
+
+<!-- 편집 모달 -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBg(event)">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modalTitleText">일정 편집</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <div class="field-label">시간</div>
+        <input class="field-input" id="f-time" placeholder="예: 09:00 또는 —">
+      </div>
+      <div class="field-group">
+        <div class="field-label">카테고리</div>
+        <select class="field-select" id="f-type">
+          <option value="spot">📍 관광</option>
+          <option value="food">🍴 맛집</option>
+          <option value="shopping">🛍️ 쇼핑</option>
+          <option value="flight">✈️ 항공/이동</option>
+          <option value="hotel">🏨 숙소</option>
+          <option value="move">🚌 교통</option>
+          <option value="etc">💡 기타</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">제목</div>
+      <input class="field-input" id="f-title" placeholder="예: 🏛️ 사그라다 파밀리아">
+    </div>
+    <div class="field-group">
+      <div class="field-label">설명 (줄바꿈 가능)</div>
+      <textarea class="field-textarea" id="f-desc" placeholder="상세 내용을 입력하세요"></textarea>
+    </div>
+    <div class="field-group">
+      <div class="field-label">주의사항 (선택)</div>
+      <input class="field-input" id="f-warn" placeholder="예: 사전 예약 필수">
+    </div>
+    <div class="field-group">
+      <div class="checkbox-row">
+        <input type="checkbox" id="f-confirmed">
+        <label for="f-confirmed">✓ 예약 확정</label>
+      </div>
+    </div>
+    <div class="modal-actions" id="modalActions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal()">취소</button>
+      <button class="modal-btn modal-btn-save" onclick="saveItem()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 호텔 편집 모달 -->
+<div class="modal-overlay" id="hotelModalOverlay" onclick="closeHotelModalOnBg(event)">
+  <div class="modal">
+    <div class="modal-title">
+      <span>🏨 숙소 정보 편집</span>
+      <button class="modal-close" onclick="closeHotelModal()">✕</button>
+    </div>
+    <div class="field-group">
+      <div class="field-label">숙소 이름 & 예약 정보</div>
+      <textarea class="field-textarea" id="h-hotel" placeholder="숙소명, 예약번호, 체크인/아웃 등"></textarea>
+    </div>
+    <div class="field-group">
+      <div class="field-label">날짜 & 지역 제목</div>
+      <input class="field-input" id="h-region" placeholder="예: 바르셀로나 — 가우디 투어 🏛️">
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeHotelModal()">취소</button>
+      <button class="modal-btn modal-btn-save" onclick="saveHotel()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let DAYS = [
+  {
+    date:"9/13 (일)", region:"한국 → 바르셀로나 ✈️", color:"#E8725A",
+    hotel:"머큐어 바르셀로나 콘도르 (4성급)\n예약번호: 3508557 | 체크인 14시",
+    schedule:[
+      {time:"11:50",title:"✈️ 인천공항 출발",desc:"OZ0511 | 터미널2 | 14시간 비행\n수하물: 23kg (아시아나)",type:"flight",confirmed:true},
+      {time:"19:10",title:"🛬 바르셀로나 도착",desc:"엘프라트 공항 T1 도착\n수하물 수취 & 입국심사",type:"flight"},
+      {time:"20:00",title:"🚌 공항 → 호텔 이동",desc:"A2공항버스 → V13버스 환승\n(약 1시간 소요)",type:"move"},
+      {time:"21:00",title:"🏨 호텔 체크인",desc:"머큐어 바르셀로나 콘도르 (4성급)\n예약번호: 3508557",type:"hotel"},
+      {time:"21:30",title:"🍽️ 가벼운 첫날 저녁",desc:"호텔 근처에서 간단히 식사\n장거리 비행 후 충분한 휴식",type:"food"},
+    ]
+  },
+  {
+    date:"9/14 (월)", region:"바르셀로나 — 가우디 투어 🏛️", color:"#E8725A",
+    hotel:"머큐어 바르셀로나 콘도르 (4성급)",
+    schedule:[
+      {time:"08:00",title:"☀️ 조식 & 출발 준비",desc:"호텔 체크인 완료 후 출발\n동키 자전거 or 지하철 이용",type:"etc"},
+      {time:"09:00",title:"⛪ 사그라다 파밀리아",desc:"가우디의 미완성 걸작\n사전 예약 필수, 오전 방문 추천!",type:"spot",warn:"사전 예약 필수"},
+      {time:"11:00",title:"🏠 카사 바트요 / 라 페드레라",desc:"그라시아 거리 가우디 건축물\n카사바트요: 비늘 외관 / 라페드레라: 물결 돌 외관\n옥상 굴뚝 포토존 필수",type:"spot",warn:"사전 예약 권장"},
+      {time:"13:00",title:"🍽️ 점심 — Cerveceria Catalana",desc:"바르셀로나 No.1 타파스집\n추천: 꿀대구, 맛조개, 감바스\n⚠️ 웨이팅 있음, 13시 전 도착 추천",type:"food"},
+      {time:"15:00",title:"🛍️ 파세이그 데 그라시아 거리 산책",desc:"명품 쇼핑 & 바르셀로나 분위기 감상\n라치나타 (올리브오일 전문점) 방문",type:"shopping"},
+      {time:"16:30",title:"🏖️ 보른 지구 / 산타 마리아 성당",desc:"중세 분위기 보른 지구 탐방\n엘 본 지구 카페에서 휴식",type:"spot"},
+      {time:"18:00",title:"🌊 바르셀로네타 해변 산책",desc:"지중해 해변 신혼 산책\n석양 감상 포인트",type:"spot"},
+      {time:"19:00",title:"🍽️ 저녁 — El Xampanyet",desc:"엘 보른 지구 타파스 & 카바\n현지인 인기 타파스 바",type:"food"},
+      {time:"21:00",title:"🌃 바르셀로네타 야경 산책",desc:"해변 야경 감상 & 귀환",type:"spot"},
+    ]
+  },
+  {
+    date:"9/15 (화)", region:"바르셀로나 — 고딕지구 & 몬주익 🏰", color:"#E8725A",
+    hotel:"머큐어 바르셀로나 콘도르 (4성급)",
+    schedule:[
+      {time:"08:00",title:"☀️ 조식 & 출발",desc:"일찍 출발해서 시내 관광 시작",type:"etc"},
+      {time:"08:30",title:"🛒 보케리아 시장",desc:"바르셀로나의 부엌, 200개+ 점포\n과일주스, 하몽, 해산물 시식",type:"spot"},
+      {time:"09:30",title:"🏛️ 고딕지구 산책",desc:"바르셀로나 대성당\n레이알 광장 & 카릴레 델 비스베\n중세 골목길 탐험",type:"spot"},
+      {time:"11:00",title:"🎨 피카소 미술관",desc:"바르셀로나 피카소 초기작 소장\n고딕지구 내 위치",type:"spot",warn:"예약 권장"},
+      {time:"12:00",title:"🍽️ 점심 — El Paraguayo",desc:"고딕지구 내 추천 식당\nor 보케리아 시장 내 타파스",type:"food"},
+      {time:"13:00",title:"🚡 몬주익 언덕 이동",desc:"지하철 + 케이블카 이용\n바르셀로나 시내 + 항구 파노라마",type:"move"},
+      {time:"14:00",title:"🏰 몬주익 성 & 전망대",desc:"바르셀로나 전경 최고 뷰\n포토스팟 필수 방문!",type:"spot"},
+      {time:"15:30",title:"🏛️ 카탈루냐 국립미술관 외관",desc:"스페인 광장 이동\n계단에서 파노라마 포토타임",type:"spot"},
+      {time:"17:00",title:"🍽️ 저녁 — La Pepita",desc:"고딕지구 근처 몬타디토 맛집",type:"food"},
+      {time:"18:30",title:"✨ 마법의 분수 쇼 (목/금/토)",desc:"몬주익 야간 분수 — 9월 목/금/토 운영",type:"spot"},
+      {time:"20:00",title:"🧳 숙소 복귀 & 이동 준비",desc:"짐 정리 & 체크아웃 준비",type:"hotel"},
+    ]
+  },
+  {
+    date:"9/16 (수)", region:"바르셀로나 → 포르투 🌉", color:"#2E86AB",
+    hotel:"레전드 하우스 바이 스위트 포르토\n예약번호: 1694479710 | 체크인 15시 | 체크아웃 11시",
+    schedule:[
+      {time:"08:00",title:"🏨 체크아웃 준비",desc:"머큐어 바르셀로나 콘도르 체크아웃 (12시)\n짐 챙기기",type:"hotel"},
+      {time:"09:00",title:"☕ 오전 자유시간",desc:"호텔 근처 카페 브런치\n바르셀로나 마지막 산책",type:"food"},
+      {time:"10:00",title:"🚌 공항 이동",desc:"숙소 → 바르셀로나 엘프라트 공항\n(지하철 약 40분)",type:"move"},
+      {time:"17:35",title:"✈️ 바르셀로나 → 포르투",desc:"라이언에어 | 약 1시간 비행\n인당 약 16-17만원 (20kg 수하물 포함)",type:"flight",warn:"예약 확인 필요"},
+      {time:"18:35",title:"🛬 포르투 공항 도착",desc:"프란시스쿠 드 사 카르네이루 공항\n→ 메트로 탑승 (알단테 교통카드)",type:"flight"},
+      {time:"19:30",title:"🏨 숙소 체크인",desc:"레전드 하우스 바이 스위트 포르토\n상벤투역 바로 앞 / 루이스강 도보 10분",type:"hotel"},
+      {time:"20:30",title:"🌉 동 루이스 다리 & 리베이라 광장",desc:"포르투 상징 다리 야경 감상\n강변 카페에서 커피 한잔",type:"spot"},
+      {time:"21:00",title:"🐙 저녁 — Botequim da Ribeira",desc:"강가 뽈뽀(문어) 맛집\n포르투갈 첫날 저녁!",type:"food"},
+      {time:"22:00",title:"📸 신문 사진 포즈",desc:"동 루이스 다리 위에서\n신문 사진 포즈 (빌라 노바 데 가이아 전망)",type:"spot"},
+    ]
+  },
+  {
+    date:"9/17 (목)", region:"포르투 — 가이아 와이너리 & 크루즈 🍷", color:"#2E86AB",
+    hotel:"레전드 하우스 바이 스위트 포르토",
+    schedule:[
+      {time:"08:30",title:"☀️ 조식 & 출발",desc:"상벤투 역 아줄레주 감상 🚉",type:"etc"},
+      {time:"09:00",title:"🗼 클레리구스 탑 전망대",desc:"포르투 시내 전경 360도 파노라마\n76m 높이 타워",type:"spot"},
+      {time:"10:00",title:"📚 렐루 서점",desc:"세계에서 가장 아름다운 서점\n해리포터 영감의 붉은 벨벳 계단\n입장료 8유로",type:"spot",warn:"오전 10시 오픈"},
+      {time:"11:00",title:"🚢 도우루강 크루즈",desc:"도우루강 6개교 크루즈 (약 1시간)\n예약 권장, 리베이라 광장 출발",type:"spot",warn:"사전 예약 권장"},
+      {time:"12:30",title:"🍽️ 점심 — Do Norte Café",desc:"숙소 도보 1분, 포르투갈 요리",type:"food"},
+      {time:"14:00",title:"🍷 가이아 와이너리 투어",desc:"동 루이스 다리 건너 가이아 지구\nTaylor's or Graham's 추천\n포트 와인 시음",type:"spot",warn:"예약 권장"},
+      {time:"16:00",title:"🌇 가이아 전망대",desc:"리베이라 전경 파노라마\n포토타임 필수!",type:"spot"},
+      {time:"17:00",title:"💙 카르무 & 카르멜리타스 성당",desc:"아줄레주 타일 외벽 포토스팟",type:"spot"},
+      {time:"18:00",title:"🥚 만테이가리아 에그타르트",desc:"포르투 1호점 에그타르트 맛집\n갓 구운 파스텔 드 나따!",type:"food"},
+      {time:"19:30",title:"🍽️ 저녁 — Taberna Dos Mercadores",desc:"포르투갈 전통 음식\n문어밥, 농어구이 강력 추천",type:"food"},
+      {time:"21:00",title:"🌃 리베이라 야경 산책",desc:"도우루 강변 + 다리 조명 야경",type:"spot"},
+    ]
+  },
+  {
+    date:"9/18 (금)", region:"포르투 — 도우로 밸리 당일투어 🍇", color:"#2E86AB",
+    hotel:"레전드 하우스 바이 스위트 포르토",
+    schedule:[
+      {time:"08:00",title:"☀️ 조식 & 투어 집결",desc:"도우로 밸리 투어 출발 준비\n(가이드 투어 추천 - GetYourGuide)",type:"etc"},
+      {time:"09:00",title:"🚌 도우로 밸리 투어 출발",desc:"약 8시간 풀데이 투어\n포르투에서 약 1시간 이동",type:"move"},
+      {time:"10:30",title:"🍇 도우루 강변 드라이브",desc:"포도밭 뷰 감상\n트라스오스몬테스 지방 절경",type:"spot"},
+      {time:"11:30",title:"🏰 킨타 와이너리 방문",desc:"도우로 밸리 대표 와이너리\n포트 와인 생산 현장 & 시음 🍷",type:"spot"},
+      {time:"13:00",title:"🍽️ 투어 포함 점심",desc:"현지 레스토랑 or 투어 포함 식사",type:"food"},
+      {time:"14:30",title:"🚤 도우로 강 보트 투어",desc:"포도밭 사이 강 유람 (옵션)",type:"spot"},
+      {time:"16:00",title:"🏘️ 레구아 or 피냥 마을 산책",desc:"도우로 밸리 소도시 구경\n현지 기념품 쇼핑",type:"spot"},
+      {time:"17:30",title:"🚌 포르투 귀환",desc:"포르투로 돌아오기 (약 1시간 30분)",type:"move"},
+      {time:"19:30",title:"🍽️ 저녁 — 포르투 시내",desc:"포르투 중심 타파스바\nor 숙소 근처 현지 음식점",type:"food"},
+      {time:"21:00",title:"🧳 숙소 복귀 & 휴식",desc:"내일 근교 투어 준비",type:"hotel"},
+    ]
+  },
+  {
+    date:"9/19 (토)", region:"포르투 — 마투지뉴스 & 아베이루 🏖️", color:"#2E86AB",
+    hotel:"레전드 하우스 바이 스위트 포르토\n체크아웃 11시 | 포르투 → 마요르카 21:00",
+    schedule:[
+      {time:"08:30",title:"☀️ 조식 & 출발",desc:"마지막 포르투 아침!\n수영복 챙겨서 출발",type:"etc"},
+      {time:"09:00",title:"🏖️ 마투지뉴스 해변",desc:"포르투 근교 최고 해변 (약 30분)\n9월이라 수영 가능!\n에메랄드빛 대서양 바다",type:"spot"},
+      {time:"11:00",title:"🦞 점심 — O Gaveto",desc:"마투지뉴스 해산물 맛집\n랍스터, 문어 해산물 추천",type:"food"},
+      {time:"13:00",title:"🛶 아베이루 당일치기",desc:"포르투갈의 작은 베네치아\n상 벤투역에서 기차 약 40분",type:"move"},
+      {time:"14:00",title:"🚣 몰리세이루 보트 탑승",desc:"알록달록한 전통 곤돌라 투어\n운하 따라 아베이루 구경",type:"spot"},
+      {time:"15:00",title:"🍮 오부스 몰레스",desc:"아베이루 전통 디저트\n달걀 노른자 크림 과자 맛보기",type:"food"},
+      {time:"15:30",title:"🏘️ 아베이루 시내 산책",desc:"아줄레주 역사 지구 구경\n코스타노바 줄무늬 집 포토스팟",type:"spot"},
+      {time:"17:00",title:"🚂 포르투 귀환",desc:"아베이루역 → 포르투 상벤투역",type:"move"},
+      {time:"18:00",title:"🛍️ 마지막 포르투 쇼핑",desc:"- 푸타 비치타올\n- 성물방 기념품\n- 유리아쥬 / 쟈크폰크림\n산타 카테리나 거리",type:"shopping"},
+      {time:"19:30",title:"🌉 리베이라 광장 마지막 야경",desc:"포르투 이별 야경 감상\n내일 마요르카로!",type:"spot"},
+      {time:"21:00",title:"✈️ 포르투 → 마요르카 팔마",desc:"라이언에어\n인당 약 16-18만원 (20kg 수하물 포함)",type:"flight",warn:"예약 확인 필요"},
+    ]
+  },
+  {
+    date:"9/20 (일)", region:"마요르카 — 팔마 도착 🌴", color:"#F5A623",
+    hotel:"엘리오스 마요르카 호텔 앤 아파트먼트\n예약번호: 1694459164 | 공항 바로 근처",
+    schedule:[
+      {time:"—",title:"🛬 팔마 공항 도착 (밤 12시)",desc:"포르투 출발 21:00 → 팔마 23:59 도착\n공항버스 A2 (5유로, 현금 필요!) → 숙소\n택시 약 10분, 2만원",type:"flight"},
+      {time:"—",title:"🏨 엘리오스 마요르카 체크인",desc:"익스프레스 체크인 / 아웃\n공항 바로 근처, 조식 포함 예약\n수영장, 호텔바 시설 좋음",type:"hotel"},
+      {time:"—",title:"😴 늦은 도착 후 충분한 휴식",desc:"밤 늦게 도착이므로 바로 취침\n내일 팔마 & 칼로데스모로 투어!",type:"etc"},
+    ]
+  },
+  {
+    date:"9/21 (월)", region:"마요르카 — 팔마 & 칼로데스모로 🏖️", color:"#F5A623",
+    hotel:"엘리오스 마요르카 호텔 앤 아파트먼트",
+    schedule:[
+      {time:"08:00",title:"🍳 호텔 조식",desc:"조식 포함 예약\n수영복 챙겨서 출발 준비",type:"food"},
+      {time:"09:00",title:"🌊 칼로데스모로 해변",desc:"에메랄드빛 바다 포토스팟\n마요르카 최고 투명도 해변!\n버스 or 렌트카 이동",type:"spot"},
+      {time:"11:00",title:"🏊 수영 & 해변 휴식",desc:"마요르카 에메랄드빛 바다에서 수영\n절벽 뷰 포토타임 📸",type:"spot"},
+      {time:"13:00",title:"🍽️ 점심 — Es Caragol",desc:"해변 근처 해산물 레스토랑\n신선한 지중해 해산물",type:"food"},
+      {time:"15:00",title:"🚌 팔마 시내 이동",desc:"차는 숙소에 두고 가기\n팔마까지 버스 한번에 약 30분",type:"move"},
+      {time:"16:00",title:"🏛️ 팔마 대성당 외관",desc:"지중해 앞 고딕 양식 대성당\n가우디가 내부 장식 참여\n주변 구시가지 산책",type:"spot"},
+      {time:"17:00",title:"🏰 알무다이나 왕궁 & 구시가지",desc:"아랍+고딕 양식 궁전\n팔마 구시가지 골목 산책",type:"spot"},
+      {time:"18:30",title:"🌇 팔마 항구 석양",desc:"지중해 항구 석양 감상\n요트 배경 포토타임",type:"spot"},
+      {time:"19:30",title:"🍽️ 저녁 — Celler Sa Premsa",desc:"팔마 전통 마요르카 음식\n소브라사다, 엔사이마다 체험",type:"food"},
+      {time:"21:00",title:"🚌 숙소 귀환",desc:"팔마 시내 → 호텔로 복귀",type:"move"},
+    ]
+  },
+  {
+    date:"9/22 (화)", region:"마요르카 — 발데모사 & 소예르 🏔️", color:"#F5A623",
+    hotel:"그란 호텔 소예르 (5성급) ⭐\n예약번호: 3510267 | 조식+스파 포함",
+    schedule:[
+      {time:"08:00",title:"🍳 조식 & 체크아웃 준비",desc:"렌트카로 이동 준비",type:"food"},
+      {time:"09:00",title:"🚗 발데모사로 출발",desc:"팔마에서 렌트카 약 25분\n트라문타나 산맥 드라이브",type:"move"},
+      {time:"10:00",title:"⛪ 발데모사 수도원",desc:"카르투지오 수도원\n쇼팽 & 조르주 상드 기념관\n마요르카 하이라이트!",type:"spot"},
+      {time:"11:00",title:"🥐 발데모사 마을 산책",desc:"돌담길 + 꽃 장식 골목\n엔사이마다 빵 맛보기",type:"spot"},
+      {time:"12:00",title:"🚗 데이아 마을 이동",desc:"발데모사 → 데이아 약 20분\n절벽 해안 뷰 드라이브 🌊",type:"move"},
+      {time:"12:30",title:"🍽️ 점심 — Café Sa Fonda (데이아)",desc:"데이아 마을 내 추천 레스토랑\n테라스에서 산 전망 식사",type:"food"},
+      {time:"14:00",title:"🏘️ 데이아 마을 산책",desc:"예술가의 마을\n절벽 위 점토색 주택 골목 포토타임 📸",type:"spot"},
+      {time:"15:00",title:"🚗 소예르로 이동 & 체크인",desc:"데이아 → 소예르 약 15분\n그란 호텔 소예르 체크인 (15시)",type:"hotel"},
+      {time:"16:00",title:"🧖 호텔 스파 & 수영장",desc:"5성급 스파 포함 예약\n트라문타나 산맥 뷰 수영장",type:"etc"},
+      {time:"17:30",title:"🍊 소예르 구시가지 산책",desc:"오렌지 향 가득한 산간 마을\n오렌지 광장 카페에서 휴식 ☕",type:"spot"},
+      {time:"19:00",title:"🍽️ 저녁 — Brises del Mar",desc:"소예르 항구 빠에야 맛집\nor 호텔 레스토랑 이용",type:"food"},
+      {time:"21:00",title:"🌙 소예르 항구 야경 산책",desc:"항구까지 도보 약 20분\n신혼 야경 산책",type:"spot"},
+    ]
+  },
+  {
+    date:"9/23 (수)", region:"마요르카 — 소예르 & 트램 🚃", color:"#F5A623",
+    hotel:"그란 호텔 소예르 (5성급)\n체크아웃 12시 | 오후 팔마 공항으로 이동",
+    schedule:[
+      {time:"08:30",title:"☀️ 조식",desc:"그란 호텔 소예르 조식\n테라스에서 산맥 뷰 감상",type:"food"},
+      {time:"09:30",title:"🚃 소예르 트램 탑승",desc:"소예르 → 포르트 데 소예르 약 20분\n창밖 오렌지 밭 뷰 감상",type:"spot",warn:"사전 예약 권장"},
+      {time:"10:30",title:"🏖️ 포르트 데 소예르 해변",desc:"잔잔한 바다, 수영 & 스노클링",type:"spot"},
+      {time:"12:00",title:"⚓ 소예르 항구 브런치",desc:"항구 카페에서 여유로운 브런치",type:"food"},
+      {time:"13:00",title:"🍽️ 점심 — Nautilus Soller",desc:"절벽 레스토랑 (예약 필수!)\n절벽 위에서 먹는 빠에야\n인생 뷰 레스토랑",type:"food",warn:"예약 필수"},
+      {time:"14:30",title:"🍊 소예르 오렌지 광장 산책",desc:"오렌지 셔벗 아이스크림\n로컬 마켓 구경",type:"spot"},
+      {time:"16:00",title:"🚗 팔마 공항으로 이동",desc:"소예르 → 팔마 공항 약 40분\n렌트카 주유 & 반납",type:"move"},
+      {time:"17:30",title:"🏟️ 팔마 공항 탑승 준비",desc:"체크인 카운터\n부엘링 항공 탑승",type:"flight"},
+      {time:"—",title:"✈️ 팔마 → 바르셀로나",desc:"부엘링 항공 예약번호: IHHNHP\n오후 4:30 출발 → 5:30 도착\n25kg 수하물 포함",type:"flight",confirmed:true},
+      {time:"19:00",title:"🏨 H10 메트로폴리탄 체크인",desc:"예약번호: 1694841847\n테라스 있음 / 무취 가능\n체크인 15시~",type:"hotel"},
+    ]
+  },
+  {
+    date:"9/24 (목)", region:"바르셀로나 — 라로카빌리지 쇼핑 🛍️", color:"#E8725A",
+    hotel:"H10 메트로폴리탄 호텔\n예약번호: 1694841847",
+    schedule:[
+      {time:"08:00",title:"☀️ 조식 & 쇼핑 준비",desc:"라로카빌리지 쇼핑 준비\n아웃렛 셔틀버스 예약 확인",type:"etc"},
+      {time:"09:00",title:"🚌 라로카빌리지 셔틀버스",desc:"그라시아 거리 → 라로카빌리지\n셔틀버스 예약 필수!\n10% 추가 할인 팁 블로그 참고",type:"move",warn:"셔틀버스 사전 예약 필수"},
+      {time:"10:00",title:"🛍️ 라로카빌리지 쇼핑",desc:"150개+ 명품 부티크, 최대 60% 할인\n구찌 / 프라다 / 버버리 / 몽클레어",type:"shopping"},
+      {time:"13:00",title:"🍽️ 아울렛 점심",desc:"아울렛 내 레스토랑에서 점심",type:"food"},
+      {time:"15:00",title:"🚌 바르셀로나 복귀",desc:"셔틀버스로 그라시아 거리 귀환",type:"move"},
+      {time:"16:00",title:"🏡 구엘공원",desc:"가우디의 모자이크 공원\n도마뱀 분수, 모자이크 테라스 포토타임\n예약 필수!",type:"spot",warn:"사전 예약 필수"},
+      {time:"17:30",title:"🛍️ 고딕지구 마지막 쇼핑",desc:"바르셀로나 기념품 쇼핑\n라치나타 올리브오일 / 사바테즈 / 오이소잠옷",type:"shopping"},
+      {time:"19:00",title:"🌇 바르셀로나 야경 & 타파스",desc:"마지막 바르셀로나 저녁\n고딕지구 타파스바",type:"food"},
+      {time:"21:00",title:"🧳 숙소 복귀 & 귀국 준비",desc:"짐 정리 & 택스리펀 서류 확인",type:"hotel"},
+    ]
+  },
+  {
+    date:"9/25 (금)", region:"바르셀로나 → 한국 ✈️🇰🇷", color:"#888",
+    hotel:"귀국일 | H10 메트로폴리탄 체크아웃 12시",
+    schedule:[
+      {time:"08:00",title:"☀️ 조식 & 마지막 아침",desc:"마지막 바르셀로나 아침!\n호텔 체크아웃 준비",type:"food"},
+      {time:"09:00",title:"🏡 구엘공원 (미방문 시)",desc:"아직 못 갔다면 오전 방문",type:"spot"},
+      {time:"10:00",title:"🛍️ 마지막 쇼핑",desc:"바르셀로나 기념품 마무리\n고딕지구 / 라치나타 / mercadona 마트",type:"shopping"},
+      {time:"12:00",title:"🏨 호텔 체크아웃 & 짐 보관",desc:"체크아웃 후 짐 호텔에 맡기기",type:"hotel"},
+      {time:"13:00",title:"🍽️ 마지막 점심",desc:"좋아하는 타파스집 한번 더\nor La Pepita / El Xampanyet",type:"food"},
+      {time:"15:00",title:"🧳 호텔로 귀환 & 짐 찾기",desc:"공항 이동 준비",type:"hotel"},
+      {time:"16:00",title:"🚌 바르셀로나 공항 이동",desc:"지하철 + 에어로버스 약 40분\n터미널1 도착 (아시아나 OZ0512)",type:"move"},
+      {time:"17:30",title:"🛫 공항 도착 & 체크인",desc:"3시간 전 도착 권장\n수하물 23kg 아시아나",type:"flight"},
+      {time:"18:30",title:"🛍️ 면세점 & 출국 심사",desc:"면세 쇼핑 마무리\n택스리펀 수속 필수!",type:"shopping"},
+      {time:"20:00",title:"🥂 신혼여행 마지막 乾杯",desc:"탑승 전 마지막 카바 한잔\n14일간의 여행 피날레",type:"food"},
+      {time:"20:50",title:"✈️ 바르셀로나 출발",desc:"OZ0512 | 터미널1 | 12시간 비행\n인천 9/26(토) 16:20 도착",type:"flight",confirmed:true},
+    ]
+  },
+  {
+    date:"9/26 (토)", region:"한국 도착 🇰🇷💕", color:"#888",
+    hotel:"—",
+    schedule:[
+      {time:"16:20",title:"🛬 인천공항 도착",desc:"OZ0512 | 터미널2 도착\n14일간의 신혼여행 무사 귀환!\n수고하셨어요 💕",type:"flight"},
+    ]
+  },
+];
+
+const TYPE_STYLES = {
+  flight:{bg:"rgba(59,130,246,.1)",border:"rgba(59,130,246,.25)",dot:"#3B82F6"},
+  hotel:{bg:"rgba(139,92,246,.1)",border:"rgba(139,92,246,.25)",dot:"#8B5CF6"},
+  spot:{bg:"rgba(16,185,129,.1)",border:"rgba(16,185,129,.25)",dot:"#10B981"},
+  food:{bg:"rgba(245,158,11,.1)",border:"rgba(245,158,11,.25)",dot:"#F59E0B"},
+  shopping:{bg:"rgba(236,72,153,.1)",border:"rgba(236,72,153,.25)",dot:"#EC4899"},
+  move:{bg:"rgba(99,102,241,.08)",border:"rgba(99,102,241,.2)",dot:"#818CF8"},
+  etc:{bg:"rgba(107,114,128,.08)",border:"rgba(107,114,128,.2)",dot:"#6B7280"},
+};
+
+let currentDay = 0;
+let currentFilter = 'all';
+let editMode = false;
+let editingIdx = null; // null = new item, number = editing index
+
+// ── 데이터 로컬 저장 ──────────────────────────────
+function saveToLocal() {
+  try { localStorage.setItem('honeymoon_days', JSON.stringify(DAYS)); } catch(e) {}
+}
+function loadFromLocal() {
+  try {
+    const d = localStorage.getItem('honeymoon_days');
+    if (d) DAYS = JSON.parse(d);
+  } catch(e) {}
+}
+
+// ── 토스트 ────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── 편집 모드 토글 ───────────────────────────────
+function toggleEdit() {
+  editMode = !editMode;
+  document.body.classList.toggle('edit-mode', editMode);
+  document.getElementById('editModeBar').classList.toggle('visible', editMode);
+  document.getElementById('addBtn').style.display = editMode ? '' : 'none';
+  document.getElementById('exportBtn').style.display = editMode ? '' : 'none';
+  document.getElementById('addItemRow').classList.toggle('visible', editMode);
+  const btn = document.getElementById('toggleEditBtn');
+  btn.textContent = editMode ? '✅ 편집 완료' : '✏️ 편집 모드';
+  btn.classList.toggle('active', editMode);
+  renderDayContent();
+  showToast(editMode ? '편집 모드 — 카드를 탭해서 수정하세요' : '편집 완료!');
+}
+
+// ── 렌더링 ────────────────────────────────────────
+function render() { renderDaySelector(); renderDayContent(); }
+
+function renderDaySelector() {
+  const el = document.getElementById('daySelector');
+  el.innerHTML = DAYS.map((d, i) => {
+    const active = i === currentDay;
+    return `<button class="day-btn ${active?'active':''}" onclick="selectDay(${i})"
+      style="border:${active?`2px solid ${d.color}`:'1px solid rgba(255,255,255,.08)'};background:${active?d.color+'22':'rgba(255,255,255,.02)'};color:${active?d.color:'#64748b'};font-weight:${active?'700':'500'}">
+      <div class="day-num">DAY ${i+1}</div>${d.date}
+    </button>`;
+  }).join('');
+  setTimeout(() => {
+    const a = el.querySelector('.active');
+    if (a) a.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  }, 50);
+}
+
+function renderDayContent() {
+  const day = DAYS[currentDay];
+  const filtered = currentFilter === 'all' ? day.schedule.map((s,i) => ({...s, _idx:i}))
+    : day.schedule.map((s,i) => ({...s, _idx:i})).filter(s => s.type === currentFilter);
+
+  // 헤더
+  document.getElementById('dayHeader').innerHTML = `
+    <div class="day-header-top">
+      <div class="day-badge" style="background:${day.color}18;border:2px solid ${day.color};color:${day.color}">D${currentDay+1}</div>
+      <div>
+        <div class="day-region">${day.region}</div>
+        <div class="day-date-sub">${day.date}</div>
+      </div>
+    </div>
+    ${day.hotel !== '—' ? `<div class="hotel-box" onclick="${editMode?'openHotelModal()':''}">🏨 ${day.hotel}${editMode?' <span style="color:#fbbf24;font-size:10px;">✏️</span>':''}</div>` : ''}
+  `;
+
+  // 필터
+  const filters = [
+    {key:'all',label:'전체'},{key:'spot',label:'📍 관광'},{key:'food',label:'🍴 맛집'},
+    {key:'shopping',label:'🛍️ 쇼핑'},{key:'flight',label:'✈️ 이동'},{key:'hotel',label:'🏨 숙소'}
+  ];
+  document.getElementById('filters').innerHTML = filters.map(f => {
+    const active = f.key === currentFilter;
+    return `<button class="filter-btn ${active?'active':''}" onclick="setFilter('${f.key}')"
+      style="${active?`border-color:${day.color};background:${day.color}18;color:${day.color}`:''}">
+      ${f.label}
+    </button>`;
+  }).join('');
+
+  // 타임라인
+  if (filtered.length === 0) {
+    document.getElementById('timeline').innerHTML = '<div style="text-align:center;padding:40px 20px;color:#475569;font-size:13px">해당 카테고리의 일정이 없습니다</div>';
+    return;
+  }
+
+  document.getElementById('timeline').innerHTML = filtered.map((item, i) => {
+    const t = TYPE_STYLES[item.type] || TYPE_STYLES.etc;
+    const isLast = i === filtered.length - 1;
+    const confirmed = item.confirmed ? '<span class="confirmed">✓ 예약확정</span>' : '';
+    const warn = item.warn ? `<div class="card-warn">⚠️ ${item.warn}</div>` : '';
+    const editClick = editMode ? `onclick="openEditModal(${item._idx})"` : '';
+    const editHint = editMode ? `<span class="edit-indicator">✏️</span>` : '';
+    const deleteBtn = editMode ? `<button onclick="event.stopPropagation();deleteItem(${item._idx})" style="position:absolute;top:8px;right:30px;width:22px;height:22px;border-radius:6px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.25);color:#f87171;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>` : '';
+    return `
+      <div class="timeline-item">
+        <div class="timeline-left">
+          <div class="timeline-time">${item.time}</div>
+          <div class="timeline-dot" style="background:${t.dot};box-shadow:0 0 8px ${t.dot}44"></div>
+          ${!isLast?`<div class="timeline-line" style="background:linear-gradient(to bottom,${t.dot}44,transparent)"></div>`:''}
+        </div>
+        <div class="timeline-card" style="background:${t.bg};border-color:${t.border}" ${editClick}>
+          ${editHint}${deleteBtn}
+          <div class="card-title">${item.title}${confirmed}</div>
+          <div class="card-desc">${item.desc}</div>
+          ${warn}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── 편집 모달 ────────────────────────────────────
+function openEditModal(idx) {
+  if (!editMode) return;
+  editingIdx = idx;
+  const item = DAYS[currentDay].schedule[idx];
+  document.getElementById('modalTitleText').textContent = '✏️ 일정 수정';
+  document.getElementById('f-time').value = item.time || '';
+  document.getElementById('f-type').value = item.type || 'etc';
+  document.getElementById('f-title').value = item.title || '';
+  document.getElementById('f-desc').value = item.desc || '';
+  document.getElementById('f-warn').value = item.warn || '';
+  document.getElementById('f-confirmed').checked = !!item.confirmed;
+  document.getElementById('modalActions').innerHTML = `
+    <button class="modal-btn modal-btn-delete" onclick="deleteItem(${idx});closeModal()">🗑️ 삭제</button>
+    <button class="modal-btn modal-btn-cancel" onclick="closeModal()">취소</button>
+    <button class="modal-btn modal-btn-save" onclick="saveItem()">저장</button>
+  `;
+  document.getElementById('modalOverlay').classList.add('visible');
+}
+
+function openAddModal() {
+  editingIdx = null;
+  document.getElementById('modalTitleText').textContent = '➕ 일정 추가';
+  document.getElementById('f-time').value = '';
+  document.getElementById('f-type').value = 'spot';
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-desc').value = '';
+  document.getElementById('f-warn').value = '';
+  document.getElementById('f-confirmed').checked = false;
+  document.getElementById('modalActions').innerHTML = `
+    <button class="modal-btn modal-btn-cancel" onclick="closeModal()">취소</button>
+    <button class="modal-btn modal-btn-save" onclick="saveItem()">추가</button>
+  `;
+  document.getElementById('modalOverlay').classList.add('visible');
+}
+
+function saveItem() {
+  const item = {
+    time: document.getElementById('f-time').value.trim() || '—',
+    type: document.getElementById('f-type').value,
+    title: document.getElementById('f-title').value.trim(),
+    desc: document.getElementById('f-desc').value.trim(),
+  };
+  const w = document.getElementById('f-warn').value.trim();
+  if (w) item.warn = w;
+  if (document.getElementById('f-confirmed').checked) item.confirmed = true;
+  if (!item.title) { showToast('❗ 제목을 입력해주세요'); return; }
+
+  if (editingIdx !== null) {
+    DAYS[currentDay].schedule[editingIdx] = item;
+    showToast('✅ 수정 완료!');
+  } else {
+    DAYS[currentDay].schedule.push(item);
+    showToast('✅ 일정이 추가됐어요!');
+  }
+  saveToLocal();
+  closeModal();
+  renderDayContent();
+}
+
+function deleteItem(idx) {
+  DAYS[currentDay].schedule.splice(idx, 1);
+  saveToLocal();
+  renderDayContent();
+  showToast('🗑️ 삭제했어요');
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('visible'); }
+function closeModalOnBg(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+
+// ── 호텔 편집 모달 ───────────────────────────────
+function openHotelModal() {
+  if (!editMode) return;
+  document.getElementById('h-hotel').value = DAYS[currentDay].hotel || '';
+  document.getElementById('h-region').value = DAYS[currentDay].region || '';
+  document.getElementById('hotelModalOverlay').classList.add('visible');
+}
+
+function saveHotel() {
+  DAYS[currentDay].hotel = document.getElementById('h-hotel').value.trim() || '—';
+  DAYS[currentDay].region = document.getElementById('h-region').value.trim() || DAYS[currentDay].region;
+  saveToLocal();
+  closeHotelModal();
+  renderDayContent();
+  renderDaySelector();
+  showToast('🏨 숙소 정보 수정 완료!');
+}
+
+function closeHotelModal() { document.getElementById('hotelModalOverlay').classList.remove('visible'); }
+function closeHotelModalOnBg(e) { if (e.target === document.getElementById('hotelModalOverlay')) closeHotelModal(); }
+
+// ── JSON 내보내기 ─────────────────────────────────
+function exportData() {
+  const blob = new Blob([JSON.stringify(DAYS, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '신혼여행_일정_수정본.json';
+  a.click();
+  showToast('💾 JSON 저장 완료!');
+}
+
+// ── 툴바 항상 표시 ────────────────────────────────
+document.getElementById('editToolbar').classList.add('visible');
+
+// ── 내비게이션 ────────────────────────────────────
+function selectDay(i) { currentDay = i; currentFilter = 'all'; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function setFilter(f) { currentFilter = f; renderDayContent(); }
+
+// ── 초기화 ────────────────────────────────────────
+loadFromLocal();
+render();
+</script>
+</body>
+</html>
