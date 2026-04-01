@@ -1,41 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1a0a00"/>
-      <stop offset="100%" stop-color="#2d1200"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e1e1e"/>
+      <stop offset="100%" stop-color="#111111"/>
     </linearGradient>
-    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#F5A623"/>
-      <stop offset="100%" stop-color="#E8725A"/>
-    </linearGradient>
+    <clipPath id="rounded"><rect width="192" height="192" rx="40"/></clipPath>
   </defs>
-  <!-- Background -->
-  <rect width="192" height="192" rx="38" fill="url(#bg)"/>
-  <!-- Spain flag stripe hint -->
-  <rect x="0" y="62" width="192" height="68" rx="0" fill="#C8102E" opacity=".12"/>
-  <rect x="0" y="78" width="192" height="36" rx="0" fill="#F5A623" opacity=".15"/>
-  <!-- Decorative tile pattern (azulejo hint) -->
-  <g opacity=".06" fill="#fff">
-    <rect x="16" y="16" width="20" height="20" rx="4"/>
-    <rect x="44" y="16" width="20" height="20" rx="4"/>
-    <rect x="128" y="16" width="20" height="20" rx="4"/>
-    <rect x="156" y="16" width="20" height="20" rx="4"/>
-    <rect x="16" y="156" width="20" height="20" rx="4"/>
-    <rect x="44" y="156" width="20" height="20" rx="4"/>
-    <rect x="128" y="156" width="20" height="20" rx="4"/>
-    <rect x="156" y="156" width="20" height="20" rx="4"/>
+  <g clip-path="url(#rounded)">
+    <!-- Background -->
+    <rect width="192" height="192" fill="url(#bg)"/>
+    <!-- Spanish flag stripes -->
+    <rect x="0" y="0" width="192" height="48" fill="#C60B1E" opacity=".85"/>
+    <rect x="0" y="48" width="192" height="96" fill="#FFC400" opacity=".85"/>
+    <rect x="0" y="144" width="192" height="48" fill="#C60B1E" opacity=".85"/>
+    <!-- Texture overlay -->
+    <rect width="192" height="192" fill="#000" opacity=".25"/>
+    <!-- Shield -->
+    <path d="M96,52 L120,66 L120,100 C120,116 96,130 96,130 C96,130 72,116 72,100 L72,66 Z" fill="none" stroke="#FFC400" stroke-width="2" opacity=".7"/>
+    <path d="M96,57 L116,69 L116,98 C116,112 96,124 96,124 C96,124 76,112 76,98 L76,69 Z" fill="#C60B1E" opacity=".3"/>
+    <!-- Airplane -->
+    <g transform="translate(96,90) rotate(-25) scale(.75)">
+      <path d="M-6,20 L0,-24 L6,20 L0,14Z" fill="#FFC400" opacity=".95"/>
+      <path d="M-22,8 L0,0 L22,8 L0,4Z" fill="#FFC400" opacity=".95"/>
+      <path d="M-8,22 L0,18 L8,22 L0,20Z" fill="#FFD700" opacity=".8"/>
+    </g>
+    <!-- Crown -->
+    <g transform="translate(96,46)" opacity=".6">
+      <rect x="-8" y="-4" width="16" height="6" rx="1" fill="#FFC400"/>
+      <rect x="-6" y="-7" width="2" height="4" rx=".5" fill="#FFC400"/>
+      <rect x="-1" y="-8" width="2" height="5" rx=".5" fill="#FFC400"/>
+      <rect x="4" y="-7" width="2" height="4" rx=".5" fill="#FFC400"/>
+    </g>
+    <!-- ESPAÑA text -->
+    <text x="96" y="160" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="20" fill="#FFC400" opacity=".9" letter-spacing="3">ESPAÑA</text>
   </g>
-  <!-- Sun/compass circle -->
-  <circle cx="96" cy="88" r="36" fill="none" stroke="url(#sun)" stroke-width="2.5" opacity=".4"/>
-  <!-- Airplane -->
-  <g transform="translate(96,86) rotate(-30)">
-    <path d="M-6,20 L0,-24 L6,20 L0,14Z" fill="url(#sun)" opacity=".9"/>
-    <path d="M-22,8 L0,0 L22,8 L0,4Z" fill="url(#sun)" opacity=".9"/>
-    <path d="M-8,22 L0,18 L8,22 L0,20Z" fill="#F5A623" opacity=".7"/>
-  </g>
-  <!-- ES text -->
-  <text x="96" y="148" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="22" fill="#F5A623" opacity=".8">ESPAÑA</text>
-  <!-- Small dot accents -->
-  <circle cx="42" cy="148" r="2" fill="#E8725A" opacity=".5"/>
-  <circle cx="150" cy="148" r="2" fill="#E8725A" opacity=".5"/>
 </svg>
