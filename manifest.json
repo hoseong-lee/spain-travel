@@ -1,16 +1,23 @@
 {
   "name": "스페인·포르투갈 여행 플래너",
   "short_name": "여행플래너",
-  "start_url": "/spain-travel/",
+  "start_url": "./spain_travel.html",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
   "description": "스페인·포르투갈 신혼여행 일정 관리 앱",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈️</text></svg>",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

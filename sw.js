@@ -1,7 +1,7 @@
-const CACHE_NAME = 'travel-planner-v3';
+const CACHE_NAME = 'travel-planner-v4';
 const ASSETS = [
-  '/spain-travel/',
-  '/spain-travel/index.html',
+  './',
+  './spain_travel.html',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap'
