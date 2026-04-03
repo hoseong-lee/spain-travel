@@ -813,7 +813,7 @@ function getLocalTimeStr(time,fromTZ,toTZ){if(!time||time==='—')return'';const
 function getDayTZ(dayIdx){const r=DAYS[dayIdx]?.region||'';if(r.includes('포르투')||r.includes('도우로')||r.includes('마투지')||r.includes('아베이루'))return'WEST';return'CET'}
 
 // ══════════ WEATHER API ══════════
-const OWM_KEY='';
+const OWM_KEY='0879f0fa07ee97e12475987024444693';
 const CITY_COORDS={barcelona:{lat:41.39,lon:2.17},porto:{lat:41.15,lon:-8.61},mallorca:{lat:39.57,lon:2.65}};
 let weatherCache2={};
 function fetchLiveWeather(){if(!OWM_KEY){renderWeather();return}
