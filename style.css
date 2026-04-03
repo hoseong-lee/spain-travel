@@ -170,6 +170,25 @@
   .transport-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;margin-right:4px;margin-bottom:3px}
   .transport-badge-metro{background:rgba(59,130,246,.12);color:#60a5fa}.transport-badge-bus{background:rgba(16,185,129,.12);color:#34d399}.transport-badge-taxi{background:rgba(245,158,11,.12);color:#fbbf24}.transport-badge-walk{background:rgba(139,92,246,.12);color:#c4b5fd}.transport-badge-car{background:rgba(236,72,153,.12);color:#f472b6}.transport-badge-train{background:rgba(99,102,241,.12);color:#a5b4fc}.transport-badge-flight{background:rgba(59,130,246,.12);color:#60a5fa}.transport-badge-other{background:rgba(107,114,128,.12);color:#9ca3af}
   .move-btns{display:flex;flex-direction:column;gap:2px;position:absolute;top:4px;right:46px}.move-btn{width:18px;height:14px;border-radius:3px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.25);color:#60a5fa;font-size:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}.move-btn:hover{background:rgba(59,130,246,.3)}
+  .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .dash-card{padding:14px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);text-align:center;transition:all .2s;cursor:pointer}.dash-card:hover{background:rgba(255,255,255,.06)}
+  .dash-card-icon{font-size:24px;margin-bottom:4px}.dash-card-value{font-size:22px;font-weight:800;color:#f1f5f9}.dash-card-label{font-size:10px;color:#64748b;margin-top:2px}
+  .dash-card-full{grid-column:1/-1}
+  .dash-today{padding:14px;border-radius:12px;background:rgba(245,166,35,.05);border:1px solid rgba(245,166,35,.15);margin-bottom:12px}
+  .dash-today-title{font-size:13px;font-weight:800;color:#F5A623;margin-bottom:10px}
+  .dash-today-item{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px}.dash-today-item:last-child{border-bottom:none}
+  .dash-today-time{width:40px;font-weight:700;color:#64748b;flex-shrink:0}.dash-today-content{flex:1;color:#e2e8f0}.dash-today-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+  .dash-progress{height:6px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden;margin-top:6px}.dash-progress-fill{height:100%;border-radius:3px;transition:width .5s}
+  .dash-warn-list{margin-top:12px}.dash-warn{padding:8px 12px;border-radius:8px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);margin-bottom:4px;font-size:10px;color:#f87171;cursor:pointer}
+  .sos-card{padding:14px;border-radius:12px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s}.sos-card:hover{transform:scale(1.02)}
+  .sos-card-icon{font-size:28px;flex-shrink:0}.sos-card-body{flex:1}.sos-card-title{font-size:13px;font-weight:700;color:#f1f5f9}.sos-card-sub{font-size:10px;color:#94a3b8;margin-top:2px}
+  .sos-call{padding:8px 16px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;text-decoration:none;display:inline-block}
+  .sos-section{margin-bottom:16px}.sos-section-title{font-size:12px;font-weight:700;color:#f1f5f9;margin-bottom:8px}
+  .sos-doc-card{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);margin-bottom:6px;cursor:pointer}
+  .sos-doc-title{font-size:11px;font-weight:700;color:#f1f5f9}.sos-doc-sub{font-size:9px;color:#64748b;margin-top:2px}
+  .sos-doc-img{width:100%;max-height:200px;object-fit:contain;border-radius:8px;margin-top:8px;border:1px solid rgba(255,255,255,.1)}
+  .tz-badge{display:inline-block;font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(99,102,241,.12);color:#a5b4fc;font-weight:600;margin-left:4px}
+  .transport-detail{margin-top:3px;font-size:9px;color:#818CF8;line-height:1.5}
   .phrase-lang-tabs{display:flex;gap:6px;margin-bottom:14px}.phrase-lang-tab{flex:1;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#64748b;font-size:12px;font-weight:700;cursor:pointer;text-align:center;font-family:inherit;transition:all .15s}.phrase-lang-tab.active{background:rgba(232,114,90,.15);color:#E8725A;border-color:rgba(232,114,90,.4)}
   .phrase-section{margin-bottom:16px}.phrase-section-title{font-size:12px;font-weight:700;color:#f1f5f9;margin-bottom:8px;display:flex;align-items:center;gap:6px}
   .phrase-card{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);margin-bottom:5px;cursor:pointer;transition:background .15s}.phrase-card:hover{background:rgba(255,255,255,.06)}

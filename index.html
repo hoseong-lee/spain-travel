@@ -186,6 +186,25 @@
   .transport-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;margin-right:4px;margin-bottom:3px}
   .transport-badge-metro{background:rgba(59,130,246,.12);color:#60a5fa}.transport-badge-bus{background:rgba(16,185,129,.12);color:#34d399}.transport-badge-taxi{background:rgba(245,158,11,.12);color:#fbbf24}.transport-badge-walk{background:rgba(139,92,246,.12);color:#c4b5fd}.transport-badge-car{background:rgba(236,72,153,.12);color:#f472b6}.transport-badge-train{background:rgba(99,102,241,.12);color:#a5b4fc}.transport-badge-flight{background:rgba(59,130,246,.12);color:#60a5fa}.transport-badge-other{background:rgba(107,114,128,.12);color:#9ca3af}
   .move-btns{display:flex;flex-direction:column;gap:2px;position:absolute;top:4px;right:46px}.move-btn{width:18px;height:14px;border-radius:3px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.25);color:#60a5fa;font-size:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}.move-btn:hover{background:rgba(59,130,246,.3)}
+  .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .dash-card{padding:14px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);text-align:center;transition:all .2s;cursor:pointer}.dash-card:hover{background:rgba(255,255,255,.06)}
+  .dash-card-icon{font-size:24px;margin-bottom:4px}.dash-card-value{font-size:22px;font-weight:800;color:#f1f5f9}.dash-card-label{font-size:10px;color:#64748b;margin-top:2px}
+  .dash-card-full{grid-column:1/-1}
+  .dash-today{padding:14px;border-radius:12px;background:rgba(245,166,35,.05);border:1px solid rgba(245,166,35,.15);margin-bottom:12px}
+  .dash-today-title{font-size:13px;font-weight:800;color:#F5A623;margin-bottom:10px}
+  .dash-today-item{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px}.dash-today-item:last-child{border-bottom:none}
+  .dash-today-time{width:40px;font-weight:700;color:#64748b;flex-shrink:0}.dash-today-content{flex:1;color:#e2e8f0}.dash-today-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+  .dash-progress{height:6px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden;margin-top:6px}.dash-progress-fill{height:100%;border-radius:3px;transition:width .5s}
+  .dash-warn-list{margin-top:12px}.dash-warn{padding:8px 12px;border-radius:8px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);margin-bottom:4px;font-size:10px;color:#f87171;cursor:pointer}
+  .sos-card{padding:14px;border-radius:12px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s}.sos-card:hover{transform:scale(1.02)}
+  .sos-card-icon{font-size:28px;flex-shrink:0}.sos-card-body{flex:1}.sos-card-title{font-size:13px;font-weight:700;color:#f1f5f9}.sos-card-sub{font-size:10px;color:#94a3b8;margin-top:2px}
+  .sos-call{padding:8px 16px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;text-decoration:none;display:inline-block}
+  .sos-section{margin-bottom:16px}.sos-section-title{font-size:12px;font-weight:700;color:#f1f5f9;margin-bottom:8px}
+  .sos-doc-card{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);margin-bottom:6px;cursor:pointer}
+  .sos-doc-title{font-size:11px;font-weight:700;color:#f1f5f9}.sos-doc-sub{font-size:9px;color:#64748b;margin-top:2px}
+  .sos-doc-img{width:100%;max-height:200px;object-fit:contain;border-radius:8px;margin-top:8px;border:1px solid rgba(255,255,255,.1)}
+  .tz-badge{display:inline-block;font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(99,102,241,.12);color:#a5b4fc;font-weight:600;margin-left:4px}
+  .transport-detail{margin-top:3px;font-size:9px;color:#818CF8;line-height:1.5}
   .phrase-lang-tabs{display:flex;gap:6px;margin-bottom:14px}.phrase-lang-tab{flex:1;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#64748b;font-size:12px;font-weight:700;cursor:pointer;text-align:center;font-family:inherit;transition:all .15s}.phrase-lang-tab.active{background:rgba(232,114,90,.15);color:#E8725A;border-color:rgba(232,114,90,.4)}
   .phrase-section{margin-bottom:16px}.phrase-section-title{font-size:12px;font-weight:700;color:#f1f5f9;margin-bottom:8px;display:flex;align-items:center;gap:6px}
   .phrase-card{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);margin-bottom:5px;cursor:pointer;transition:background .15s}.phrase-card:hover{background:rgba(255,255,255,.06)}
@@ -265,12 +284,14 @@
 </div>
 <div class="weather-bar" id="weatherBar"></div>
 <div class="view-tabs">
+  <button class="view-tab" onclick="switchView('dashboard')">🏠</button>
   <button class="view-tab active" onclick="switchView('timeline')">📋 일정</button>
   <button class="view-tab" onclick="switchView('map')">🗺️ 지도</button>
   <button class="view-tab" onclick="switchView('route')">🧭 동선</button>
   <button class="view-tab" onclick="switchView('budget')">💰 예산</button>
   <button class="view-tab" onclick="switchView('prep')">📋 준비</button>
   <button class="view-tab" onclick="switchView('phrase')">🗣️ 회화</button>
+  <button class="view-tab" onclick="switchView('sos')">🆘</button>
 </div>
 <div class="day-selector" id="daySelector"></div>
 <div class="edit-toolbar" id="editToolbar">
@@ -283,6 +304,7 @@
   <button class="toolbar-btn btn-import" onclick="document.getElementById('importInput').click()">📂</button>
   <input type="file" id="importInput" accept=".json" onchange="importData(event)">
 </div>
+<div class="prep-container" id="dashboardView"></div>
 <div id="timelineView">
   <div class="day-header" id="dayHeader"></div>
   <div class="filters" id="filters"></div>
@@ -299,6 +321,7 @@
 <div class="budget-container" id="budgetView"></div>
 <div class="prep-container" id="prepView"></div>
 <div class="prep-container" id="phraseView"></div>
+<div class="prep-container" id="sosView"></div>
 <div class="tips" id="tipsSection">
   <div class="tips-title">💡 여행 꿀팁</div>
   <div class="tips-body">
@@ -447,7 +470,7 @@ function saveToLocal(){saveToLocalOnly();syncToRemote()}
 function loadFromLocal(){try{const d=localStorage.getItem('travel_planner_days');if(d)DAYS=JSON.parse(d)}catch(e){}}
 
 // ══════════ VIEW ══════════
-function switchView(v){currentView=v;document.querySelectorAll('.view-tab').forEach((t,i)=>t.classList.toggle('active',['timeline','map','route','budget','prep','phrase'][i]===v));document.getElementById('timelineView').style.display=v==='timeline'?'':'none';document.getElementById('mapView').classList.toggle('visible',v==='map');document.getElementById('routeView').classList.toggle('visible',v==='route');document.getElementById('budgetView').classList.toggle('visible',v==='budget');document.getElementById('prepView').classList.toggle('visible',v==='prep');document.getElementById('phraseView').classList.toggle('visible',v==='phrase');document.getElementById('tipsSection').style.display=v==='timeline'?'':'none';document.getElementById('editToolbar').style.display=v==='timeline'?'':'none';document.getElementById('daySelector').style.display=v==='route'||v==='budget'||v==='prep'||v==='phrase'?'none':'';if(v==='map')setTimeout(()=>{if(!map)initMap();else map.invalidateSize();updateMap()},100);if(v==='route')renderRouteView();if(v==='budget')renderBudgetView();if(v==='prep')renderPrepView();if(v==='phrase')renderPhraseView()}
+function switchView(v){currentView=v;const views=['dashboard','timeline','map','route','budget','prep','phrase','sos'];document.querySelectorAll('.view-tab').forEach((t,i)=>t.classList.toggle('active',views[i]===v));document.getElementById('dashboardView').classList.toggle('visible',v==='dashboard');document.getElementById('timelineView').style.display=v==='timeline'?'':'none';document.getElementById('mapView').classList.toggle('visible',v==='map');document.getElementById('routeView').classList.toggle('visible',v==='route');document.getElementById('budgetView').classList.toggle('visible',v==='budget');document.getElementById('prepView').classList.toggle('visible',v==='prep');document.getElementById('phraseView').classList.toggle('visible',v==='phrase');document.getElementById('sosView').classList.toggle('visible',v==='sos');document.getElementById('tipsSection').style.display=v==='timeline'?'':'none';document.getElementById('editToolbar').style.display=v==='timeline'?'':'none';document.getElementById('daySelector').style.display=v==='dashboard'||v==='route'||v==='budget'||v==='prep'||v==='phrase'||v==='sos'?'none':'';if(v==='map')setTimeout(()=>{if(!map)initMap();else map.invalidateSize();updateMap()},100);if(v==='dashboard')renderDashboard();if(v==='route')renderRouteView();if(v==='budget')renderBudgetView();if(v==='prep')renderPrepView();if(v==='phrase')renderPhraseView();if(v==='sos')renderSOSView()}
 
 // ══════════ EDIT MODE ══════════
 function toggleEdit(){editMode=!editMode;document.body.classList.toggle('edit-mode',editMode);document.getElementById('editModeBar').classList.toggle('visible',editMode);['addBtn','addDayBtn','delDayBtn'].forEach(id=>document.getElementById(id).style.display=editMode?'':'none');document.getElementById('addItemRow').classList.toggle('visible',editMode);const btn=document.getElementById('toggleEditBtn');btn.textContent=editMode?'✅ 완료':'✏️ 편집';btn.classList.toggle('active',editMode);if(!editMode&&pendingRemoteData){DAYS=pendingRemoteData.days;saveToLocalOnly();pendingRemoteData=null;if(currentDay>=DAYS.length)currentDay=DAYS.length-1;showToast('보류된 변경 반영')}renderDayContent();if(!editMode)showToast('편집 완료')}
@@ -459,7 +482,8 @@ function renderDayContent(){const day=DAYS[currentDay];const filtered=currentFil
 const dayCost=day.schedule.reduce((s,i)=>s+(i.cost||0),0);const checkedCount=day.schedule.filter(i=>i.checked).length;
 // header
 const weatherMatch=day.region.includes('바르셀로나')||day.region.includes('한국→')||day.region.includes('라로카')?WEATHER_DATA[0]:day.region.includes('포르투')||day.region.includes('도우로')||day.region.includes('마투지')||day.region.includes('아베이루')?WEATHER_DATA[1]:day.region.includes('마요르카')||day.region.includes('발데모사')||day.region.includes('소예르')||day.region.includes('팔마')?WEATHER_DATA[2]:null;
-document.getElementById('dayHeader').innerHTML=`<div class="day-header-top"><div class="day-badge" style="background:${day.color}18;border:2px solid ${day.color};color:${day.color}">D${currentDay+1}</div><div><div class="day-region">${esc(day.region)}</div><div class="day-date-sub">${day.date} · ${day.schedule.length}개 일정 · ${checkedCount}/${day.schedule.length} 완료</div>${weatherMatch?`<div class="day-weather">${weatherMatch.icon} ${weatherMatch.temp} ${weatherMatch.desc}</div>`:''}</div></div>${day.hotel!=='—'?`<div class="hotel-box" onclick="${editMode?'openHotelModal()':''}">🏨 ${esc(day.hotel)}${editMode?' <span style="color:#fbbf24;font-size:9px">✏️</span>':''}</div>`:''}${dayCost?`<div class="day-budget"><span>💰 이 날 예상 비용</span><strong>${fmt(dayCost)}</strong></div>`:''}`;
+const tz=getDayTZ(currentDay);const tzLabel=tz==='WEST'?'포르투갈 UTC+1':'스페인 UTC+2';const tzDiff=tz==='WEST'?'+8h':'+7h';
+document.getElementById('dayHeader').innerHTML=`<div class="day-header-top"><div class="day-badge" style="background:${day.color}18;border:2px solid ${day.color};color:${day.color}">D${currentDay+1}</div><div><div class="day-region">${esc(day.region)}</div><div class="day-date-sub">${day.date} · ${day.schedule.length}개 일정 · ${checkedCount}/${day.schedule.length} 완료</div>${weatherMatch?`<div class="day-weather">${weatherMatch.icon} ${weatherMatch.temp} ${weatherMatch.desc}</div>`:''}<div style="font-size:9px;color:#818CF8;margin-top:1px">🕐 ${tzLabel} (한국과 ${tzDiff})</div></div></div>${day.hotel!=='—'?`<div class="hotel-box" onclick="${editMode?'openHotelModal()':''}">🏨 ${esc(day.hotel)}${editMode?' <span style="color:#fbbf24;font-size:9px">✏️</span>':''}</div>`:''}${dayCost?`<div class="day-budget"><span>💰 이 날 예상 비용</span><strong>${fmt(dayCost)}</strong></div>`:''}`;
 // filters
 const filters=[{key:'all',label:'전체'},{key:'spot',label:'📍 관광'},{key:'food',label:'🍴 맛집'},{key:'shopping',label:'🛍️ 쇼핑'},{key:'flight',label:'✈️ 이동'},{key:'hotel',label:'🏨 숙소'}];
 document.getElementById('filters').innerHTML=filters.map(f=>`<button class="filter-btn ${f.key===currentFilter?'active':''}" onclick="setFilter('${f.key}')" style="${f.key===currentFilter?`border-color:${day.color};background:${day.color}18;color:${day.color}`:''}">${f.label}</button>`).join('');
@@ -473,7 +497,13 @@ const photosHtml=item.photos&&item.photos.length?`<div class="card-photos">${ite
 const editClick=editMode?`onclick="openEditModal(${item._idx})"`:'';const editHint=editMode?'<span class="edit-indicator">✏️</span>':'';const delBtn=editMode?`<button onclick="event.stopPropagation();deleteItem(${item._idx})" style="position:absolute;top:5px;right:24px;width:18px;height:18px;border-radius:5px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.25);color:#f87171;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>`:'';const dragHandle=editMode?`<div class="drag-handle" data-idx="${item._idx}">⠿</div>`:'';const moveBtns=editMode?`<div class="move-btns"><button class="move-btn" onclick="event.stopPropagation();moveItem(${item._idx},-1)" title="위로">▲</button><button class="move-btn" onclick="event.stopPropagation();moveItem(${item._idx},1)" title="아래로">▼</button></div>`:'';const ctxTrigger=editMode?`oncontextmenu="showContextMenu(event,${currentDay},${item._idx})"`:'';
 // Travel time connector
 let connector='';if(i>0&&filtered[i-1].coords&&item.coords){const c1=filtered[i-1].coords,c2=item.coords;const sd=haversine(c1[0],c1[1],c2[0],c2[1]);const prof=sd<1.5?'foot':'car';const ck=c1.join(',')+'>'+c2.join(',')+':'+prof;const cached=travelTimeCache.get(ck);if(cached){const icon=cached.profile==='foot'?'🚶':'🚗';const mins=Math.round(cached.dur/60);const distTxt=cached.dist<1000?(cached.dist).toFixed(0)+'m':(cached.dist/1000).toFixed(1)+'km';connector=`<div class="travel-time-connector"><span class="tt-icon">${icon}</span><span class="tt-text">${mins}분 · ${distTxt}</span></div>`}else{connector=`<div class="travel-time-connector" id="tt-${currentDay}-${i}"></div>`}}
-return`${connector}<div class="timeline-item" data-idx="${item._idx}">${dragHandle}<div class="timeline-left"><div class="timeline-time">${item.time}</div><div class="timeline-dot" style="background:${t.dot};box-shadow:0 0 6px ${t.dot}44"></div>${!isLast?`<div class="timeline-line" style="background:linear-gradient(to bottom,${t.dot}44,transparent)"></div>`:''}</div><div class="timeline-card ${checkedClass}" style="background:${t.bg};border-color:${t.border}" ${editClick} ${ctxTrigger}>${editHint}${delBtn}${moveBtns}<div class="card-top"><button class="card-checkbox ${checked}" onclick="event.stopPropagation();toggleCheck(${item._idx})">${item.checked?'✓':''}</button><div class="card-body"><div class="card-title">${esc(item.title)}</div><div class="card-desc">${esc(item.desc)}</div><div class="card-meta">${meta}</div>${memoHtml}${ratingHtml}${reviewHtml}${photosHtml}</div></div></div></div>`}).join('');
+// Timezone badge for flights
+const dayTZ=getDayTZ(currentDay);let tzBadge='';
+if(item.type==='flight'&&item.time!=='—'){const krTime=getLocalTimeStr(item.time,dayTZ,'KST');if(krTime)tzBadge=`<span class="tz-badge">🇰🇷 ${krTime}</span>`}
+// Transport details
+let transportHtml='';
+if(item.type==='move'||item.type==='flight'){const titleKey=Object.keys(TRANSPORT_DETAILS).find(k=>item.title.includes(k)||item.desc.includes(k));if(titleKey){const td=TRANSPORT_DETAILS[titleKey];transportHtml=`<div class="transport-detail">${td.routes?'🚏 '+td.routes.join(' / '):''}${td.fare?' · 💶 '+td.fare:''}${td.interval?' · ⏱ '+td.interval:''}${td.taxi?'<br>🚕 택시: '+td.taxi:''}</div>`}}
+return`${connector}<div class="timeline-item" data-idx="${item._idx}">${dragHandle}<div class="timeline-left"><div class="timeline-time">${item.time}${tzBadge}</div><div class="timeline-dot" style="background:${t.dot};box-shadow:0 0 6px ${t.dot}44"></div>${!isLast?`<div class="timeline-line" style="background:linear-gradient(to bottom,${t.dot}44,transparent)"></div>`:''}</div><div class="timeline-card ${checkedClass}" style="background:${t.bg};border-color:${t.border}" ${editClick} ${ctxTrigger}>${editHint}${delBtn}${moveBtns}<div class="card-top"><button class="card-checkbox ${checked}" onclick="event.stopPropagation();toggleCheck(${item._idx})">${item.checked?'✓':''}</button><div class="card-body"><div class="card-title">${esc(item.title)}</div><div class="card-desc">${esc(item.desc)}</div>${transportHtml}<div class="card-meta">${meta}</div>${memoHtml}${ratingHtml}${reviewHtml}${photosHtml}</div></div></div></div>`}).join('');
 // Fetch travel times async for current day
 fetchTravelTimes(filtered)}
 
@@ -730,8 +760,83 @@ cats.forEach(cat=>{const items=list[cat]||[];if(!items.length)return;html+=`<div
 html+=`<div class="packing-add-row"><input class="packing-add-input" id="packing-new-item" placeholder="새 아이템"><select class="packing-add-cat" id="packing-new-cat">${catOptions}</select><button class="packing-add-btn" onclick="addPackingItem()">+ 추가</button></div>`;
 return html}
 
+// ══════════ DASHBOARD ══════════
+function renderDashboard(){const el=document.getElementById('dashboardView');
+const now=new Date();now.setHours(0,0,0,0);
+let ddayText='',ddayColor='#F5A623';
+if(now<TRIP_START){const d=Math.ceil((TRIP_START-now)/864e5);ddayText=`D-${d}`;ddayColor='#F5A623'}
+else if(now<=TRIP_END){const d=Math.floor((now-TRIP_START)/864e5)+1;ddayText=`DAY ${d}`;ddayColor='#10B981'}
+else{ddayText='여행 완료!';ddayColor='#c4b5fd'}
+let unbooked=0,totalItems=0;
+DAYS.forEach(day=>day.schedule.forEach(item=>{totalItems++;if(item.status==='unbooked'||(item.warn&&/예약|확인|필수|권장/.test(item.warn)&&!item.status))unbooked++}));
+const packing=loadPackingList();const packTotal=Object.values(packing).reduce((s,a)=>s+a.length,0);const packDone=Object.values(packing).reduce((s,a)=>s+a.filter(i=>i.checked).length,0);const packPct=packTotal?Math.round(packDone/packTotal*100):0;
+let totalBudget=0,totalSpent=0;
+DAYS.forEach(day=>{day.schedule.forEach(i=>{if(i.cost)totalBudget+=i.cost});(day.expenses||[]).forEach(e=>{totalSpent+=expenseToKRW(e)})});
+const checked=DAYS.reduce((s,d)=>s+d.schedule.filter(i=>i.checked).length,0);const checkPct=totalItems?Math.round(checked/totalItems*100):0;
+let todayHtml='';const tripDayIdx=Math.floor((now-TRIP_START)/864e5);
+if(tripDayIdx>=0&&tripDayIdx<DAYS.length){const today=DAYS[tripDayIdx];
+todayHtml=`<div class="dash-today"><div class="dash-today-title">📍 오늘의 일정 — DAY ${tripDayIdx+1} ${esc(today.region)}</div>${today.schedule.map(item=>{const t=TYPE_STYLES[item.type]||TYPE_STYLES.etc;return`<div class="dash-today-item"><div class="dash-today-time">${item.time}</div><div class="dash-today-dot" style="background:${t.dot}"></div><div class="dash-today-content"><strong>${esc(item.title)}</strong></div></div>`}).join('')}</div>`}
+else if(now<TRIP_START){const first=DAYS[0];todayHtml=`<div class="dash-today"><div class="dash-today-title">✈️ 첫날 일정 미리보기 — ${esc(first.region)}</div>${first.schedule.slice(0,5).map(item=>{const t=TYPE_STYLES[item.type]||TYPE_STYLES.etc;return`<div class="dash-today-item"><div class="dash-today-time">${item.time}</div><div class="dash-today-dot" style="background:${t.dot}"></div><div class="dash-today-content"><strong>${esc(item.title)}</strong></div></div>`}).join('')}${first.schedule.length>5?`<div style="font-size:10px;color:#64748b;text-align:center;padding:4px">외 ${first.schedule.length-5}건...</div>`:''}</div>`}
+let warnHtml='';
+if(unbooked>0){const warns=[];DAYS.forEach((day,di)=>day.schedule.forEach(item=>{if(item.status==='unbooked'||(item.warn&&/예약|확인|필수|권장/.test(item.warn)&&!item.status))warns.push({di,item})}));
+warnHtml=`<div class="dash-warn-list"><div style="font-size:11px;font-weight:700;color:#f87171;margin-bottom:6px">⚠️ 예약 필요 항목</div>${warns.slice(0,8).map(w=>`<div class="dash-warn" onclick="selectDay(${w.di});switchView('timeline')">D${w.di+1} · ${esc(w.item.title)}${w.item.warn?' — '+esc(w.item.warn):''}</div>`).join('')}</div>`}
+el.innerHTML=`<div class="prep-title" style="text-align:center;margin-bottom:6px">🇪🇸 스페인 · 포르투갈 신혼여행</div>
+<div style="text-align:center;margin-bottom:16px"><span style="font-size:36px;font-weight:800;color:${ddayColor}">${ddayText}</span><div style="font-size:10px;color:#64748b;margin-top:4px">2026.09.13 — 09.26 · 14일</div></div>
+<div class="dash-grid">
+<div class="dash-card" onclick="switchView('prep')"><div class="dash-card-icon">⚠️</div><div class="dash-card-value" style="color:${unbooked>0?'#f87171':'#34d399'}">${unbooked}</div><div class="dash-card-label">미예약 항목</div></div>
+<div class="dash-card" onclick="switchView('prep')"><div class="dash-card-icon">🧳</div><div class="dash-card-value">${packPct}%</div><div class="dash-card-label">패킹 진행률</div><div class="dash-progress"><div class="dash-progress-fill" style="width:${packPct}%;background:${packPct>=100?'#10B981':packPct>=50?'#F5A623':'#EF4444'}"></div></div></div>
+<div class="dash-card" onclick="switchView('budget')"><div class="dash-card-icon">💰</div><div class="dash-card-value" style="font-size:16px">${(totalBudget/10000).toFixed(0)}만</div><div class="dash-card-label">총 예산${totalSpent?` · 지출 ${(totalSpent/10000).toFixed(0)}만`:''}</div></div>
+<div class="dash-card" onclick="switchView('timeline')"><div class="dash-card-icon">✅</div><div class="dash-card-value">${checkPct}%</div><div class="dash-card-label">일정 완료 (${checked}/${totalItems})</div><div class="dash-progress"><div class="dash-progress-fill" style="width:${checkPct}%;background:#10B981"></div></div></div>
+</div>${todayHtml}${warnHtml}`}
+
+// ══════════ SOS / EMERGENCY ══════════
+const SOS_CONTACTS=[
+{icon:'🏛️',title:'주스페인 한국대사관',sub:'마드리드 | 월-금 09:00-18:00',tel:'+34913532000',bg:'rgba(59,130,246,.1)',border:'rgba(59,130,246,.25)',btnBg:'rgba(59,130,246,.2)',btnColor:'#60a5fa'},
+{icon:'🏛️',title:'주포르투갈 한국대사관',sub:'리스본 | 월-금 09:00-18:00',tel:'+351217937200',bg:'rgba(59,130,246,.1)',border:'rgba(59,130,246,.25)',btnBg:'rgba(59,130,246,.2)',btnColor:'#60a5fa'},
+{icon:'🚔',title:'스페인 경찰 (Policía)',sub:'범죄/도난 신고',tel:'112',bg:'rgba(239,68,68,.08)',border:'rgba(239,68,68,.2)',btnBg:'rgba(239,68,68,.2)',btnColor:'#f87171'},
+{icon:'🚑',title:'유럽 공통 긴급번호',sub:'경찰/소방/구급 통합',tel:'112',bg:'rgba(239,68,68,.08)',border:'rgba(239,68,68,.2)',btnBg:'rgba(239,68,68,.2)',btnColor:'#f87171'},
+{icon:'🏥',title:'관광객 전용 핫라인 (스페인)',sub:'Tourist Helpline (영어 가능)',tel:'902102112',bg:'rgba(16,185,129,.08)',border:'rgba(16,185,129,.2)',btnBg:'rgba(16,185,129,.2)',btnColor:'#34d399'},
+{icon:'💳',title:'카드 분실 신고',sub:'비자: 800-811-1121 / 마스터: 900-971-231',tel:'800811121',bg:'rgba(245,166,35,.08)',border:'rgba(245,166,35,.2)',btnBg:'rgba(245,166,35,.2)',btnColor:'#F5A623'},
+{icon:'🛡️',title:'여행자보험 콜센터',sub:'보험사 연락처를 저장하세요',tel:'',bg:'rgba(139,92,246,.08)',border:'rgba(139,92,246,.2)',btnBg:'rgba(139,92,246,.2)',btnColor:'#c4b5fd'}];
+function renderSOSView(){const el=document.getElementById('sosView');
+const docPhotos=JSON.parse(localStorage.getItem('sos_doc_photos')||'{}');
+const contacts=SOS_CONTACTS.map(c=>`<div class="sos-card" style="background:${c.bg};border:1px solid ${c.border}"><div class="sos-card-icon">${c.icon}</div><div class="sos-card-body"><div class="sos-card-title">${c.title}</div><div class="sos-card-sub">${c.sub}</div></div>${c.tel?`<a class="sos-call" href="tel:${c.tel}" style="background:${c.btnBg};color:${c.btnColor}" onclick="event.stopPropagation()">📞 전화</a>`:''}</div>`).join('');
+const docs=[{key:'passport',title:'여권 사본',icon:'🛂'},{key:'insurance',title:'여행자보험 증서',icon:'🛡️'},{key:'flight',title:'항공권 확인서',icon:'✈️'},{key:'hotel',title:'호텔 바우처',icon:'🏨'}];
+const docsHtml=docs.map(d=>{const photo=docPhotos[d.key];return`<div class="sos-doc-card"><div class="sos-doc-title">${d.icon} ${d.title}</div>${photo?`<img class="sos-doc-img" src="${esc(photo)}" onclick="openPhotoModal('${esc(photo)}')" onerror="this.style.display='none'"><div class="sos-doc-sub" style="margin-top:4px"><button onclick="removeDocPhoto('${d.key}')" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);color:#f87171;padding:3px 8px;border-radius:6px;font-size:9px;cursor:pointer;font-family:inherit">삭제</button></div>`:`<div class="sos-doc-sub">사진 URL을 입력하세요</div><div style="display:flex;gap:4px;margin-top:6px"><input class="field-input" id="doc-url-${d.key}" placeholder="https://..." style="font-size:10px;padding:6px 8px"><button onclick="saveDocPhoto('${d.key}')" style="padding:6px 10px;border-radius:8px;border:none;background:rgba(16,185,129,.15);color:#34d399;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">저장</button></div>`}</div>`}).join('');
+el.innerHTML=`<div class="prep-title">🆘 긴급 연락처 & SOS</div><div style="padding:10px 14px;border-radius:10px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);margin-bottom:14px;font-size:11px;color:#f87171;text-align:center;font-weight:600">유럽 통합 긴급번호: <a href="tel:112" style="color:#f87171;font-size:16px;font-weight:800">112</a></div>${contacts}<div class="sos-section" style="margin-top:16px;border-top:1px solid rgba(255,255,255,.06);padding-top:16px"><div class="sos-section-title">📄 중요 서류 사본</div><div style="font-size:10px;color:#64748b;margin-bottom:10px">사진 URL을 저장하면 오프라인에서도 확인할 수 있습니다</div>${docsHtml}</div>`}
+function saveDocPhoto(key){const input=document.getElementById('doc-url-'+key);const url=input?.value?.trim();if(!url){showToast('URL을 입력하세요');return}const docs=JSON.parse(localStorage.getItem('sos_doc_photos')||'{}');docs[key]=url;localStorage.setItem('sos_doc_photos',JSON.stringify(docs));renderSOSView();showToast('저장 완료')}
+function removeDocPhoto(key){const docs=JSON.parse(localStorage.getItem('sos_doc_photos')||'{}');delete docs[key];localStorage.setItem('sos_doc_photos',JSON.stringify(docs));renderSOSView();showToast('삭제 완료')}
+
+// ══════════ TIMEZONE ══════════
+const TZ_OFFSETS={KST:9,CET:2,WEST:1};
+function getLocalTimeStr(time,fromTZ,toTZ){if(!time||time==='—')return'';const parts=time.match(/(\d{1,2}):(\d{2})/);if(!parts)return'';let h=parseInt(parts[1]),m=parseInt(parts[2]);h=h-TZ_OFFSETS[fromTZ]+TZ_OFFSETS[toTZ];if(h<0)h+=24;if(h>=24)h-=24;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')}
+function getDayTZ(dayIdx){const r=DAYS[dayIdx]?.region||'';if(r.includes('포르투')||r.includes('도우로')||r.includes('마투지')||r.includes('아베이루'))return'WEST';return'CET'}
+
+// ══════════ WEATHER API ══════════
+const OWM_KEY='';
+const CITY_COORDS={barcelona:{lat:41.39,lon:2.17},porto:{lat:41.15,lon:-8.61},mallorca:{lat:39.57,lon:2.65}};
+let weatherCache2={};
+function fetchLiveWeather(){if(!OWM_KEY){renderWeather();return}
+Object.entries(CITY_COORDS).forEach(([city,{lat,lon}])=>{fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${OWM_KEY}&units=metric&lang=kr`).then(r=>r.json()).then(data=>{if(data.list){weatherCache2[city]=data.list;renderLiveWeather()}}).catch(()=>{})})}
+function renderLiveWeather(){if(!Object.keys(weatherCache2).length){renderWeather();return}
+const icons={'01':'☀️','02':'🌤️','03':'⛅','04':'☁️','09':'🌧️','10':'🌦️','11':'⛈️','13':'🌨️','50':'🌫️'};
+const cityNames={barcelona:'바르셀로나',porto:'포르투',mallorca:'마요르카'};
+document.getElementById('weatherBar').innerHTML=Object.entries(weatherCache2).map(([city,list])=>{const today=list[0];const iconCode=today.weather[0].icon.slice(0,2);const temp=`${Math.round(today.main.temp_min)}~${Math.round(today.main.temp_max)}°C`;
+return`<div class="weather-card"><div class="weather-city">${cityNames[city]||city}</div><div class="weather-icon">${icons[iconCode]||'🌡️'}</div><div class="weather-temp">${temp}</div><div class="weather-desc">${today.weather[0].description}</div></div>`}).join('')}
+
+// ══════════ TRANSPORT DETAILS ══════════
+const TRANSPORT_DETAILS={
+'공항→호텔':{routes:['A2 공항버스 → V13 환승'],fare:'€6.75',interval:'5~10분',taxi:'€35~45 (약 30분)'},
+'공항 이동':{routes:['L9 지하철 → 엘프라트 공항'],fare:'€5.15 (알단테)',interval:'7분',taxi:'€40~50'},
+'몬주익 이동':{routes:['L1/L3 지하철 → 텔레페릭'],fare:'€2.40+€13.50',interval:'5분',taxi:'€10~15'},
+'라로카빌리지':{routes:['Shopping Express 셔틀'],fare:'€20 왕복',interval:'사전예약',taxi:'€100~120'},
+'팔마 이동':{routes:['TIB 401/412 버스'],fare:'€8~10',interval:'30분',taxi:'€80~100'},
+'소예르 트램':{routes:['소예르 트램 (Port de Soller)'],fare:'€7',interval:'30분'},
+'아베이루 이동':{routes:['CP 기차 (상벤투→아베이루)'],fare:'€3.55',interval:'1시간'},
+'투어 출발':{routes:['GetYourGuide 픽업'],fare:'투어 포함',interval:'09:00 출발'}};
+
 // ══════════ INIT ══════════
-migrateStatus(DAYS);loadFromLocal();migrateStatus(DAYS);render();updateDDay();renderWeather();initFirebase();fetchExchangeRate();restoreLightMode();
+migrateStatus(DAYS);loadFromLocal();migrateStatus(DAYS);render();updateDDay();fetchLiveWeather();initFirebase();fetchExchangeRate();restoreLightMode();
 document.addEventListener('click',hideContextMenu);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSearch();hideContextMenu()}});
 // 모바일 롱프레스 핸들러
