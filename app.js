@@ -84,6 +84,13 @@ document.getElementById('dayHeader').innerHTML=`<div class="day-header-top"><div
 // filters
 const filters=[{key:'all',label:'전체'},{key:'spot',label:'📍 관광'},{key:'food',label:'🍴 맛집'},{key:'shopping',label:'🛍️ 쇼핑'},{key:'flight',label:'✈️ 이동'},{key:'hotel',label:'🏨 숙소'}];
 document.getElementById('filters').innerHTML=filters.map(f=>`<button class="filter-btn ${f.key===currentFilter?'active':''}" onclick="setFilter('${f.key}')" style="${f.key===currentFilter?`border-color:${day.color};background:${day.color}18;color:${day.color}`:''}">${f.label}</button>`).join('');
+// Time conflict detection
+const conflicts=detectConflicts(day.schedule);
+if(conflicts.length){const conflictHtml=conflicts.map(c=>`<div class="conflict-warn"><span class="conflict-icon">⚠️</span> <strong>${c.time}</strong> 시간 충돌: ${esc(c.title1)} / ${esc(c.title2)}</div>`).join('');
+document.getElementById('timeline').insertAdjacentHTML?void 0:0;
+const conflictBar=document.getElementById('conflictBar');if(conflictBar)conflictBar.innerHTML=conflictHtml;
+else{const cb=document.createElement('div');cb.id='conflictBar';cb.className='conflict-bar';cb.innerHTML=conflictHtml;document.getElementById('filters').after(cb)}}
+else{const cb=document.getElementById('conflictBar');if(cb)cb.remove()}
 if(!filtered.length){document.getElementById('timeline').innerHTML='<div style="text-align:center;padding:40px;color:#475569;font-size:12px">일정이 없습니다</div>';return}
 document.getElementById('timeline').innerHTML=filtered.map((item,i)=>{const t=TYPE_STYLES[item.type]||TYPE_STYLES.etc;const isLast=i===filtered.length-1;const checked=item.checked?'checked':'';const checkedClass=item.checked?'checked-item':'';
 let meta='';if(item.status&&STATUS_LABELS[item.status])meta+=`<span class="status-badge ${STATUS_CSS[item.status]}">${STATUS_LABELS[item.status]}</span>`;else if(item.confirmed)meta+='<span class="status-badge status-confirmed">✅ 확정</span>';if(item.warn)meta+=`<div class="card-warn">⚠️ ${esc(item.warn)}</div>`;if(item.cost)meta+=`<span class="card-cost">${fmt(item.cost)}</span>`;if(item.url)meta+=`<a class="card-link" href="${esc(item.url)}" target="_blank" onclick="event.stopPropagation()">🔗 예약</a>`;if(item.bookingUrl)meta+=`<a class="card-link" href="${esc(item.bookingUrl)}" target="_blank" onclick="event.stopPropagation()" style="background:rgba(139,92,246,.1);color:#c4b5fd">📄 바우처</a>`;if(item.coords)meta+=`<a class="card-gmaps" href="${gmapsUrl(item.coords)}" target="_blank" onclick="event.stopPropagation()">📍 지도</a>`;
@@ -115,7 +122,9 @@ function toggleCheck(idx){DAYS[currentDay].schedule[idx].checked=!DAYS[currentDa
 function initMap(){map=L.map('map',{zoomControl:true,attributionControl:false}).setView([41.3851,2.1734],13);L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);map.on('click',function(e){if(!editMode)return;const lat=e.latlng.lat.toFixed(6),lng=e.latlng.lng.toFixed(6);L.popup().setLatLng(e.latlng).setContent(`<div style="text-align:center"><div style="font-size:10px;color:#94a3b8;margin-bottom:4px">${lat}, ${lng}</div><button onclick="openAddModalWithCoords(${lat},${lng})" style="padding:5px 14px;border-radius:8px;border:none;background:rgba(16,185,129,.2);color:#34d399;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">+ 일정 추가</button></div>`).openOn(map)})}
 function setMapMode(m){mapMode=m;document.getElementById('mapDayToggle').classList.toggle('active',m==='day');document.getElementById('mapAllToggle').classList.toggle('active',m==='all');document.getElementById('daySelector').style.display=m==='all'?'none':'';updateMap()}
 function updateMap(){if(!map)return;mapMarkers.forEach(m=>map.removeLayer(m));mapMarkers=[];mapRoutes.forEach(r=>map.removeLayer(r));mapRoutes=[];
-if(mapMode==='day'){const day=DAYS[currentDay];const coords=[];let num=1;day.schedule.forEach(item=>{if(!item.coords)return;const[lat,lng]=item.coords;coords.push([lat,lng]);const t=TYPE_STYLES[item.type]||TYPE_STYLES.etc;const icon=L.divIcon({className:'',html:`<div class="custom-marker" style="background:${t.dot}">${num}</div>`,iconSize:[26,26],iconAnchor:[13,13]});const mk=L.marker([lat,lng],{icon}).bindPopup(`<strong>${esc(item.title)}</strong><div class="popup-type">${t.label}</div><div class="popup-time">${item.time!=='—'?item.time:''}</div><div style="margin-top:3px;color:#94a3b8;font-size:10px;white-space:pre-line">${esc(item.desc)}</div>${item.coords?`<a href="${gmapsUrl(item.coords)}" target="_blank" style="color:#60a5fa;font-size:10px">Google Maps 열기</a>`:''}`,{maxWidth:230}).addTo(map);mapMarkers.push(mk);num++});if(coords.length>=2){const route=L.polyline(coords,{color:day.color,weight:3,opacity:.7,dashArray:'8,8'}).addTo(map);mapRoutes.push(route)}if(coords.length)map.fitBounds(L.latLngBounds(coords),{padding:[40,40],maxZoom:15});document.getElementById('mapDayInfo').innerHTML=`<strong>DAY ${currentDay+1} — ${day.date}</strong><br><span style="color:#94a3b8">${esc(day.region)}</span><br><span style="color:${day.color}">📍 ${coords.length}곳</span>`
+if(mapMode==='day'){const day=DAYS[currentDay];const coords=[];let num=1;day.schedule.forEach(item=>{if(!item.coords)return;const[lat,lng]=item.coords;coords.push([lat,lng]);const t=TYPE_STYLES[item.type]||TYPE_STYLES.etc;const icon=L.divIcon({className:'',html:`<div class="custom-marker" style="background:${t.dot}">${num}</div>`,iconSize:[26,26],iconAnchor:[13,13]});const mk=L.marker([lat,lng],{icon}).bindPopup(`<strong>${esc(item.title)}</strong><div class="popup-type">${t.label}</div><div class="popup-time">${item.time!=='—'?item.time:''}</div><div style="margin-top:3px;color:#94a3b8;font-size:10px;white-space:pre-line">${esc(item.desc)}</div>${item.coords?`<a href="${gmapsUrl(item.coords)}" target="_blank" style="color:#60a5fa;font-size:10px">Google Maps 열기</a>`:''}`,{maxWidth:230}).addTo(map);mapMarkers.push(mk);num++});if(coords.length>=2){// Show dashed line immediately, then overlay real route
+const dashed=L.polyline(coords,{color:day.color,weight:2,opacity:.3,dashArray:'8,8'}).addTo(map);mapRoutes.push(dashed);
+fetchRealRoute(coords,day.color,geom=>{if(geom.length){const real=L.polyline(geom,{color:day.color,weight:4,opacity:.8}).addTo(map);mapRoutes.push(real)}})}if(coords.length)map.fitBounds(L.latLngBounds(coords),{padding:[40,40],maxZoom:15});document.getElementById('mapDayInfo').innerHTML=`<strong>DAY ${currentDay+1} — ${day.date}</strong><br><span style="color:#94a3b8">${esc(day.region)}</span><br><span style="color:${day.color}">📍 ${coords.length}곳</span>`
 }else{// all days
 const allCoords=[];const DAY_COLORS=['#E8725A','#E8725A','#E8725A','#2E86AB','#2E86AB','#2E86AB','#2E86AB','#F5A623','#F5A623','#F5A623','#F5A623','#E8725A','#888','#888'];
 DAYS.forEach((day,di)=>{const coords=[];day.schedule.forEach(item=>{if(!item.coords)return;const[lat,lng]=item.coords;coords.push([lat,lng]);allCoords.push([lat,lng])});if(coords.length>=2){const route=L.polyline(coords,{color:day.color,weight:2.5,opacity:.5,dashArray:'6,6'}).addTo(map);mapRoutes.push(route)}if(coords.length){const first=coords[0];const icon=L.divIcon({className:'',html:`<div class="custom-marker" style="background:${day.color};font-size:9px">D${di+1}</div>`,iconSize:[26,26],iconAnchor:[13,13]});const mk=L.marker(first,{icon}).bindPopup(`<strong>DAY ${di+1}</strong><br>${esc(day.region)}<br><span style="color:#64748b">${day.date}</span>`).addTo(map);mapMarkers.push(mk)}});if(allCoords.length)map.fitBounds(L.latLngBounds(allCoords),{padding:[30,30],maxZoom:8});document.getElementById('mapDayInfo').innerHTML=`<strong>전체 여정</strong><br><span style="color:#94a3b8">14일 · 3개국</span>`}}
@@ -169,7 +178,7 @@ const overDays=dayCosts.filter(d=>d.actual>d.plan&&d.plan>0);
 const overWarnHtml=overDays.length?`<div class="budget-over-warn">⚠️ ${overDays.length}일 예산 초과: ${overDays.map(d=>`D${d.di+1}(+${fmt(d.actual-d.plan)})`).join(', ')}</div>`:'';
 const totalActualAll=dayCosts.reduce((s,d)=>s+d.actual,0);
 const totalOverHtml=totalActualAll>total?`<div class="budget-over-warn">🚨 총 지출이 계획 대비 ${fmt(totalActualAll-total)} 초과! (${Math.round(totalActualAll/total*100)}%)</div>`:'';
-el.innerHTML=`<div class="budget-title">💰 예산 관리</div>${tabsHtml}<div class="budget-total"><div class="budget-total-amount">${total.toLocaleString('ko-KR')}원</div><div class="budget-total-label">총 예상 비용 · 약 €${Math.round(total/EUR_RATE).toLocaleString()}</div></div>${totalOverHtml}${overWarnHtml}${trendHtml}${chartHtml}<div class="budget-cats">${Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="budget-cat"><div class="budget-cat-label">${k}</div><div class="budget-cat-amount">${v.toLocaleString('ko-KR')}원</div></div>`).join('')}</div><div style="font-size:12px;font-weight:700;color:#f1f5f9;margin-bottom:8px">일별 상세</div>${DAYS.map((day,di)=>{const dc=day.schedule.reduce((s,i)=>s+(i.cost||0),0);if(!dc)return'';return`<div class="budget-day" onclick="selectDay(${di});switchView('timeline')"><div class="budget-day-name" style="color:${day.color}">D${di+1} ${day.date}</div><div class="budget-day-amount">${fmt(dc)}</div></div>`}).join('')}`
+el.innerHTML=`<div class="budget-title">💰 예산 관리</div>${tabsHtml}<div class="budget-total"><div class="budget-total-amount">${total.toLocaleString('ko-KR')}원</div><div class="budget-total-label">총 예상 비용 · 약 €${Math.round(total/EUR_RATE).toLocaleString()}</div></div>${totalOverHtml}${overWarnHtml}${trendHtml}${chartHtml}<div class="budget-cats">${Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="budget-cat"><div class="budget-cat-label">${k}</div><div class="budget-cat-amount">${v.toLocaleString('ko-KR')}원</div></div>`).join('')}</div>${renderTaxRefundWidget()}<div style="font-size:12px;font-weight:700;color:#f1f5f9;margin:16px 0 8px">일별 상세</div>${DAYS.map((day,di)=>{const dc=day.schedule.reduce((s,i)=>s+(i.cost||0),0);if(!dc)return'';return`<div class="budget-day" onclick="selectDay(${di});switchView('timeline')"><div class="budget-day-name" style="color:${day.color}">D${di+1} ${day.date}</div><div class="budget-day-amount">${fmt(dc)}</div></div>`}).join('')}`
 }else{
 // Expense sub-view
 let totalActual=0;const actualByCat={};
@@ -431,6 +440,100 @@ const TRANSPORT_DETAILS={
 '소예르 트램':{routes:['소예르 트램 (Port de Soller)'],fare:'€7',interval:'30분'},
 '아베이루 이동':{routes:['CP 기차 (상벤투→아베이루)'],fare:'€3.55',interval:'1시간'},
 '투어 출발':{routes:['GetYourGuide 픽업'],fare:'투어 포함',interval:'09:00 출발'}};
+
+// ══════════ GOOGLE CALENDAR (.ics) EXPORT ══════════
+function exportICS(){
+const pad2=n=>String(n).padStart(2,'0');
+const year=TRIP_START.getFullYear();
+function toICSDate(dayIdx,time){
+const baseDate=new Date(TRIP_START);baseDate.setDate(baseDate.getDate()+dayIdx);
+const y=baseDate.getFullYear(),mo=baseDate.getMonth()+1,d=baseDate.getDate();
+if(!time||time==='—')return`${y}${pad2(mo)}${pad2(d)}`;
+const[h,m]=time.split(':').map(Number);
+return`${y}${pad2(mo)}${pad2(d)}T${pad2(h)}${pad2(m)}00`}
+let ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//TravelPlanner//ES-PT//KO','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:스페인·포르투갈 여행'];
+DAYS.forEach((day,di)=>{day.schedule.forEach((item,ii)=>{
+const dtStart=toICSDate(di,item.time);
+const isAllDay=!item.time||item.time==='—';
+let dtEnd;
+if(isAllDay){const nd=new Date(TRIP_START);nd.setDate(nd.getDate()+di+1);dtEnd=`${nd.getFullYear()}${pad2(nd.getMonth()+1)}${pad2(nd.getDate())}`}
+else{const[h,m]=item.time.split(':').map(Number);const eh=h+1;dtEnd=toICSDate(di,`${pad2(eh%24)}:${pad2(m)}`)}
+const uid=`travel-${di}-${ii}-${year}@planner`;
+const loc=item.coords?`${item.coords[0]},${item.coords[1]}`:'';
+const desc=(item.desc||'').replace(/\n/g,'\\n')+(item.warn?'\\n⚠️ '+item.warn:'')+(item.cost?'\\n💰 '+fmt(item.cost):'');
+ics.push('BEGIN:VEVENT',`UID:${uid}`,
+isAllDay?`DTSTART;VALUE=DATE:${dtStart}`:`DTSTART:${dtStart}`,
+isAllDay?`DTEND;VALUE=DATE:${dtEnd}`:`DTEND:${dtEnd}`,
+`SUMMARY:${item.title.replace(/,/g,'\\,')}`,
+`DESCRIPTION:${desc.replace(/,/g,'\\,')}`,
+loc?`LOCATION:${loc}`:'',
+item.url?`URL:${item.url}`:'',
+'END:VEVENT')})});
+ics.push('END:VCALENDAR');
+const blob=new Blob([ics.filter(Boolean).join('\r\n')],{type:'text/calendar;charset=utf-8'});
+const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='spain-portugal-trip.ics';a.click();URL.revokeObjectURL(a.href);showToast('캘린더 파일 다운로드 완료')}
+
+// ══════════ TIME CONFLICT DETECTION ══════════
+function detectConflicts(schedule){
+const conflicts=[];
+const timed=schedule.map((item,i)=>({item,i})).filter(o=>o.item.time&&o.item.time!=='—');
+for(let a=0;a<timed.length;a++){for(let b=a+1;b<timed.length;b++){
+if(timed[a].item.time===timed[b].item.time){
+conflicts.push({idx1:timed[a].i,idx2:timed[b].i,time:timed[a].item.time,
+title1:timed[a].item.title,title2:timed[b].item.title})}}}
+return conflicts}
+
+// ══════════ SWIPE DAY NAVIGATION ══════════
+(function(){let sx=0,sy=0,swiping=false;const minDist=60,maxY=40;
+const getSwipeTarget=e=>{
+const t=e.target;if(t.closest('#map')||t.closest('.modal')||t.closest('.search-overlay')||t.closest('.currency-widget'))return false;
+return currentView==='timeline'||currentView==='map';};
+document.addEventListener('touchstart',function(e){if(!getSwipeTarget(e))return;sx=e.touches[0].clientX;sy=e.touches[0].clientY;swiping=true},{passive:true});
+document.addEventListener('touchmove',function(e){if(!swiping)return;const dx=e.touches[0].clientX-sx,dy=Math.abs(e.touches[0].clientY-sy);if(dy>maxY)swiping=false},{passive:true});
+document.addEventListener('touchend',function(e){if(!swiping)return;swiping=false;const dx=e.changedTouches[0].clientX-sx;
+if(Math.abs(dx)<minDist)return;
+if(dx<0&&currentDay<DAYS.length-1){currentDay++;currentFilter='all';render();if(currentView==='map')updateMap();showSwipeIndicator('next')}
+else if(dx>0&&currentDay>0){currentDay--;currentFilter='all';render();if(currentView==='map')updateMap();showSwipeIndicator('prev')}},{passive:true})})();
+function showSwipeIndicator(dir){const el=document.getElementById('swipeIndicator');if(!el)return;el.className='swipe-indicator visible '+(dir==='next'?'swipe-right':'swipe-left');el.textContent=dir==='next'?`DAY ${currentDay+1} →`:`← DAY ${currentDay+1}`;setTimeout(()=>el.classList.remove('visible'),800)}
+
+// ══════════ MAP REAL ROAD ROUTES (OSRM) ══════════
+function fetchRealRoute(coords,color,callback){
+if(coords.length<2){callback([]);return}
+const waypoints=coords.map(c=>c[1]+','+c[0]).join(';');
+const url=`https://router.project-osrm.org/route/v1/driving/${waypoints}?overview=full&geometries=geojson`;
+fetch(url).then(r=>r.json()).then(data=>{
+if(data.routes&&data.routes[0]){
+const geom=data.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
+callback(geom)}else callback([])}).catch(()=>callback([]))}
+
+// ══════════ TAX REFUND CALCULATOR ══════════
+const TAX_REFUND_RATES={spain:{name:'스페인',vat:21,minPurchase:90.16,refundPct:15.7},portugal:{name:'포르투갈',vat:23,minPurchase:61.50,refundPct:16}};
+function calcTaxRefund(){
+const amount=parseFloat(document.getElementById('taxrefund-amount')?.value)||0;
+const country=document.getElementById('taxrefund-country')?.value||'spain';
+const rate=TAX_REFUND_RATES[country];
+const el=document.getElementById('taxrefund-result');if(!el)return;
+if(amount<rate.minPurchase){el.innerHTML=`<span style="color:#f87171">최소 구매 금액: €${rate.minPurchase} (약 ${fmt(Math.round(rate.minPurchase*EUR_RATE))})</span>`;return}
+const refundEur=Math.round(amount*rate.refundPct/100*100)/100;
+const refundKrw=Math.round(refundEur*EUR_RATE);
+el.innerHTML=`<div class="taxrefund-row"><span>VAT ${rate.vat}%</span><span>€${(amount*rate.vat/100).toFixed(2)}</span></div>
+<div class="taxrefund-row" style="color:#34d399;font-weight:700"><span>예상 환급액 (${rate.refundPct}%)</span><span>€${refundEur} (${fmt(refundKrw)})</span></div>
+<div class="taxrefund-row" style="color:#64748b;font-size:9px"><span>실수령 (수수료 제외)</span><span>약 €${(refundEur*0.85).toFixed(2)}</span></div>`}
+function renderTaxRefundWidget(){
+return`<div class="taxrefund-widget">
+<div class="taxrefund-title">🧾 택스리펀 계산기</div>
+<div class="taxrefund-form">
+<select class="field-select" id="taxrefund-country" onchange="calcTaxRefund()" style="font-size:11px;padding:6px 8px;margin-bottom:6px">
+<option value="spain">🇪🇸 스페인 (VAT 21%)</option><option value="portugal">🇵🇹 포르투갈 (VAT 23%)</option></select>
+<div style="display:flex;gap:6px;align-items:center"><span style="font-size:14px;color:#F5A623">€</span>
+<input class="field-input" id="taxrefund-amount" type="number" placeholder="구매 금액 (EUR)" oninput="calcTaxRefund()" style="font-size:12px;padding:8px 10px">
+</div></div>
+<div id="taxrefund-result" style="margin-top:8px"></div>
+<div style="margin-top:8px;font-size:9px;color:#475569;line-height:1.5">
+💡 스페인: 1회 €90.16 이상 구매 시 환급 가능<br>
+💡 포르투갈: 1회 €61.50 이상 구매 시 환급 가능<br>
+💡 바르셀로나 공항 T1 Tax Free 카운터에서 수속
+</div></div>`}
 
 // ══════════ INIT ══════════
 migrateStatus(DAYS);loadFromLocal();migrateStatus(DAYS);render();updateDDay();fetchLiveWeather();initFirebase();fetchExchangeRate();restoreLightMode();
