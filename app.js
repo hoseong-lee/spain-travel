@@ -288,8 +288,8 @@ if(dragSrcIdx!==null&&lastOverIdx!==null&&lastOverIdx.idx!==dragSrcIdx){const sc
 document.getElementById('timeline').addEventListener('pointerdown',onPointerDown)})();
 
 // ══════════ LIGHT/DARK MODE ══════════
-function toggleLightMode(){const isLight=document.body.classList.toggle('light-mode');localStorage.setItem('travel_light_mode',isLight?'1':'0');document.getElementById('themeToggleBtn').textContent=isLight?'☀️':'🌙'}
-function restoreLightMode(){if(localStorage.getItem('travel_light_mode')==='1'){document.body.classList.add('light-mode');document.getElementById('themeToggleBtn').textContent='☀️'}}
+function toggleTheme(){const isDark=document.body.classList.toggle('dark-mode');localStorage.setItem('travel_theme',isDark?'dark':'light');document.getElementById('themeToggleBtn').textContent=isDark?'☀️':'🌙'}
+function restoreTheme(){try{const legacy=localStorage.getItem('travel_light_mode');if(legacy!==null)localStorage.removeItem('travel_light_mode')}catch(e){}const t=localStorage.getItem('travel_theme');if(t==='dark'){document.body.classList.add('dark-mode');document.getElementById('themeToggleBtn').textContent='☀️'}else{document.getElementById('themeToggleBtn').textContent='🌙'}}
 
 // ══════════ PRINT / PDF ══════════
 function printSchedule(){window.print()}
@@ -536,7 +536,7 @@ return`<div class="taxrefund-widget">
 </div></div>`}
 
 // ══════════ INIT ══════════
-loadFromLocal();migrateStatus(DAYS);render();updateDDay();fetchLiveWeather();initFirebase();fetchExchangeRate();restoreLightMode();
+loadFromLocal();migrateStatus(DAYS);render();updateDDay();fetchLiveWeather();initFirebase();fetchExchangeRate();restoreTheme();
 document.addEventListener('click',hideContextMenu);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSearch();hideContextMenu()}});
 // 모바일 롱프레스 핸들러
