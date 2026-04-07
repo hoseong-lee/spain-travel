@@ -1,8 +1,9 @@
-const CACHE_NAME = 'travel-planner-v8';
+const CACHE_NAME = 'travel-planner-v9';
 const STATIC_ASSETS = [
   './',
   './index.html',
   './style.css',
+  './trip-data.js',
   './app.js',
   './icon-192.png',
   './icon-512.png',
