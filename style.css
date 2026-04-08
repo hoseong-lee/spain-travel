@@ -247,6 +247,47 @@
   .map-legend-item{display:flex;align-items:center;gap:6px;margin-bottom:3px}
   .map-legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;border:1px solid var(--bg-card);box-shadow:0 0 0 1px currentColor}
 
+  /* 지도 검색바 */
+  .map-search-wrap{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:1000;width:min(380px,calc(100% - 460px));display:flex;align-items:center;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow-md);padding:0 6px 0 12px}
+  .map-search-icon{font-size:13px;color:var(--text-muted);flex-shrink:0}
+  .map-search-input{flex:1;border:none;outline:none;background:transparent;padding:10px 8px;font-family:inherit;font-size:12px;color:var(--text-strong);min-width:0}
+  .map-search-input::placeholder{color:var(--text-dim)}
+  .map-search-clear{background:transparent;border:none;color:var(--text-muted);font-size:12px;cursor:pointer;padding:6px 8px;border-radius:var(--r-sm);display:none}
+  .map-search-clear.visible{display:block}
+  .map-search-clear:hover{background:var(--bg-section);color:var(--text-strong)}
+  .map-search-results{display:none;position:absolute;top:100%;left:0;right:0;margin-top:6px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow-lg);max-height:340px;overflow-y:auto}
+  .map-search-results.visible{display:block}
+  .map-search-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s}
+  .map-search-item:last-child{border-bottom:none}
+  .map-search-item:hover{background:var(--bg-section)}
+  .map-search-item-name{font-size:12px;font-weight:700;color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .map-search-item-addr{font-size:10px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .map-search-item-type{display:inline-block;font-size:9px;color:var(--primary);background:var(--primary-soft);padding:1px 6px;border-radius:4px;margin-top:3px;font-weight:700}
+  .map-search-empty{padding:18px;text-align:center;color:var(--text-dim);font-size:11px}
+  .map-search-loading{padding:14px;text-align:center;color:var(--text-muted);font-size:11px}
+
+  /* 우측 액션 버튼 (GPS, 프리캐시) */
+  .map-action-stack{position:absolute;top:64px;right:14px;z-index:1000;display:flex;flex-direction:column;gap:6px}
+  .map-action-btn{width:38px;height:38px;border-radius:var(--r-md);background:var(--bg-card);border:1px solid var(--border);color:var(--text-base);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);transition:all .15s}
+  .map-action-btn:hover{background:var(--bg-section);transform:translateY(-1px);box-shadow:var(--shadow-md);border-color:var(--border-strong)}
+  .map-action-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .map-action-btn:disabled{opacity:.6;cursor:wait}
+
+  /* GPS 마커 */
+  .gps-pulse{width:14px;height:14px;background:#3B82F6;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 6px rgba(59,130,246,.25),0 2px 8px rgba(0,0,0,.3);animation:gps-pulse 2s infinite}
+  @keyframes gps-pulse{0%,100%{box-shadow:0 0 0 6px rgba(59,130,246,.25),0 2px 8px rgba(0,0,0,.3)}50%{box-shadow:0 0 0 12px rgba(59,130,246,.08),0 2px 8px rgba(0,0,0,.3)}}
+
+  /* 검색 결과 임시 마커 */
+  .search-marker{width:30px;height:30px;background:#EC4899;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 12px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center}
+  .search-marker::after{content:'📍';transform:rotate(45deg);font-size:14px}
+
+  /* 모바일 대응 */
+  @media (max-width:640px){
+    .map-search-wrap{width:calc(100% - 28px);left:14px;transform:none;top:60px}
+    .map-controls{top:14px}
+    .map-action-stack{top:110px}
+  }
+
   /* ══════ ROUTE ══════ */
   .route-container{display:none;padding:18px}
   .route-container.visible{display:block}

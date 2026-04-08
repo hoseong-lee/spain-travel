@@ -15,6 +15,9 @@ function migrateStatus(days){days.forEach(day=>day.schedule.forEach(item=>{if(it
 // ══════════ STATE ══════════
 let currentDay=0,currentFilter='all',editMode=false,editingIdx=null,currentView='timeline';
 let map=null,mapMarkers=[],mapRoutes=[],mapMode='day';
+let routeProfile='car'; // 'car' | 'foot'
+let mapSearchTimeout=null,mapSearchMarker=null,mapSearchResultsCache=[];
+let gpsMarker=null,gpsCircle=null,gpsWatchId=null;
 let pendingRemoteData=null;
 let budgetSubView='plan'; // 'plan' or 'expense'
 const travelTimeCache=new Map();
@@ -486,7 +489,7 @@ return conflicts}
 // ══════════ SWIPE DAY NAVIGATION ══════════
 (function(){let sx=0,sy=0,swiping=false;const minDist=60,maxY=40;
 const getSwipeTarget=e=>{
-const t=e.target;if(t.closest('#map')||t.closest('.modal')||t.closest('.search-overlay')||t.closest('.currency-widget'))return false;
+const t=e.target;if(t.closest('#map')||t.closest('.modal')||t.closest('.search-overlay')||t.closest('.currency-widget')||t.closest('.map-search-wrap')||t.closest('.map-action-stack')||t.closest('.map-controls'))return false;
 return currentView==='timeline'||currentView==='map';};
 document.addEventListener('touchstart',function(e){if(!getSwipeTarget(e))return;sx=e.touches[0].clientX;sy=e.touches[0].clientY;swiping=true},{passive:true});
 document.addEventListener('touchmove',function(e){if(!swiping)return;const dx=e.touches[0].clientX-sx,dy=Math.abs(e.touches[0].clientY-sy);if(dy>maxY)swiping=false},{passive:true});
@@ -497,14 +500,100 @@ else if(dx>0&&currentDay>0){currentDay--;currentFilter='all';render();if(current
 function showSwipeIndicator(dir){const el=document.getElementById('swipeIndicator');if(!el)return;el.className='swipe-indicator visible '+(dir==='next'?'swipe-right':'swipe-left');el.textContent=dir==='next'?`DAY ${currentDay+1} →`:`← DAY ${currentDay+1}`;setTimeout(()=>el.classList.remove('visible'),800)}
 
 // ══════════ MAP REAL ROAD ROUTES (OSRM) ══════════
-function fetchRealRoute(coords,color,callback){
+function fetchRealRoute(coords,color,callback,profile){
 if(coords.length<2){callback([]);return}
+const p=profile||routeProfile||'car';
+const osrmProfile=p==='foot'?'foot':'driving';
 const waypoints=coords.map(c=>c[1]+','+c[0]).join(';');
-const url=`https://router.project-osrm.org/route/v1/driving/${waypoints}?overview=full&geometries=geojson`;
+const url=`https://router.project-osrm.org/route/v1/${osrmProfile}/${waypoints}?overview=full&geometries=geojson`;
 fetch(url).then(r=>r.json()).then(data=>{
 if(data.routes&&data.routes[0]){
 const geom=data.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
-callback(geom)}else callback([])}).catch(()=>callback([]))}
+callback(geom)}else if(p==='foot'){// foot 실패 시 driving 폴백
+fetchRealRoute(coords,color,callback,'car')}else callback([])}).catch(()=>{
+if(p==='foot')fetchRealRoute(coords,color,callback,'car');else callback([])})}
+
+// ══════════ MAP SEARCH (Nominatim with viewbox) ══════════
+// 스페인+포르투갈 영역 가중치 (viewbox=좌,상,우,하)
+const TRIP_VIEWBOX='-9.5,43.8,4.5,36.0';
+function gmapsPlaceUrl(name,lat,lng){const q=encodeURIComponent(name);return`https://www.google.com/maps/search/${q}/@${lat},${lng},17z`}
+function onMapPlaceSearch(q){clearTimeout(mapSearchTimeout);const el=document.getElementById('mapSearchResults');const clr=document.getElementById('mapSearchClear');clr.classList.toggle('visible',!!q);if(!q||q.length<2){el.classList.remove('visible');return}
+el.innerHTML='<div class="map-search-loading">검색 중...</div>';el.classList.add('visible');
+mapSearchTimeout=setTimeout(()=>{
+const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=8&accept-language=ko&addressdetails=1&viewbox=${TRIP_VIEWBOX}&bounded=0`;
+fetch(url).then(r=>r.json()).then(data=>{
+if(!data||!data.length){el.innerHTML='<div class="map-search-empty">결과 없음 — 다른 키워드를 시도해보세요</div>';return}
+mapSearchResultsCache=data;
+el.innerHTML=data.map((p,i)=>{const name=p.display_name.split(',')[0];const addr=p.display_name.split(',').slice(1,4).join(',').trim();const typeLabel=({tourism:'관광',amenity:'편의',building:'건물',shop:'쇼핑',leisure:'여가',historic:'유적',natural:'자연'})[p.class]||p.type||'';return`<div class="map-search-item" onclick="selectMapSearchResult(${i})"><div class="map-search-item-name">${esc(name)}</div><div class="map-search-item-addr">${esc(addr)}</div>${typeLabel?`<span class="map-search-item-type">${esc(typeLabel)}</span>`:''}</div>`}).join('')
+}).catch(()=>{el.innerHTML='<div class="map-search-empty">검색 오류 — 인터넷 연결 확인</div>'})},350)}
+function selectMapSearchResult(idx){const p=mapSearchResultsCache[idx];if(!p||!map)return;
+const lat=parseFloat(p.lat),lng=parseFloat(p.lon);
+const name=p.display_name.split(',')[0];
+const addr=p.display_name.split(',').slice(1,4).join(',').trim();
+clearMapSearchMarker();
+const icon=L.divIcon({className:'',html:'<div class="search-marker"></div>',iconSize:[30,30],iconAnchor:[15,30]});
+mapSearchMarker=L.marker([lat,lng],{icon,zIndexOffset:1000}).addTo(map);
+const popupHtml=`<div style="min-width:200px"><strong>${esc(name)}</strong><div style="font-size:10px;color:#94a3b8;margin-top:3px;line-height:1.4">${esc(addr)}</div><div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap"><a href="${gmapsPlaceUrl(name,lat,lng)}" target="_blank" rel="noopener" style="flex:1;min-width:90px;padding:7px 10px;border-radius:6px;background:rgba(66,133,244,.15);color:#4285F4;font-size:11px;font-weight:700;text-align:center;text-decoration:none;border:1px solid rgba(66,133,244,.3)">⭐ Google 리뷰</a><button onclick="addPlaceFromMapSearchByIdx(${idx})" style="flex:1;min-width:90px;padding:7px 10px;border-radius:6px;background:rgba(16,185,129,.15);color:#34d399;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(16,185,129,.3);font-family:inherit">+ 일정 추가</button></div></div>`;
+mapSearchMarker.bindPopup(popupHtml,{maxWidth:280}).openPopup();
+map.flyTo([lat,lng],16,{duration:.8});
+document.getElementById('mapSearchResults').classList.remove('visible')}
+function clearMapSearch(){const el=document.getElementById('mapSearchResults');const inp=document.getElementById('mapSearchInput');inp.value='';el.classList.remove('visible');document.getElementById('mapSearchClear').classList.remove('visible');clearMapSearchMarker()}
+function clearMapSearchMarker(){if(mapSearchMarker&&map){map.removeLayer(mapSearchMarker);mapSearchMarker=null}}
+function addPlaceFromMapSearchByIdx(idx){const p=mapSearchResultsCache[idx];if(!p)return;const lat=parseFloat(p.lat),lng=parseFloat(p.lon);const name=p.display_name.split(',')[0];const addr=p.display_name.split(',').slice(1,3).join(',').trim();if(map)map.closePopup();openAddModal();document.getElementById('f-title').value=name;document.getElementById('f-lat').value=lat.toFixed(6);document.getElementById('f-lng').value=lng.toFixed(6);const descEl=document.getElementById('f-desc');if(descEl&&!descEl.value)descEl.value=addr}
+
+// ══════════ ROUTE PROFILE TOGGLE ══════════
+function toggleRouteProfile(){routeProfile=routeProfile==='car'?'foot':'car';const btn=document.getElementById('mapProfileToggle');btn.textContent=routeProfile==='car'?'🚗 자동차':'🚶 도보';showToast(`경로: ${routeProfile==='car'?'자동차':'도보'} 모드`);if(currentView==='map')updateMap()}
+
+// ══════════ GPS LOCATE ══════════
+function locateGPS(){if(!map||!navigator.geolocation){showToast('위치 정보를 사용할 수 없습니다');return}
+const btn=document.getElementById('mapGpsBtn');btn.disabled=true;btn.textContent='⏳';
+navigator.geolocation.getCurrentPosition(pos=>{
+const lat=pos.coords.latitude,lng=pos.coords.longitude,acc=pos.coords.accuracy;
+if(gpsMarker){map.removeLayer(gpsMarker);gpsMarker=null}
+if(gpsCircle){map.removeLayer(gpsCircle);gpsCircle=null}
+const icon=L.divIcon({className:'',html:'<div class="gps-pulse"></div>',iconSize:[20,20],iconAnchor:[10,10]});
+gpsMarker=L.marker([lat,lng],{icon,zIndexOffset:900}).addTo(map);
+gpsCircle=L.circle([lat,lng],{radius:acc,color:'#3B82F6',fillColor:'#3B82F6',fillOpacity:.08,weight:1}).addTo(map);
+gpsMarker.bindPopup(`<strong>📍 내 위치</strong><div style="font-size:10px;color:#94a3b8;margin-top:3px">${lat.toFixed(5)}, ${lng.toFixed(5)}<br>정확도 ±${Math.round(acc)}m</div>`);
+map.flyTo([lat,lng],15,{duration:.8});
+btn.disabled=false;btn.textContent='📍';btn.classList.add('active');
+showToast(`현재 위치 찾음 (±${Math.round(acc)}m)`)
+},err=>{btn.disabled=false;btn.textContent='📍';
+const msg={1:'위치 권한이 거부됨',2:'위치를 찾을 수 없음',3:'시간 초과'}[err.code]||'위치 오류';
+showToast(msg)},{enableHighAccuracy:true,timeout:10000,maximumAge:30000})}
+
+// ══════════ OFFLINE TILE PREFETCH ══════════
+const PREFETCH_AREAS=[
+{name:'바르셀로나',lat:41.39,lng:2.17,radius:.12},
+{name:'포르투',lat:41.15,lng:-8.61,radius:.10},
+{name:'마요르카',lat:39.57,lng:2.65,radius:.20},
+{name:'도우로',lat:41.10,lng:-7.78,radius:.15}
+];
+const PREFETCH_ZOOMS=[11,12,13,14];
+function lonToTileX(lon,z){return Math.floor((lon+180)/360*Math.pow(2,z))}
+function latToTileY(lat,z){return Math.floor((1-Math.log(Math.tan(lat*Math.PI/180)+1/Math.cos(lat*Math.PI/180))/Math.PI)/2*Math.pow(2,z))}
+async function prefetchOfflineTiles(){
+const btn=document.getElementById('mapPrefetchBtn');if(btn.disabled)return;
+const tiles=[];
+PREFETCH_AREAS.forEach(area=>{
+PREFETCH_ZOOMS.forEach(z=>{
+const x1=lonToTileX(area.lng-area.radius,z),x2=lonToTileX(area.lng+area.radius,z);
+const y1=latToTileY(area.lat+area.radius,z),y2=latToTileY(area.lat-area.radius,z);
+for(let x=Math.min(x1,x2);x<=Math.max(x1,x2);x++)for(let y=Math.min(y1,y2);y<=Math.max(y1,y2);y++){
+// 다크/라이트 두 테마 모두 캐싱
+tiles.push(`https://a.basemaps.cartocdn.com/dark_all/${z}/${x}/${y}.png`);
+tiles.push(`https://a.basemaps.cartocdn.com/light_all/${z}/${x}/${y}.png`)
+}})});
+btn.disabled=true;btn.textContent='⏳';
+let done=0,failed=0;const total=tiles.length;
+showToast(`오프라인 지도 다운로드 시작 (${total}개 타일)`);
+const BATCH=8;
+for(let i=0;i<tiles.length;i+=BATCH){
+const batch=tiles.slice(i,i+BATCH);
+await Promise.all(batch.map(u=>fetch(u,{mode:'cors'}).then(r=>{if(r.ok)done++;else failed++}).catch(()=>failed++)));
+btn.textContent=Math.round((i+BATCH)/total*100)+'%'}
+btn.disabled=false;btn.textContent='📥';btn.classList.add('active');
+showToast(`오프라인 지도 완료 — 성공 ${done} / 실패 ${failed}`)}
 
 // ══════════ TAX REFUND CALCULATOR ══════════
 const TAX_REFUND_RATES={spain:{name:'스페인',vat:21,minPurchase:90.16,refundPct:15.7},portugal:{name:'포르투갈',vat:23,minPurchase:61.50,refundPct:16}};
@@ -538,7 +627,8 @@ return`<div class="taxrefund-widget">
 // ══════════ INIT ══════════
 loadFromLocal();migrateStatus(DAYS);render();updateDDay();fetchLiveWeather();initFirebase();fetchExchangeRate();restoreTheme();
 document.addEventListener('click',hideContextMenu);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSearch();hideContextMenu()}});
+document.addEventListener('click',e=>{const wrap=document.querySelector('.map-search-wrap');if(wrap&&!wrap.contains(e.target)){const r=document.getElementById('mapSearchResults');if(r)r.classList.remove('visible')}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSearch();hideContextMenu();const r=document.getElementById('mapSearchResults');if(r)r.classList.remove('visible')}});
 // 모바일 롱프레스 핸들러
 document.addEventListener('touchstart',function(e){const card=e.target.closest('.timeline-card[oncontextmenu]');if(!card)return;longPressTimer=setTimeout(()=>{const attr=card.getAttribute('oncontextmenu');if(attr){const touch=e.touches[0];const fakeE={preventDefault:()=>{},stopPropagation:()=>{},clientX:touch.clientX,clientY:touch.clientY,pageX:touch.pageX,pageY:touch.pageY};const m=attr.match(/showContextMenu\(event,(\d+),(\d+)\)/);if(m)showContextMenu(fakeE,parseInt(m[1]),parseInt(m[2]))}},600)},{passive:true});
 document.addEventListener('touchend',()=>{clearTimeout(longPressTimer)});

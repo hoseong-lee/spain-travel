@@ -1,4 +1,4 @@
-const CACHE_NAME = 'travel-planner-v10';
+const CACHE_NAME = 'travel-planner-v11';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -12,8 +12,8 @@ const STATIC_ASSETS = [
   'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap'
 ];
 
-const TILE_CACHE = 'travel-tiles-v1';
-const TILE_MAX = 500; // 최대 타일 수
+const TILE_CACHE = 'travel-tiles-v2';
+const TILE_MAX = 2500; // 최대 타일 수 — 4도시 × 4줌 × 라이트/다크 커버
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -49,15 +49,18 @@ self.addEventListener('fetch', e => {
   }
 
   // 지도 타일 — 캐시 우선 + LRU 관리
+  // 서브도메인 a/b/c 정규화로 캐시 공유 (Leaflet은 랜덤 서브도메인 사용)
   if (url.includes('basemaps.cartocdn.com') || url.includes('tile.openstreetmap.org')) {
+    const normalizedUrl = url.replace(/\/\/[abc]\./, '//a.');
+    const cacheKey = new Request(normalizedUrl);
     e.respondWith(
       caches.open(TILE_CACHE).then(cache =>
-        cache.match(e.request).then(cached => {
+        cache.match(cacheKey).then(cached => {
           if (cached) return cached;
           return fetch(e.request).then(r => {
             if (r.ok) {
               const c = r.clone();
-              cache.put(e.request, c);
+              cache.put(cacheKey, c);
               // LRU: 타일 수 제한
               cache.keys().then(keys => {
                 if (keys.length > TILE_MAX) {

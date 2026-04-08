@@ -67,9 +67,23 @@
   <div class="timeline" id="timeline"></div>
 </div>
 <div class="map-container" id="mapView">
-  <div class="map-controls"><button class="map-toggle active" id="mapDayToggle" onclick="setMapMode('day')">일자별</button><button class="map-toggle" id="mapAllToggle" onclick="setMapMode('all')">전체 여정</button></div>
+  <div class="map-controls">
+    <button class="map-toggle active" id="mapDayToggle" onclick="setMapMode('day')">일자별</button>
+    <button class="map-toggle" id="mapAllToggle" onclick="setMapMode('all')">전체 여정</button>
+    <button class="map-toggle" id="mapProfileToggle" onclick="toggleRouteProfile()" title="경로 이동수단 전환">🚗 자동차</button>
+  </div>
+  <div class="map-search-wrap">
+    <span class="map-search-icon">🔍</span>
+    <input class="map-search-input" id="mapSearchInput" placeholder="장소·건물·지역 검색 (예: 사그라다 파밀리아)" oninput="onMapPlaceSearch(this.value)" onfocus="onMapPlaceSearch(this.value)">
+    <button class="map-search-clear" id="mapSearchClear" onclick="clearMapSearch()" title="지우기">✕</button>
+    <div class="map-search-results" id="mapSearchResults"></div>
+  </div>
   <div id="map"></div>
   <div class="map-day-info" id="mapDayInfo"></div>
+  <div class="map-action-stack">
+    <button class="map-action-btn" id="mapGpsBtn" onclick="locateGPS()" title="내 위치">📍</button>
+    <button class="map-action-btn" id="mapPrefetchBtn" onclick="prefetchOfflineTiles()" title="오프라인 지도 다운로드">📥</button>
+  </div>
   <div class="map-legend"><div class="map-legend-title">카테고리</div><div class="map-legend-item"><div class="map-legend-dot" style="background:#10B981"></div>관광</div><div class="map-legend-item"><div class="map-legend-dot" style="background:#F59E0B"></div>맛집</div><div class="map-legend-item"><div class="map-legend-dot" style="background:#EC4899"></div>쇼핑</div><div class="map-legend-item"><div class="map-legend-dot" style="background:#3B82F6"></div>항공</div><div class="map-legend-item"><div class="map-legend-dot" style="background:#8B5CF6"></div>숙소</div></div>
 </div>
 <div class="route-container" id="routeView"></div>
