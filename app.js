@@ -29,6 +29,15 @@ const DEFAULT_PACKING={
 '의약품':['상비약','멀미약'],
 '기타':['에코백','자물쇠']
 };
+const DEFAULT_SHOPPING={
+'🛒 Mercadona 마트':['꿀국화차','올리브 바디크림','환타레몬'],
+'🏪 그 외 슈퍼':['프링글스 하몽맛','하몽 + 멜론'],
+'🫒 라치나타 (La Chinata)':['올리브오일 (트러플)','발사믹','핸드크림','립밤'],
+'🛍️ 백화점':['부보 초콜릿','꾸악 올리브오일','프리오랏 와인','베르뭇 와인','뚜론 비센스','고메즈 손소독제'],
+'🏛️ 고딕지구':['사바테즈','코쿠아 플랫슈즈','오이소 잠옷'],
+'🌉 포르토 쇼핑':['푸타 비치타올','성물방','유리아쥬','쟈크폰 크림'],
+'🐟 포르투 시장':['※ 참고: m.blog.naver.com/soso_seoul/224179281858']
+};
 let fbApp=null,fbAuth=null,fbDb=null,fbUser=null,fbConnected=false,isSyncingFromRemote=false,lastSyncTimestamp=0;
 let dataListener=null,presenceListener=null;
 
@@ -360,12 +369,14 @@ else if(item.warn&&/예약|확인|필수|권장/.test(item.warn))unbooked.push({
 if(item.type==='move'||item.type==='flight')transports.push(item)});if(transports.length)transportByDay.push({di,day,transports})});
 const mkCard=(arr,cls)=>arr.map(u=>`<div class="prep-card ${cls}" onclick="selectDay(${u.di});switchView('timeline')"><div class="prep-card-title">${esc(u.item.title)}${u.item.status?` <span class="status-badge ${STATUS_CSS[u.item.status]}" style="font-size:8px">${STATUS_LABELS[u.item.status]}</span>`:''}</div><div class="prep-card-meta">DAY ${u.di+1} · ${esc(DAYS[u.di].date)}${u.item.warn?' · '+esc(u.item.warn):''}</div></div>`).join('');
 const packingHtml=renderPackingList();
+const shoppingHtml=renderShoppingList();
 el.innerHTML=`<div class="prep-title">📋 여행 준비 체크리스트</div>
 <div class="prep-section"><div class="prep-section-title">⬜ 미예약 (${unbooked.length}건)</div>${unbooked.length?mkCard(unbooked,'prep-warn'):'<div class="prep-card prep-ok">미예약 항목 없음 ✓</div>'}</div>
 <div class="prep-section"><div class="prep-section-title">🟡 진행중 (${pending.length}건)</div>${pending.length?mkCard(pending,''):'<div class="prep-card" style="color:#64748b">진행중 항목 없음</div>'}</div>
 <div class="prep-section"><div class="prep-section-title">✅ 확정 (${confirmed.length}건)</div>${confirmed.length?mkCard(confirmed,'prep-ok'):'<div class="prep-card" style="color:#64748b">확정 항목 없음</div>'}</div>
 ${cancelled.length?`<div class="prep-section"><div class="prep-section-title">❌ 취소 (${cancelled.length}건)</div>${mkCard(cancelled,'')}</div>`:''}
 <div class="prep-section"><div class="prep-section-title">🚌 일별 교통 요약</div>${transportByDay.map(td=>`<div class="prep-card" onclick="selectDay(${td.di});switchView('timeline')"><div class="prep-card-title">DAY ${td.di+1} · ${esc(td.day.date)}</div><div class="prep-card-meta">${td.transports.map(t=>esc(t.title)).join(' → ')}</div></div>`).join('')||'<div class="prep-card" style="color:#64748b">교통 일정 없음</div>'}</div>
+<div style="border-top:1px solid rgba(255,255,255,.06);margin-top:16px;padding-top:16px"><div class="prep-title">🛍️ 쇼핑 리스트</div>${shoppingHtml}</div>
 <div style="border-top:1px solid rgba(255,255,255,.06);margin-top:16px;padding-top:16px"><div class="prep-title">🧳 패킹 리스트</div>${packingHtml}</div>`}
 
 // ══════════ CONFLICT HIGHLIGHT ══════════
@@ -390,6 +401,26 @@ const catOptions=cats.map(c=>`<option value="${c}">${c}</option>`).join('');
 let html=`<div style="font-size:11px;color:#64748b;margin-bottom:10px">${checkedItems}/${totalItems} 준비 완료</div>`;
 cats.forEach(cat=>{const items=list[cat]||[];if(!items.length)return;html+=`<div class="packing-section"><div class="packing-section-title">${cat}</div>`;items.forEach((item,i)=>{html+=`<div class="packing-item ${item.checked?'packed':''}" onclick="togglePackingItem('${esc(cat)}',${i})"><span class="packing-check ${item.checked?'checked':''}">${item.checked?'✓':''}</span><span class="packing-item-text">${esc(item.name)}</span>${item.custom?`<button class="packing-del" onclick="event.stopPropagation();deletePackingItem('${esc(cat)}',${i})">✕</button>`:''}</div>`});html+=`</div>`});
 html+=`<div class="packing-add-row"><input class="packing-add-input" id="packing-new-item" placeholder="새 아이템"><select class="packing-add-cat" id="packing-new-cat">${catOptions}</select><button class="packing-add-btn" onclick="addPackingItem()">+ 추가</button></div>`;
+return html}
+
+// ══════════ SHOPPING LIST ══════════
+function loadShoppingList(){try{const d=localStorage.getItem('travel_shopping_list');if(d)return JSON.parse(d)}catch(e){}
+const list={};Object.entries(DEFAULT_SHOPPING).forEach(([cat,items])=>{list[cat]=items.map(name=>({name,checked:false,custom:false}))});return list}
+function saveShoppingList(list){try{localStorage.setItem('travel_shopping_list',JSON.stringify(list))}catch(e){}}
+function toggleShoppingItem(cat,idx){const list=loadShoppingList();if(list[cat]&&list[cat][idx]){list[cat][idx].checked=!list[cat][idx].checked;saveShoppingList(list);renderPrepView()}}
+function addShoppingItem(){const input=document.getElementById('shopping-new-item');const catSel=document.getElementById('shopping-new-cat');const name=input.value.trim();const cat=catSel.value;if(!name){showToast('아이템명을 입력하세요');return}const list=loadShoppingList();if(!list[cat])list[cat]=[];list[cat].push({name,checked:false,custom:true});saveShoppingList(list);showToast('쇼핑 아이템 추가');renderPrepView()}
+function deleteShoppingItem(cat,idx){const list=loadShoppingList();if(list[cat]&&list[cat][idx]&&list[cat][idx].custom){list[cat].splice(idx,1);if(!list[cat].length)delete list[cat];saveShoppingList(list);showToast('아이템 삭제');renderPrepView()}}
+function addShoppingCategory(){const name=prompt('새 카테고리 이름 (예: 🛍️ 그라시아 거리)');if(!name)return;const trimmed=name.trim();if(!trimmed)return;const list=loadShoppingList();if(list[trimmed]){showToast('이미 존재하는 카테고리');return}list[trimmed]=[];saveShoppingList(list);renderPrepView()}
+function resetShoppingList(){if(!confirm('쇼핑리스트를 초기 상태로 되돌릴까요? (체크/추가 내역 모두 사라집니다)'))return;localStorage.removeItem('travel_shopping_list');renderPrepView();showToast('쇼핑리스트 초기화')}
+function renderShoppingList(){const list=loadShoppingList();const cats=Object.keys(DEFAULT_SHOPPING);Object.keys(list).forEach(k=>{if(!cats.includes(k))cats.push(k)});
+const totalItems=Object.values(list).reduce((s,arr)=>s+arr.length,0);const checkedItems=Object.values(list).reduce((s,arr)=>s+arr.filter(i=>i.checked).length,0);
+const catOptions=cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div style="font-size:11px;color:#64748b">${checkedItems}/${totalItems} 구매 완료</div><div style="display:flex;gap:6px"><button class="packing-add-btn" style="padding:4px 8px;font-size:10px" onclick="addShoppingCategory()">+ 카테고리</button><button class="packing-add-btn" style="padding:4px 8px;font-size:10px;background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.3);color:#dc2626" onclick="resetShoppingList()">↺ 초기화</button></div></div>`;
+cats.forEach(cat=>{const items=list[cat]||[];html+=`<div class="packing-section"><div class="packing-section-title">${esc(cat)}</div>`;
+if(!items.length){html+=`<div style="font-size:10px;color:#94a3b8;padding:4px 0">— 아이템 없음 —</div>`}
+items.forEach((item,i)=>{const isLink=/^https?:\/\/|^www\.|\.com|\.kr/i.test(item.name)||item.name.startsWith('※');html+=`<div class="packing-item ${item.checked?'packed':''}" onclick="toggleShoppingItem('${esc(cat).replace(/'/g,"\\'")}',${i})"><span class="packing-check ${item.checked?'checked':''}">${item.checked?'✓':''}</span><span class="packing-item-text" style="${isLink?'font-size:10px;color:#64748b':''}">${esc(item.name)}</span>${item.custom?`<button class="packing-del" onclick="event.stopPropagation();deleteShoppingItem('${esc(cat).replace(/'/g,"\\'")}',${i})">✕</button>`:''}</div>`});
+html+=`</div>`});
+html+=`<div class="packing-add-row"><input class="packing-add-input" id="shopping-new-item" placeholder="새 쇼핑 아이템"><select class="packing-add-cat" id="shopping-new-cat">${catOptions}</select><button class="packing-add-btn" onclick="addShoppingItem()">+ 추가</button></div>`;
 return html}
 
 // ══════════ DASHBOARD ══════════
