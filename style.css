@@ -670,5 +670,39 @@
   .photo-modal.visible{display:flex;animation:fadeSlideIn .25s ease}
   .photo-modal img{max-width:95%;max-height:90%;border-radius:var(--r-md);object-fit:contain}
 
+  /* ══════ DEADLINE BADGE (H3) ══════ */
+  .deadline-badge{display:inline-block;font-size:9px;padding:3px 8px;border-radius:6px;font-weight:700;background:rgba(99,102,241,.12);color:#818CF8;border:1px solid rgba(99,102,241,.25);margin-left:4px;white-space:nowrap}
+  .deadline-badge.deadline-soon{background:rgba(245,158,11,.14);color:#F59E0B;border-color:rgba(245,158,11,.3)}
+  .deadline-badge.deadline-today{background:rgba(239,68,68,.15);color:#f87171;border-color:rgba(239,68,68,.35);animation:deadlinePulse 1.8s ease-in-out infinite}
+  .deadline-badge.deadline-over{background:rgba(239,68,68,.22);color:#fca5a5;border-color:rgba(239,68,68,.4)}
+  @keyframes deadlinePulse{0%,100%{opacity:1}50%{opacity:.55}}
+
+  /* ══════ DASH STATUS SUMMARY (H1) ══════ */
+  .dash-status-summary{padding:14px 16px;border-radius:var(--r-lg);background:var(--bg-card);border:1px solid var(--border);margin-bottom:14px;cursor:pointer;transition:all .18s}
+  .dash-status-summary:hover{border-color:var(--border-strong);box-shadow:var(--shadow-sm)}
+  .dash-status-summary-title{font-size:12px;font-weight:800;color:var(--text-strong);margin-bottom:10px}
+  .dash-status-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--bg-section);margin-bottom:10px}
+  .dash-status-fill{height:100%;transition:width .5s cubic-bezier(.4,0,.2,1)}
+  .dash-status-fill-confirmed{background:#10B981}
+  .dash-status-fill-pending{background:#F59E0B}
+  .dash-status-fill-unbooked{background:#64748b}
+  .dash-status-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .dash-status-chip{font-size:10px;padding:4px 9px;border-radius:6px;font-weight:700}
+  .dash-deadline-list{margin-top:4px;margin-bottom:14px}
+
+  /* ══════ VOUCHER HUB (H2) ══════ */
+  .voucher-open-all{float:right;font-size:10px;padding:4px 10px;border-radius:6px;background:rgba(139,92,246,.12);color:#c4b5fd;border:1px solid rgba(139,92,246,.28);font-weight:700;cursor:pointer;font-family:inherit}
+  .voucher-open-all:hover{background:rgba(139,92,246,.18)}
+  .voucher-card{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--r-md);background:var(--bg-card);border:1px solid var(--border);margin-bottom:6px;cursor:pointer;transition:all .18s}
+  .voucher-card:hover{border-color:var(--border-strong);transform:translateX(2px);box-shadow:var(--shadow-sm)}
+  .voucher-card-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;box-shadow:0 0 6px currentColor}
+  .voucher-card-body{flex:1;min-width:0}
+  .voucher-card-title{font-size:12px;font-weight:700;color:var(--text-strong);overflow:hidden;text-overflow:ellipsis}
+  .voucher-card-meta{font-size:9px;color:var(--text-dim);font-weight:500;margin-top:2px}
+  .voucher-card-actions{display:flex;gap:4px;flex-shrink:0}
+  .voucher-link{font-size:9px;padding:5px 9px;border-radius:6px;text-decoration:none;font-weight:700;white-space:nowrap}
+  .voucher-link-booking{background:rgba(139,92,246,.14);color:#c4b5fd;border:1px solid rgba(139,92,246,.3)}
+  .voucher-link-url{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
+
   /* ══════ PRINT ══════ */
   @media print{body{background:#fff!important;color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.auth-bar,.presence-bar,.weather-bar,.edit-toolbar,.day-selector,.view-tabs,.currency-toggle,.currency-widget,.safe-bottom,.header-actions,.add-item-row,.edit-indicator,.card-checkbox,.move-btns,.filter-btn,.toolbar-btn,.map-container,.search-overlay,.ctx-menu,.toast,.swipe-indicator{display:none!important}.header{background:none!important;border-bottom:2px solid #000;position:static}.header-title{color:#000!important;font-size:20px}.header-date{color:#333!important}.timeline-card{break-inside:avoid;border:1px solid #ccc!important;background:#fff!important;margin-bottom:6px;box-shadow:none!important}.card-title{color:#000!important}.card-desc{color:#333!important}.day-header{break-before:page}.day-header:first-of-type{break-before:auto}.day-region{color:#000!important}.hotel-box{border:1px solid #999!important;background:#f5f5f5!important;color:#333!important}.tips{border-top:1px solid #ccc;background:none}.tips-title{color:#000}.tips-body{color:#333}.tips-body .hl-y,.tips-body .hl-p,.tips-body .hl-g,.tips-body .hl-o,.tips-body .hl-b{color:#000!important;font-weight:700}.route-container,.budget-container,.prep-container{display:block!important}.budget-total{border:2px solid #1D4ED8;background:#fff!important}.budget-total-amount{color:#1D4ED8!important}}

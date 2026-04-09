@@ -74,6 +74,14 @@ function gmapsUrl(coords,title){if(!coords)return null;if(title){const q=encodeU
 // 현재 위치 → 목적지 길찾기 URL (장소명 우선, 없으면 좌표)
 function gmapsDirUrl(coords,title){if(!coords&&!title)return null;const dest=title?encodeURIComponent(title):`${coords[0]},${coords[1]}`;return`https://www.google.com/maps/dir/?api=1&destination=${dest}`}
 
+// ══════════ DEADLINE ══════════
+// item.deadline (YYYY-MM-DD) → 오늘 기준 남은 일수. 과거면 음수.
+function daysUntilDeadline(deadline){if(!deadline)return null;const d=new Date(deadline);if(isNaN(d))return null;d.setHours(0,0,0,0);const now=new Date();now.setHours(0,0,0,0);return Math.round((d-now)/864e5)}
+// 배지 HTML: D-N / 당일 / 마감 경과. 7일 이내 경고색.
+function deadlineBadgeHtml(deadline){const n=daysUntilDeadline(deadline);if(n===null)return'';let cls='deadline-badge',label;if(n<0){cls+=' deadline-over';label=`⏰ 마감 ${-n}일 경과`}else if(n===0){cls+=' deadline-today';label='⏰ 오늘 마감'}else if(n<=7){cls+=' deadline-soon';label=`⏰ D-${n}`}else{label=`⏰ D-${n}`}return`<span class="${cls}" title="예약 마감 ${esc(deadline)}">${label}</span>`}
+// 마감 임박 항목 전체 수집 (7일 이내 또는 경과)
+function collectUpcomingDeadlines(){const out=[];DAYS.forEach((day,di)=>day.schedule.forEach(item=>{const n=daysUntilDeadline(item.deadline);if(n===null)return;if(item.status==='confirmed'||item.status==='cancelled')return;if(n<=7)out.push({di,item,days:n})}));return out.sort((a,b)=>a.days-b.days)}
+
 // ══════════ D-DAY ══════════
 function updateDDay(){const now=new Date();now.setHours(0,0,0,0);const el=document.getElementById('ddayBadge');if(now<TRIP_START){const d=Math.ceil((TRIP_START-now)/864e5);el.textContent=`D-${d}`;el.style.background='rgba(245,166,35,.15)';el.style.color='#F5A623'}else if(now<=TRIP_END){const d=Math.floor((now-TRIP_START)/864e5)+1;el.textContent=`DAY ${d} 진행중`;el.style.background='rgba(16,185,129,.15)';el.style.color='#10B981'}else{el.textContent='여행 완료!';el.style.background='rgba(139,92,246,.15)';el.style.color='#c4b5fd'}}
 
@@ -128,7 +136,7 @@ else{const cb=document.createElement('div');cb.id='conflictBar';cb.className='co
 else{const cb=document.getElementById('conflictBar');if(cb)cb.remove()}
 if(!filtered.length){document.getElementById('timeline').innerHTML='<div style="text-align:center;padding:40px;color:#475569;font-size:12px">일정이 없습니다</div>';return}
 document.getElementById('timeline').innerHTML=filtered.map((item,i)=>{const t=TYPE_STYLES[item.type]||TYPE_STYLES.etc;const isLast=i===filtered.length-1;const checked=item.checked?'checked':'';const checkedClass=item.checked?'checked-item':'';
-let meta='';if(item.status&&STATUS_LABELS[item.status])meta+=`<span class="status-badge ${STATUS_CSS[item.status]}">${STATUS_LABELS[item.status]}</span>`;if(item.warn)meta+=`<div class="card-warn">⚠️ ${esc(item.warn)}</div>`;if(item.cost)meta+=`<span class="card-cost">${fmt(item.cost)}</span>`;if(item.url)meta+=`<a class="card-link" href="${esc(item.url)}" target="_blank" onclick="event.stopPropagation()">🔗 예약</a>`;if(item.bookingUrl)meta+=`<a class="card-link" href="${esc(item.bookingUrl)}" target="_blank" onclick="event.stopPropagation()" style="background:rgba(139,92,246,.1);color:#c4b5fd">📄 바우처</a>`;if(item.coords){const pn=extractPlaceName(item,day);meta+=`<a class="card-gmaps" href="${gmapsUrl(item.coords,pn)}" target="_blank" onclick="event.stopPropagation()">📍 지도</a>`;meta+=`<a class="card-gmaps" href="${gmapsDirUrl(item.coords,pn)}" target="_blank" onclick="event.stopPropagation()" style="background:rgba(59,130,246,.12);color:#60a5fa;border-color:rgba(59,130,246,.25)">🧭 길찾기</a>`}
+let meta='';if(item.status&&STATUS_LABELS[item.status])meta+=`<span class="status-badge ${STATUS_CSS[item.status]}">${STATUS_LABELS[item.status]}</span>`;if(item.deadline&&item.status!=='confirmed'&&item.status!=='cancelled')meta+=deadlineBadgeHtml(item.deadline);if(item.warn)meta+=`<div class="card-warn">⚠️ ${esc(item.warn)}</div>`;if(item.cost)meta+=`<span class="card-cost">${fmt(item.cost)}</span>`;if(item.url)meta+=`<a class="card-link" href="${esc(item.url)}" target="_blank" onclick="event.stopPropagation()">🔗 예약</a>`;if(item.bookingUrl)meta+=`<a class="card-link" href="${esc(item.bookingUrl)}" target="_blank" onclick="event.stopPropagation()" style="background:rgba(139,92,246,.1);color:#c4b5fd">📄 바우처</a>`;if(item.coords){const pn=extractPlaceName(item,day);meta+=`<a class="card-gmaps" href="${gmapsUrl(item.coords,pn)}" target="_blank" onclick="event.stopPropagation()">📍 지도</a>`;meta+=`<a class="card-gmaps" href="${gmapsDirUrl(item.coords,pn)}" target="_blank" onclick="event.stopPropagation()" style="background:rgba(59,130,246,.12);color:#60a5fa;border-color:rgba(59,130,246,.25)">🧭 길찾기</a>`}
 const memoHtml=item.memo?`<div class="card-memo">${esc(item.memo)}</div>`:'';
 const ratingHtml=item.rating?`<div class="card-rating">${'★'.repeat(item.rating)+'☆'.repeat(5-item.rating)}</div>`:'';
 const reviewHtml=item.review?`<div class="card-review">${esc(item.review)}</div>`:'';
@@ -228,9 +236,9 @@ return`<div style="margin-bottom:12px"><div class="budget-day" style="margin-bot
 el.innerHTML=`<div class="budget-title">💸 지출 기록</div>${tabsHtml}<div class="budget-total"><div class="budget-total-amount" style="color:#10B981">${totalActual.toLocaleString('ko-KR')}원</div><div class="budget-total-label">총 실제 지출 · 약 €${Math.round(totalActual/EUR_RATE).toLocaleString()} | 계획 대비 ${total?Math.round(totalActual/total*100):0}%</div></div>${compareHtml}${dayExpenses}`}}
 
 // ══════════ EDIT MODALS ══════════
-function openEditModal(idx){if(!editMode)return;editingIdx=idx;const item=DAYS[currentDay].schedule[idx];document.getElementById('modalTitleText').textContent='✏️ 수정';document.getElementById('placeSearchInput').value='';document.getElementById('placeResults').classList.remove('visible');document.getElementById('f-time').value=item.time||'';document.getElementById('f-type').value=item.type||'etc';document.getElementById('f-title').value=item.title||'';document.getElementById('f-placename').value=item.placeName||'';document.getElementById('f-desc').value=item.desc||'';document.getElementById('f-url').value=item.url||'';document.getElementById('f-cost').value=item.cost||'';document.getElementById('f-memo').value=item.memo||'';document.getElementById('f-warn').value=item.warn||'';document.getElementById('f-lat').value=item.coords?item.coords[0]:'';document.getElementById('f-lng').value=item.coords?item.coords[1]:'';document.getElementById('f-status').value=item.status||'';document.getElementById('f-booking').value=item.bookingUrl||'';currentRating=item.rating||0;renderRatingStars();document.getElementById('f-review').value=item.review||'';document.getElementById('f-photos').value=(item.photos||[]).join('\n');document.getElementById('modalActions').innerHTML=`<button class="modal-btn modal-btn-delete" onclick="deleteItem(${idx});closeModal()">삭제</button><button class="modal-btn modal-btn-cancel" onclick="closeModal()">취소</button><button class="modal-btn modal-btn-save" onclick="saveItem()">저장</button>`;document.getElementById('modalOverlay').classList.add('visible')}
-function openAddModal(){editingIdx=null;document.getElementById('modalTitleText').textContent='➕ 추가';['f-time','f-title','f-placename','f-desc','f-url','f-cost','f-memo','f-warn','f-lat','f-lng','f-booking'].forEach(id=>document.getElementById(id).value='');document.getElementById('placeSearchInput').value='';document.getElementById('placeResults').classList.remove('visible');document.getElementById('f-type').value='spot';document.getElementById('f-status').value='';currentRating=0;renderRatingStars();document.getElementById('f-review').value='';document.getElementById('f-photos').value='';document.getElementById('modalActions').innerHTML='<button class="modal-btn modal-btn-cancel" onclick="closeModal()">취소</button><button class="modal-btn modal-btn-save" onclick="saveItem()">추가</button>';document.getElementById('modalOverlay').classList.add('visible')}
-function saveItem(){const item={time:document.getElementById('f-time').value.trim()||'—',type:document.getElementById('f-type').value,title:document.getElementById('f-title').value.trim(),desc:document.getElementById('f-desc').value.trim()};if(!item.title){showToast('제목 필수');return}const placeName=document.getElementById('f-placename').value.trim();if(placeName)item.placeName=placeName;const w=document.getElementById('f-warn').value.trim();if(w)item.warn=w;const url=document.getElementById('f-url').value.trim();if(url)item.url=url;const cost=parseInt(document.getElementById('f-cost').value);if(cost>0)item.cost=cost;const memo=document.getElementById('f-memo').value.trim();if(memo)item.memo=memo;const bookingUrl=document.getElementById('f-booking').value.trim();if(bookingUrl)item.bookingUrl=bookingUrl;const st=document.getElementById('f-status').value;if(st)item.status=st;if(currentRating>0)item.rating=currentRating;const review=document.getElementById('f-review').value.trim();if(review)item.review=review;const photosRaw=document.getElementById('f-photos').value.trim();if(photosRaw)item.photos=photosRaw.split('\n').map(s=>s.trim()).filter(s=>s);
+function openEditModal(idx){if(!editMode)return;editingIdx=idx;const item=DAYS[currentDay].schedule[idx];document.getElementById('modalTitleText').textContent='✏️ 수정';document.getElementById('placeSearchInput').value='';document.getElementById('placeResults').classList.remove('visible');document.getElementById('f-time').value=item.time||'';document.getElementById('f-type').value=item.type||'etc';document.getElementById('f-title').value=item.title||'';document.getElementById('f-placename').value=item.placeName||'';document.getElementById('f-desc').value=item.desc||'';document.getElementById('f-url').value=item.url||'';document.getElementById('f-cost').value=item.cost||'';document.getElementById('f-memo').value=item.memo||'';document.getElementById('f-warn').value=item.warn||'';document.getElementById('f-lat').value=item.coords?item.coords[0]:'';document.getElementById('f-lng').value=item.coords?item.coords[1]:'';document.getElementById('f-status').value=item.status||'';document.getElementById('f-deadline').value=item.deadline||'';document.getElementById('f-booking').value=item.bookingUrl||'';currentRating=item.rating||0;renderRatingStars();document.getElementById('f-review').value=item.review||'';document.getElementById('f-photos').value=(item.photos||[]).join('\n');document.getElementById('modalActions').innerHTML=`<button class="modal-btn modal-btn-delete" onclick="deleteItem(${idx});closeModal()">삭제</button><button class="modal-btn modal-btn-cancel" onclick="closeModal()">취소</button><button class="modal-btn modal-btn-save" onclick="saveItem()">저장</button>`;document.getElementById('modalOverlay').classList.add('visible')}
+function openAddModal(){editingIdx=null;document.getElementById('modalTitleText').textContent='➕ 추가';['f-time','f-title','f-placename','f-desc','f-url','f-cost','f-memo','f-warn','f-lat','f-lng','f-booking','f-deadline'].forEach(id=>document.getElementById(id).value='');document.getElementById('placeSearchInput').value='';document.getElementById('placeResults').classList.remove('visible');document.getElementById('f-type').value='spot';document.getElementById('f-status').value='';currentRating=0;renderRatingStars();document.getElementById('f-review').value='';document.getElementById('f-photos').value='';document.getElementById('modalActions').innerHTML='<button class="modal-btn modal-btn-cancel" onclick="closeModal()">취소</button><button class="modal-btn modal-btn-save" onclick="saveItem()">추가</button>';document.getElementById('modalOverlay').classList.add('visible')}
+function saveItem(){const item={time:document.getElementById('f-time').value.trim()||'—',type:document.getElementById('f-type').value,title:document.getElementById('f-title').value.trim(),desc:document.getElementById('f-desc').value.trim()};if(!item.title){showToast('제목 필수');return}const placeName=document.getElementById('f-placename').value.trim();if(placeName)item.placeName=placeName;const w=document.getElementById('f-warn').value.trim();if(w)item.warn=w;const url=document.getElementById('f-url').value.trim();if(url)item.url=url;const cost=parseInt(document.getElementById('f-cost').value);if(cost>0)item.cost=cost;const memo=document.getElementById('f-memo').value.trim();if(memo)item.memo=memo;const bookingUrl=document.getElementById('f-booking').value.trim();if(bookingUrl)item.bookingUrl=bookingUrl;const st=document.getElementById('f-status').value;if(st)item.status=st;const dl=document.getElementById('f-deadline').value;if(dl)item.deadline=dl;if(currentRating>0)item.rating=currentRating;const review=document.getElementById('f-review').value.trim();if(review)item.review=review;const photosRaw=document.getElementById('f-photos').value.trim();if(photosRaw)item.photos=photosRaw.split('\n').map(s=>s.trim()).filter(s=>s);
 const lat=parseFloat(document.getElementById('f-lat').value),lng=parseFloat(document.getElementById('f-lng').value);if(!isNaN(lat)&&!isNaN(lng))item.coords=[lat,lng];
 if(editingIdx!==null){DAYS[currentDay].schedule[editingIdx]=item;showToast('수정 완료')}else{DAYS[currentDay].schedule.push(item);showToast('추가 완료')}DAYS[currentDay].schedule.sort((a,b)=>{if(a.time==='—'&&b.time==='—')return 0;if(a.time==='—')return 1;if(b.time==='—')return -1;return a.time.localeCompare(b.time)});saveToLocal();closeModal();renderDayContent()}
 function deleteItem(idx){DAYS[currentDay].schedule.splice(idx,1);saveToLocal();renderDayContent();showToast('삭제')}
@@ -328,35 +336,106 @@ function restoreTheme(){try{const legacy=localStorage.getItem('travel_light_mode
 
 // ══════════ PRINT / PDF ══════════
 function printSchedule(){window.print()}
-function exportPDF(){const origView=currentView;const origDay=currentDay;
+function exportPDF(){
 const win=window.open('','_blank');if(!win){showToast('팝업 차단됨 — 허용해주세요');return}
-let html=`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>여행 일정표</title>
+// 집계
+let grandTotal=0;const byCat={};let totalStops=0,coordStops=0;
+DAYS.forEach(day=>day.schedule.forEach(item=>{if(item.cost){grandTotal+=item.cost;const cat=TYPE_STYLES[item.type]?.label||'기타';byCat[cat]=(byCat[cat]||0)+item.cost}totalStops++;if(item.coords)coordStops++}));
+const confirmedCnt=DAYS.reduce((s,d)=>s+d.schedule.filter(i=>i.status==='confirmed').length,0);
+const unbookedCnt=DAYS.reduce((s,d)=>s+d.schedule.filter(i=>i.status==='unbooked'||(i.warn&&/예약|확인|필수|권장/.test(i.warn)&&!i.status)).length,0);
+const today=new Date().toLocaleDateString('ko-KR');
+let html=`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>여행 일정표 — 스페인·포르투갈</title>
 <style>@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap');
-*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans KR',sans-serif;color:#1e293b;padding:20px;font-size:11px;line-height:1.6}
-.pdf-header{text-align:center;margin-bottom:20px;padding-bottom:15px;border-bottom:2px solid #E8725A}
-.pdf-title{font-size:22px;font-weight:800;color:#E8725A}.pdf-date{font-size:12px;color:#64748b;margin-top:4px}
-.day-section{page-break-inside:avoid;margin-bottom:18px;border:1px solid #e2e8f0;border-radius:10px;padding:14px}
-.day-title{font-size:14px;font-weight:800;color:#fff;padding:6px 12px;border-radius:6px;margin-bottom:10px;display:inline-block}
-.day-hotel{font-size:10px;color:#7c3aed;background:#f5f3ff;padding:4px 10px;border-radius:6px;margin-bottom:8px;white-space:pre-line}
-.item-row{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #f1f5f9}.item-row:last-child{border-bottom:none}
-.item-time{width:45px;font-weight:700;color:#64748b;flex-shrink:0;font-size:10px}.item-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
-.item-content{flex:1}.item-title{font-weight:700;font-size:11px}.item-desc{color:#64748b;font-size:9px;white-space:pre-line}
-.item-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}.item-badge{font-size:8px;padding:1px 5px;border-radius:3px;font-weight:600}
-.badge-warn{background:#fef2f2;color:#ef4444}.badge-confirmed{background:#f0fdf4;color:#16a34a}.badge-cost{background:#fffbeb;color:#d97706}
-@media print{body{padding:10px}.day-section{break-inside:avoid}}
+@page{size:A4;margin:14mm 12mm}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:'Noto Sans KR',sans-serif;color:#1e293b;font-size:11px;line-height:1.55}
+.pdf-page{page-break-after:always}
+.pdf-page:last-child{page-break-after:auto}
+/* 표지/요약 */
+.pdf-cover{text-align:center;padding:40px 20px 24px;border-bottom:3px solid #E8725A;margin-bottom:22px}
+.pdf-cover-title{font-size:28px;font-weight:800;color:#E8725A;letter-spacing:-.5px;margin-bottom:6px}
+.pdf-cover-sub{font-size:14px;color:#475569;font-weight:600}
+.pdf-cover-meta{font-size:11px;color:#94a3b8;margin-top:10px}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.summary-card{border:1px solid #e2e8f0;border-radius:10px;padding:14px;background:#fafbfc}
+.summary-label{font-size:9px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.summary-value{font-size:20px;font-weight:800;color:#1e293b;margin-top:3px;letter-spacing:-.3px}
+.summary-hint{font-size:9px;color:#64748b;margin-top:2px}
+.summary-title{font-size:13px;font-weight:800;color:#1e293b;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid #e2e8f0}
+.cat-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #f1f5f9;font-size:11px}
+.cat-row:last-child{border-bottom:none}
+.cat-row strong{color:#E8725A;font-weight:700}
+/* 하루 페이지 */
+.day-page{page-break-before:always;padding-top:4px}
+.day-page:first-of-type{page-break-before:auto}
+.day-banner{padding:12px 16px;border-radius:10px;color:#fff;margin-bottom:12px;box-shadow:0 2px 6px rgba(0,0,0,.06)}
+.day-banner-num{font-size:11px;opacity:.85;font-weight:700;letter-spacing:.5px}
+.day-banner-region{font-size:18px;font-weight:800;margin-top:2px}
+.day-banner-date{font-size:10px;opacity:.9;margin-top:2px}
+.day-meta-row{display:flex;gap:10px;margin-bottom:10px;font-size:10px}
+.day-meta-chip{padding:4px 10px;border-radius:6px;background:#f1f5f9;color:#475569;font-weight:600}
+.day-hotel{font-size:10px;color:#7c3aed;background:#f5f3ff;padding:6px 12px;border-radius:8px;margin-bottom:10px;white-space:pre-line;border-left:3px solid #8B5CF6}
+.item-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9;page-break-inside:avoid}
+.item-row:last-child{border-bottom:none}
+.item-time{width:48px;font-weight:700;color:#334155;flex-shrink:0;font-size:10px;font-variant-numeric:tabular-nums}
+.item-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.item-content{flex:1;min-width:0}
+.item-title{font-weight:700;font-size:11px;color:#0f172a}
+.item-desc{color:#64748b;font-size:9.5px;white-space:pre-line;margin-top:1px}
+.item-memo{color:#8b5cf6;font-size:9px;margin-top:3px;padding:3px 7px;background:#f5f3ff;border-radius:4px;display:inline-block}
+.item-link{color:#3b82f6;font-size:9px;text-decoration:none;word-break:break-all}
+.item-link-row{margin-top:3px;display:flex;flex-wrap:wrap;gap:8px}
+.item-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.item-badge{font-size:8px;padding:2px 6px;border-radius:3px;font-weight:700}
+.badge-warn{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+.badge-confirmed{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0}
+.badge-pending{background:#fffbeb;color:#d97706;border:1px solid #fde68a}
+.badge-unbooked{background:#f1f5f9;color:#475569;border:1px solid #cbd5e1}
+.badge-cost{background:#fffbeb;color:#d97706}
+.badge-deadline{background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5}
+.day-total{text-align:right;padding:8px 12px;background:#fffbeb;border-radius:6px;margin-top:10px;font-size:11px;color:#92400e;font-weight:700}
+.pdf-footer{text-align:center;color:#94a3b8;font-size:9px;margin-top:24px;padding-top:10px;border-top:1px solid #e2e8f0}
 </style></head><body>`;
-html+=`<div class="pdf-header"><div class="pdf-title">🇪🇸 스페인 · 포르투갈 신혼여행</div><div class="pdf-date">2026.09.13 — 09.26 · 14일</div></div>`;
-DAYS.forEach((day,di)=>{html+=`<div class="day-section"><div class="day-title" style="background:${day.color}">DAY ${di+1} · ${esc(day.date)} — ${esc(day.region)}</div>`;
+// ─── 1쪽: 표지 + 전체 요약 ───
+html+=`<div class="pdf-page"><div class="pdf-cover"><div class="pdf-cover-title">🇪🇸 스페인 · 포르투갈 여행 🇵🇹</div><div class="pdf-cover-sub">2026.09.13 — 09.26 · 14일</div><div class="pdf-cover-meta">생성일: ${today}</div></div>`;
+html+=`<div class="summary-grid">`;
+html+=`<div class="summary-card"><div class="summary-label">총 예상 비용</div><div class="summary-value">${fmt(grandTotal)}</div><div class="summary-hint">약 €${Math.round(grandTotal/EUR_RATE).toLocaleString()} (1€ ≈ ${EUR_RATE.toLocaleString()}원)</div></div>`;
+html+=`<div class="summary-card"><div class="summary-label">총 일정</div><div class="summary-value">${totalStops}건</div><div class="summary-hint">📍 위치 등록 ${coordStops}건 · ${DAYS.length}일</div></div>`;
+html+=`<div class="summary-card"><div class="summary-label">예약 확정</div><div class="summary-value" style="color:#16a34a">${confirmedCnt}건</div><div class="summary-hint">전체 일정 대비 ${totalStops?Math.round(confirmedCnt/totalStops*100):0}%</div></div>`;
+html+=`<div class="summary-card"><div class="summary-label">미예약/확인필요</div><div class="summary-value" style="color:${unbookedCnt?'#dc2626':'#16a34a'}">${unbookedCnt}건</div><div class="summary-hint">${unbookedCnt?'출국 전 예약 완료 필요':'모두 예약 완료 ✓'}</div></div>`;
+html+=`</div>`;
+// 카테고리 비용 요약
+html+=`<div class="summary-title">💰 카테고리별 예상 비용</div>`;
+Object.entries(byCat).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{const pct=grandTotal?Math.round(v/grandTotal*100):0;html+=`<div class="cat-row"><span>${k}</span><span><strong>${fmt(v)}</strong> <span style="color:#94a3b8">(${pct}%)</span></span></div>`});
+// 일자별 개요
+html+=`<div class="summary-title">📅 일자별 개요</div>`;
+DAYS.forEach((day,di)=>{const dc=day.schedule.reduce((s,i)=>s+(i.cost||0),0);html+=`<div class="cat-row"><span><strong style="color:${day.color}">D${di+1}</strong> · ${esc(day.date)} — ${esc(day.region)}</span><span>${day.schedule.length}건${dc?' · '+fmt(dc):''}</span></div>`});
+html+=`</div>`;
+// ─── 각 날짜 페이지 ───
+DAYS.forEach((day,di)=>{const dc=day.schedule.reduce((s,i)=>s+(i.cost||0),0);
+html+=`<div class="day-page"><div class="day-banner" style="background:linear-gradient(135deg,${day.color},${day.color}cc)"><div class="day-banner-num">DAY ${di+1} / ${DAYS.length}</div><div class="day-banner-region">${esc(day.region)}</div><div class="day-banner-date">${esc(day.date)}</div></div>`;
+html+=`<div class="day-meta-row"><span class="day-meta-chip">📍 ${day.schedule.length}개 일정</span>${dc?`<span class="day-meta-chip">💰 예상 ${fmt(dc)}</span>`:''}</div>`;
 if(day.hotel&&day.hotel!=='—')html+=`<div class="day-hotel">🏨 ${esc(day.hotel)}</div>`;
 day.schedule.forEach(item=>{const t=TYPE_STYLES[item.type]||TYPE_STYLES.etc;let badges='';
 if(item.status==='confirmed')badges+='<span class="item-badge badge-confirmed">✅ 확정</span>';
+else if(item.status==='pending')badges+='<span class="item-badge badge-pending">🟡 진행중</span>';
+else if(item.status==='unbooked')badges+='<span class="item-badge badge-unbooked">⬜ 미예약</span>';
+if(item.deadline){const n=daysUntilDeadline(item.deadline);if(n!==null)badges+=`<span class="item-badge badge-deadline">⏰ ${n<0?`마감 ${-n}일 경과`:n===0?'오늘 마감':'D-'+n} (${esc(item.deadline)})</span>`}
 if(item.warn)badges+=`<span class="item-badge badge-warn">⚠️ ${esc(item.warn)}</span>`;
 if(item.cost)badges+=`<span class="item-badge badge-cost">${fmt(item.cost)}</span>`;
-html+=`<div class="item-row"><div class="item-time">${item.time}</div><div class="item-dot" style="background:${t.dot}"></div><div class="item-content"><div class="item-title">${esc(item.title)}</div><div class="item-desc">${esc(item.desc)}</div>${badges?'<div class="item-badges">'+badges+'</div>':''}</div></div>`});
+let links='';
+if(item.bookingUrl)links+=`<a class="item-link" href="${esc(item.bookingUrl)}">📄 바우처</a>`;
+if(item.url)links+=`<a class="item-link" href="${esc(item.url)}">🔗 예약링크</a>`;
+if(item.coords){const pn=extractPlaceName(item,day);links+=`<a class="item-link" href="${gmapsUrl(item.coords,pn)}">📍 지도</a>`}
+html+=`<div class="item-row"><div class="item-time">${esc(item.time||'—')}</div><div class="item-dot" style="background:${t.dot}"></div><div class="item-content"><div class="item-title">${esc(item.title)}</div>${item.desc?`<div class="item-desc">${esc(item.desc)}</div>`:''}${item.memo?`<div class="item-memo">📝 ${esc(item.memo)}</div>`:''}${badges?'<div class="item-badges">'+badges+'</div>':''}${links?'<div class="item-link-row">'+links+'</div>':''}</div></div>`});
+if(dc)html+=`<div class="day-total">DAY ${di+1} 예상 합계 · ${fmt(dc)}</div>`;
 html+=`</div>`});
-html+=`<div style="text-align:center;color:#94a3b8;font-size:9px;margin-top:20px">Generated by Travel Planner · ${new Date().toLocaleDateString('ko-KR')}</div>`;
+html+=`<div class="pdf-footer">Travel Planner · ${today} · 총 ${DAYS.length}일 / ${totalStops}건 / ${fmt(grandTotal)}</div>`;
 html+=`</body></html>`;
-win.document.write(html);win.document.close();setTimeout(()=>win.print(),500)}
+win.document.write(html);win.document.close();setTimeout(()=>win.print(),600)}
+
+// ══════════ VOUCHER BULK OPEN ══════════
+function openAllVouchers(){const urls=[];DAYS.forEach(day=>day.schedule.forEach(item=>{if(item.bookingUrl)urls.push(item.bookingUrl)}));if(!urls.length){showToast('바우처가 없습니다');return}if(urls.length>6&&!confirm(`${urls.length}개 탭을 엽니다. 계속할까요?`))return;urls.forEach((u,i)=>setTimeout(()=>window.open(u,'_blank','noopener'),i*80));showToast(`바우처 ${urls.length}개 열기`)}
 
 // ══════════ PREP VIEW (준비 탭) ══════════
 function renderPrepView(){const el=document.getElementById('prepView');const unbooked=[],pending=[],confirmed=[],cancelled=[],transportByDay=[];
@@ -367,10 +446,15 @@ else if(item.status==='confirmed')confirmed.push({di,item});
 else if(item.status==='cancelled')cancelled.push({di,item});
 else if(item.warn&&/예약|확인|필수|권장/.test(item.warn))unbooked.push({di,item});
 if(item.type==='move'||item.type==='flight')transports.push(item)});if(transports.length)transportByDay.push({di,day,transports})});
-const mkCard=(arr,cls)=>arr.map(u=>`<div class="prep-card ${cls}" onclick="selectDay(${u.di});switchView('timeline')"><div class="prep-card-title">${esc(u.item.title)}${u.item.status?` <span class="status-badge ${STATUS_CSS[u.item.status]}" style="font-size:8px">${STATUS_LABELS[u.item.status]}</span>`:''}</div><div class="prep-card-meta">DAY ${u.di+1} · ${esc(DAYS[u.di].date)}${u.item.warn?' · '+esc(u.item.warn):''}</div></div>`).join('');
+const mkCard=(arr,cls)=>arr.map(u=>`<div class="prep-card ${cls}" onclick="selectDay(${u.di});switchView('timeline')"><div class="prep-card-title">${esc(u.item.title)}${u.item.status?` <span class="status-badge ${STATUS_CSS[u.item.status]}" style="font-size:8px">${STATUS_LABELS[u.item.status]}</span>`:''}${u.item.deadline&&u.item.status!=='confirmed'&&u.item.status!=='cancelled'?' '+deadlineBadgeHtml(u.item.deadline):''}</div><div class="prep-card-meta">DAY ${u.di+1} · ${esc(DAYS[u.di].date)}${u.item.warn?' · '+esc(u.item.warn):''}</div></div>`).join('');
+// H2 · 바우처 보관함: bookingUrl 또는 url 보유 항목
+const vouchers=[];DAYS.forEach((day,di)=>day.schedule.forEach(item=>{if(item.bookingUrl||item.url)vouchers.push({di,day,item})}));
+const voucherOpenAll=vouchers.length?`<button class="voucher-open-all" onclick="openAllVouchers()">📂 바우처 전체 열기 (${vouchers.filter(v=>v.item.bookingUrl).length})</button>`:'';
+const voucherHtml=vouchers.length?vouchers.map(v=>{const it=v.item;const b=it.bookingUrl?`<a class="voucher-link voucher-link-booking" href="${esc(it.bookingUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📄 바우처</a>`:'';const u=it.url?`<a class="voucher-link voucher-link-url" href="${esc(it.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗 예약</a>`:'';const st=it.status&&STATUS_LABELS[it.status]?`<span class="status-badge ${STATUS_CSS[it.status]}" style="font-size:8px">${STATUS_LABELS[it.status]}</span>`:'';const t=TYPE_STYLES[it.type]||TYPE_STYLES.etc;return`<div class="voucher-card" onclick="selectDay(${v.di});switchView('timeline')"><div class="voucher-card-dot" style="background:${t.dot}"></div><div class="voucher-card-body"><div class="voucher-card-title">${esc(it.title)} ${st}</div><div class="voucher-card-meta">DAY ${v.di+1} · ${esc(v.day.date)}${it.time&&it.time!=='—'?' · '+esc(it.time):''}</div></div><div class="voucher-card-actions">${b}${u}</div></div>`}).join(''):'<div class="prep-card" style="color:#64748b">등록된 바우처 없음 — 일정 편집에서 바우처 링크를 추가하세요</div>';
 const packingHtml=renderPackingList();
 const shoppingHtml=renderShoppingList();
 el.innerHTML=`<div class="prep-title">📋 여행 준비 체크리스트</div>
+<div class="prep-section"><div class="prep-section-title">📎 내 바우처 (${vouchers.length}건) ${voucherOpenAll}</div>${voucherHtml}</div>
 <div class="prep-section"><div class="prep-section-title">⬜ 미예약 (${unbooked.length}건)</div>${unbooked.length?mkCard(unbooked,'prep-warn'):'<div class="prep-card prep-ok">미예약 항목 없음 ✓</div>'}</div>
 <div class="prep-section"><div class="prep-section-title">🟡 진행중 (${pending.length}건)</div>${pending.length?mkCard(pending,''):'<div class="prep-card" style="color:#64748b">진행중 항목 없음</div>'}</div>
 <div class="prep-section"><div class="prep-section-title">✅ 확정 (${confirmed.length}건)</div>${confirmed.length?mkCard(confirmed,'prep-ok'):'<div class="prep-card" style="color:#64748b">확정 항목 없음</div>'}</div>
@@ -430,8 +514,10 @@ let ddayText='',ddayColor='#F5A623';
 if(now<TRIP_START){const d=Math.ceil((TRIP_START-now)/864e5);ddayText=`D-${d}`;ddayColor='#F5A623'}
 else if(now<=TRIP_END){const d=Math.floor((now-TRIP_START)/864e5)+1;ddayText=`DAY ${d}`;ddayColor='#10B981'}
 else{ddayText='여행 완료!';ddayColor='#c4b5fd'}
-let unbooked=0,totalItems=0;
-DAYS.forEach(day=>day.schedule.forEach(item=>{totalItems++;if(item.status==='unbooked'||(item.warn&&/예약|확인|필수|권장/.test(item.warn)&&!item.status))unbooked++}));
+let unbooked=0,pendingCnt=0,confirmedCnt=0,cancelledCnt=0,totalItems=0,statusableTotal=0;
+DAYS.forEach(day=>day.schedule.forEach(item=>{totalItems++;const hasImplicit=item.warn&&/예약|확인|필수|권장/.test(item.warn)&&!item.status;if(item.status==='unbooked'||hasImplicit)unbooked++;if(item.status==='pending')pendingCnt++;if(item.status==='confirmed')confirmedCnt++;if(item.status==='cancelled')cancelledCnt++;if(item.status||hasImplicit)statusableTotal++}));
+const confirmPct=statusableTotal?Math.round(confirmedCnt/statusableTotal*100):0;
+const deadlines=collectUpcomingDeadlines();
 const packing=loadPackingList();const packTotal=Object.values(packing).reduce((s,a)=>s+a.length,0);const packDone=Object.values(packing).reduce((s,a)=>s+a.filter(i=>i.checked).length,0);const packPct=packTotal?Math.round(packDone/packTotal*100):0;
 let totalBudget=0,totalSpent=0;
 DAYS.forEach(day=>{day.schedule.forEach(i=>{if(i.cost)totalBudget+=i.cost});(day.expenses||[]).forEach(e=>{totalSpent+=expenseToKRW(e)})});
@@ -440,6 +526,11 @@ let todayHtml='';const tripDayIdx=Math.floor((now-TRIP_START)/864e5);
 if(tripDayIdx>=0&&tripDayIdx<DAYS.length){const today=DAYS[tripDayIdx];
 todayHtml=`<div class="dash-today"><div class="dash-today-title">📍 오늘의 일정 — DAY ${tripDayIdx+1} ${esc(today.region)}</div>${today.schedule.map(item=>{const t=TYPE_STYLES[item.type]||TYPE_STYLES.etc;return`<div class="dash-today-item"><div class="dash-today-time">${item.time}</div><div class="dash-today-dot" style="background:${t.dot}"></div><div class="dash-today-content"><strong>${esc(item.title)}</strong></div></div>`}).join('')}</div>`}
 else if(now<TRIP_START){const first=DAYS[0];todayHtml=`<div class="dash-today"><div class="dash-today-title">✈️ 첫날 일정 미리보기 — ${esc(first.region)}</div>${first.schedule.slice(0,5).map(item=>{const t=TYPE_STYLES[item.type]||TYPE_STYLES.etc;return`<div class="dash-today-item"><div class="dash-today-time">${item.time}</div><div class="dash-today-dot" style="background:${t.dot}"></div><div class="dash-today-content"><strong>${esc(item.title)}</strong></div></div>`}).join('')}${first.schedule.length>5?`<div style="font-size:10px;color:#64748b;text-align:center;padding:4px">외 ${first.schedule.length-5}건...</div>`:''}</div>`}
+// 예약 상태 요약 (4-way breakdown)
+const statusSummaryHtml=`<div class="dash-status-summary" onclick="switchView('prep')"><div class="dash-status-summary-title">🗂️ 예약 상태 요약 <span style="color:var(--text-dim);font-size:10px;font-weight:500">· ${confirmedCnt}/${statusableTotal} 확정 (${confirmPct}%)</span></div><div class="dash-status-bar"><div class="dash-status-fill dash-status-fill-confirmed" style="width:${statusableTotal?confirmedCnt/statusableTotal*100:0}%"></div><div class="dash-status-fill dash-status-fill-pending" style="width:${statusableTotal?pendingCnt/statusableTotal*100:0}%"></div><div class="dash-status-fill dash-status-fill-unbooked" style="width:${statusableTotal?unbooked/statusableTotal*100:0}%"></div></div><div class="dash-status-chips"><span class="dash-status-chip status-confirmed">✅ 확정 ${confirmedCnt}</span><span class="dash-status-chip status-pending">🟡 진행중 ${pendingCnt}</span><span class="dash-status-chip status-unbooked">⬜ 미예약 ${unbooked}</span>${cancelledCnt?`<span class="dash-status-chip status-cancelled">❌ 취소 ${cancelledCnt}</span>`:''}</div></div>`;
+// 마감 임박 위젯 (H3)
+let deadlineHtml='';
+if(deadlines.length){const overdue=deadlines.filter(d=>d.days<0).length;deadlineHtml=`<div class="dash-deadline-list"><div style="font-size:11px;font-weight:700;color:#f87171;margin-bottom:6px">⏰ 예약 마감 임박 (${deadlines.length}건${overdue?`, ${overdue}건 경과`:''})</div>${deadlines.slice(0,8).map(d=>{const lbl=d.days<0?`마감 ${-d.days}일 경과`:d.days===0?'오늘 마감':`D-${d.days}`;return`<div class="dash-warn" onclick="selectDay(${d.di});switchView('timeline')"><strong>${lbl}</strong> · D${d.di+1} · ${esc(d.item.title)}</div>`}).join('')}</div>`}
 let warnHtml='';
 if(unbooked>0){const warns=[];DAYS.forEach((day,di)=>day.schedule.forEach(item=>{if(item.status==='unbooked'||(item.warn&&/예약|확인|필수|권장/.test(item.warn)&&!item.status))warns.push({di,item})}));
 warnHtml=`<div class="dash-warn-list"><div style="font-size:11px;font-weight:700;color:#f87171;margin-bottom:6px">⚠️ 예약 필요 항목</div>${warns.slice(0,8).map(w=>`<div class="dash-warn" onclick="selectDay(${w.di});switchView('timeline')">D${w.di+1} · ${esc(w.item.title)}${w.item.warn?' — '+esc(w.item.warn):''}</div>`).join('')}</div>`}
@@ -450,7 +541,7 @@ el.innerHTML=`<div class="prep-title" style="text-align:center;margin-bottom:6px
 <div class="dash-card" onclick="switchView('prep')"><div class="dash-card-icon">🧳</div><div class="dash-card-value">${packPct}%</div><div class="dash-card-label">패킹 진행률</div><div class="dash-progress"><div class="dash-progress-fill" style="width:${packPct}%;background:${packPct>=100?'#10B981':packPct>=50?'#F5A623':'#EF4444'}"></div></div></div>
 <div class="dash-card" onclick="switchView('budget')"><div class="dash-card-icon">💰</div><div class="dash-card-value" style="font-size:16px">${(totalBudget/10000).toFixed(0)}만</div><div class="dash-card-label">총 예산${totalSpent?` · 지출 ${(totalSpent/10000).toFixed(0)}만`:''}</div></div>
 <div class="dash-card" onclick="switchView('timeline')"><div class="dash-card-icon">✅</div><div class="dash-card-value">${checkPct}%</div><div class="dash-card-label">일정 완료 (${checked}/${totalItems})</div><div class="dash-progress"><div class="dash-progress-fill" style="width:${checkPct}%;background:#10B981"></div></div></div>
-</div>${todayHtml}${warnHtml}`}
+</div>${statusSummaryHtml}${deadlineHtml}${todayHtml}${warnHtml}`}
 
 // ══════════ SOS / EMERGENCY ══════════
 const SOS_CONTACTS=[

@@ -138,7 +138,10 @@
       <div class="field-group"><div class="field-label">위도</div><input class="field-input" id="f-lat" placeholder="41.4036" type="number" step="any"></div>
       <div class="field-group"><div class="field-label">경도</div><input class="field-input" id="f-lng" placeholder="2.1744" type="number" step="any"></div>
     </div>
-    <div class="field-group"><div class="field-label">예약 상태</div><select class="field-select" id="f-status"><option value="">— 해당없음</option><option value="unbooked">⬜ 미예약</option><option value="pending">🟡 진행중</option><option value="confirmed">✅ 확정</option><option value="cancelled">❌ 취소</option></select></div>
+    <div class="field-row">
+      <div class="field-group"><div class="field-label">예약 상태</div><select class="field-select" id="f-status"><option value="">— 해당없음</option><option value="unbooked">⬜ 미예약</option><option value="pending">🟡 진행중</option><option value="confirmed">✅ 확정</option><option value="cancelled">❌ 취소</option></select></div>
+      <div class="field-group"><div class="field-label">예약 마감일 (D-N 경고)</div><input class="field-input" id="f-deadline" type="date" placeholder="YYYY-MM-DD"></div>
+    </div>
     <div style="border-top:1px solid rgba(255,255,255,.08);margin-top:12px;padding-top:12px">
       <div class="field-label" style="margin-bottom:8px;font-size:11px;color:#c4b5fd">📝 여행 후기 (여행 후 작성)</div>
       <div class="field-group"><div class="field-label">별점</div><div id="f-rating-stars" style="display:flex;gap:4px;font-size:22px;cursor:pointer" onclick="setRating(event)">
