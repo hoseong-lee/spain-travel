@@ -43,6 +43,7 @@
   <button class="view-tab active" onclick="switchView('timeline')">📋 일정</button>
   <button class="view-tab" onclick="switchView('map')">🗺️ 지도</button>
   <button class="view-tab" onclick="switchView('route')">🧭 동선</button>
+  <button class="view-tab" onclick="switchView('voucher')">🎫 바우처</button>
   <button class="view-tab" onclick="switchView('budget')">💰 예산</button>
   <button class="view-tab" onclick="switchView('prep')">📋 준비</button>
   <button class="view-tab" onclick="switchView('phrase')">🗣️ 회화</button>
@@ -87,6 +88,7 @@
   <div class="map-legend"><div class="map-legend-title">카테고리</div><div class="map-legend-item"><div class="map-legend-dot" style="background:#10B981"></div>관광</div><div class="map-legend-item"><div class="map-legend-dot" style="background:#F59E0B"></div>맛집</div><div class="map-legend-item"><div class="map-legend-dot" style="background:#EC4899"></div>쇼핑</div><div class="map-legend-item"><div class="map-legend-dot" style="background:#3B82F6"></div>항공</div><div class="map-legend-item"><div class="map-legend-dot" style="background:#8B5CF6"></div>숙소</div></div>
 </div>
 <div class="route-container" id="routeView"></div>
+<div class="prep-container" id="voucherView"></div>
 <div class="budget-container" id="budgetView"></div>
 <div class="prep-container" id="prepView"></div>
 <div class="prep-container" id="phraseView"></div>
@@ -94,12 +96,13 @@
 <div class="tips" id="tipsSection">
   <div class="tips-title">💡 여행 꿀팁</div>
   <div class="tips-body">
-    • <span class="hl-y">사전 예약 필수</span>: 사그라다파밀리아, 구엘공원, 카사바트요, 가이아 와이너리<br>
-    • <span class="hl-p">라로카빌리지</span>: 셔틀버스 예약 필수, 10% 추가 할인<br>
-    • <span class="hl-g">바르셀로나 교통</span>: 알단테 교통카드 발급<br>
-    • <span class="hl-o">마요르카 렌트카</span>: skyscanner 가격비교<br>
-    • 스페인 식사시간: 점심 14시, 저녁 21시 이후<br>
-    • 포르투 도시세, 마요르카 숙소세 <span class="hl-y">현장 현금 결제</span>
+    • <span class="hl-y">아직 미예약</span>: 라이언에어 2건 (9/16 BCN→OPO · 9/20 OPO→PMI) — 직항 편수 적어 서둘러야 함<br>
+    • <span class="hl-p">현금 필수</span>: 포르투 스냅 잔금 €150 · 팔마 A2 공항버스 €5 (카드 태그 안 되는 경우)<br>
+    • <span class="hl-g">렌터카 3종 실물</span>: 한국 면허증 + 국제(영문) 면허증 + 여권 — 캡처·복사본 불가<br>
+    • <span class="hl-o">포르투 숙소</span>: 실내화 없음 → 다이소 욕실화 지참 · 구시가지 계단 많아 운동화<br>
+    • <span class="hl-b">칼로데스모로</span>: 화장실·매점·그늘 없음 → 돗자리·모자·물·간식 챙기기<br>
+    • 스페인 식사시간: 점심 14시, 저녁 21시 이후 · 도시세는 전부 <span class="hl-y">숙소 현장 결제</span><br>
+    • 9/20(일) 포르투는 상점 상당수 휴무 · 9/25 공항에서 <span class="hl-p">택스리펀</span> 시간 확보
   </div>
 </div>
 <div class="safe-bottom"></div>
