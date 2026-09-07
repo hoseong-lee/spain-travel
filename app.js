@@ -10,7 +10,10 @@ const TRIP_START=new Date(2026,8,13);const TRIP_END=new Date(2026,8,26);
 const STATUS_LABELS={unbooked:'⬜ 미예약',pending:'🟡 진행중',confirmed:'✅ 확정',cancelled:'❌ 취소'};
 const STATUS_CSS={unbooked:'status-unbooked',pending:'status-pending',confirmed:'status-confirmed',cancelled:'status-cancelled'};
 // 기존 confirmed 불리언 → status 필드 마이그레이션
-function migrateStatus(days){days.forEach(day=>day.schedule.forEach(item=>{if(item.status)return;if(item.confirmed){item.status='confirmed';delete item.confirmed}else if(item.warn&&/예약/.test(item.warn)){item.status='unbooked'}}));return days}
+function migrateStatus(days){days.forEach(day=>day.schedule.forEach(item=>{
+// 2026-09 통합일정 xlsx 반영: 라이언에어 2건(9/16 BCN→OPO, 9/20 OPO→PMI) 예약 완료
+if(item.type==='flight'&&/라이언에어/.test(item.title||'')&&item.status!=='confirmed'){item.status='confirmed';delete item.warn;item.memo='✅ 예약 완료 · 예약번호는 라이언에어 앱/메일 확인 후 기록';item.url='https://www.ryanair.com/kr/ko/trip/manage'}
+if(item.status)return;if(item.confirmed){item.status='confirmed';delete item.confirmed}else if(item.warn&&/예약/.test(item.warn)){item.status='unbooked'}}));return days}
 
 // ══════════ STATE ══════════
 let currentDay=0,currentFilter='all',editMode=false,editingIdx=null,currentView='timeline';
@@ -93,7 +96,7 @@ function toggleCurrency(){const w=document.getElementById('currencyWidget');w.cl
 function calcCurrency(from){const e=document.getElementById('eurInput'),k=document.getElementById('krwInput');if(from==='eur'){const v=parseFloat(e.value)||0;k.value=v?Math.round(v*EUR_RATE).toLocaleString():''}else{const v=parseFloat(k.value.replace(/,/g,''))||0;e.value=v?(v/EUR_RATE).toFixed(2):''}}
 
 // ══════════ FIREBASE ══════════
-function initFirebase(){try{fbApp=firebase.initializeApp(FIREBASE_CONFIG);fbAuth=firebase.auth();fbDb=firebase.database();fbDb.ref('.info/connected').on('value',s=>{fbConnected=s.val()===true;if(fbConnected&&fbUser){updateSyncUI('online');setupPresence()}else if(!fbConnected)updateSyncUI('offline')});fbAuth.onAuthStateChanged(user=>{if(user&&ALLOWED_EMAILS.length>0&&!ALLOWED_EMAILS.includes(user.email)){fbAuth.signOut();fbUser=null;updateAuthUI();updateSyncUI('offline');showToast('접근 권한이 없는 계정');return}fbUser=user;updateAuthUI();if(user){updateSyncUI(fbConnected?'online':'offline');setupPresence();fetchRemoteThenSync().then(()=>listenForChanges())}else{updateSyncUI('offline');detachListeners()}});return true}catch(e){console.error(e);updateSyncUI('offline');return false}}
+function initFirebase(){try{fbApp=firebase.initializeApp(FIREBASE_CONFIG);fbAuth=firebase.auth();fbDb=firebase.database();fbDb.ref('.info/connected').on('value',s=>{fbConnected=s.val()===true;if(fbConnected&&fbUser){updateSyncUI('online');setupPresence()}else if(!fbConnected)updateSyncUI('offline')});fbAuth.onAuthStateChanged(user=>{if(user&&ALLOWED_EMAILS.length>0&&!ALLOWED_EMAILS.includes(user.email)){fbAuth.signOut();fbUser=null;updateAuthUI();updateSyncUI('offline');showToast('접근 권한이 없는 계정');return}fbUser=user;updateAuthUI();if(currentView==='voucher')renderVoucherView();if(user){updateSyncUI(fbConnected?'online':'offline');setupPresence();fetchRemoteThenSync().then(()=>listenForChanges())}else{updateSyncUI('offline');detachListeners()}});return true}catch(e){console.error(e);updateSyncUI('offline');return false}}
 function signIn(){if(!fbAuth){showToast('연결 실패 — 새로고침');return}const p=new firebase.auth.GoogleAuthProvider();fbAuth.signInWithPopup(p).catch(e=>{if(e.code==='auth/popup-blocked'||e.code==='auth/popup-closed-by-user')fbAuth.signInWithRedirect(p);else showToast('로그인 실패')})}
 function signOut(){if(fbAuth)fbAuth.signOut();fbUser=null;updateAuthUI();updateSyncUI('offline');showToast('로그아웃')}
 function updateAuthUI(){const el=document.getElementById('authContent');if(fbUser){const p=fbUser.photoURL||'',n=fbUser.displayName||fbUser.email;el.innerHTML=`<div class="auth-user">${p?`<img class="auth-avatar" src="${p}">`:''}${esc(n)}</div><button class="auth-btn auth-btn-logout" onclick="signOut()">로그아웃</button>`}else el.innerHTML='<button class="auth-btn auth-btn-login" onclick="signIn()">🔑 로그인</button>'}
@@ -136,7 +139,7 @@ else{const cb=document.createElement('div');cb.id='conflictBar';cb.className='co
 else{const cb=document.getElementById('conflictBar');if(cb)cb.remove()}
 if(!filtered.length){document.getElementById('timeline').innerHTML='<div style="text-align:center;padding:40px;color:#475569;font-size:12px">일정이 없습니다</div>';return}
 document.getElementById('timeline').innerHTML=filtered.map((item,i)=>{const t=TYPE_STYLES[item.type]||TYPE_STYLES.etc;const isLast=i===filtered.length-1;const checked=item.checked?'checked':'';const checkedClass=item.checked?'checked-item':'';
-let meta='';if(item.status&&STATUS_LABELS[item.status])meta+=`<span class="status-badge ${STATUS_CSS[item.status]}">${STATUS_LABELS[item.status]}</span>`;if(item.deadline&&item.status!=='confirmed'&&item.status!=='cancelled')meta+=deadlineBadgeHtml(item.deadline);if(item.warn)meta+=`<div class="card-warn">⚠️ ${esc(item.warn)}</div>`;if(item.cost)meta+=`<span class="card-cost">${fmt(item.cost)}</span>`;if(item.url)meta+=`<a class="card-link" href="${esc(item.url)}" target="_blank" onclick="event.stopPropagation()">🔗 예약</a>`;if(item.bookingUrl)meta+=`<a class="card-link" href="${esc(item.bookingUrl)}" target="_blank" onclick="event.stopPropagation()" style="background:rgba(139,92,246,.1);color:#c4b5fd">📄 바우처</a>`;if(item.coords){const pn=extractPlaceName(item,day);meta+=`<a class="card-gmaps" href="${gmapsUrl(item.coords,pn)}" target="_blank" onclick="event.stopPropagation()">📍 지도</a>`;meta+=`<a class="card-gmaps" href="${gmapsDirUrl(item.coords,pn)}" target="_blank" onclick="event.stopPropagation()" style="background:rgba(59,130,246,.12);color:#60a5fa;border-color:rgba(59,130,246,.25)">🧭 길찾기</a>`}
+let meta='';if(item.status&&STATUS_LABELS[item.status])meta+=`<span class="status-badge ${STATUS_CSS[item.status]}">${STATUS_LABELS[item.status]}</span>`;if(item.deadline&&item.status!=='confirmed'&&item.status!=='cancelled')meta+=deadlineBadgeHtml(item.deadline);if(item.warn)meta+=`<div class="card-warn">⚠️ ${esc(item.warn)}</div>`;if(item.cost)meta+=`<span class="card-cost">${fmt(item.cost)}</span>`;if(item.url)meta+=`<a class="card-link" href="${esc(item.url)}" target="_blank" onclick="event.stopPropagation()">🔗 예약</a>`;if(item.bookingUrl)meta+=`<a class="card-link" href="${esc(item.bookingUrl)}" target="_blank" onclick="event.stopPropagation()" style="background:rgba(139,92,246,.1);color:#c4b5fd">📄 예약링크</a>`;const _vvid=voucherIdFor(item);if(_vvid)meta+=`<button class="card-voucher-btn" onclick="event.stopPropagation();openVoucherFromCard('${_vvid}')">🎫 바우처</button>`;if(item.coords){const pn=extractPlaceName(item,day);meta+=`<a class="card-gmaps" href="${gmapsUrl(item.coords,pn)}" target="_blank" onclick="event.stopPropagation()">📍 지도</a>`;meta+=`<a class="card-gmaps" href="${gmapsDirUrl(item.coords,pn)}" target="_blank" onclick="event.stopPropagation()" style="background:rgba(59,130,246,.12);color:#60a5fa;border-color:rgba(59,130,246,.25)">🧭 길찾기</a>`}
 const memoHtml=item.memo?`<div class="card-memo">${esc(item.memo)}</div>`:'';
 const ratingHtml=item.rating?`<div class="card-rating">${'★'.repeat(item.rating)+'☆'.repeat(5-item.rating)}</div>`:'';
 const reviewHtml=item.review?`<div class="card-review">${esc(item.review)}</div>`:'';
@@ -162,7 +165,9 @@ function updateTTElement(dayIdx,idx,result){const el=document.getElementById('tt
 function toggleCheck(idx){DAYS[currentDay].schedule[idx].checked=!DAYS[currentDay].schedule[idx].checked;saveToLocal();renderDayContent()}
 
 // ══════════ MAP ══════════
-function initMap(){map=L.map('map',{zoomControl:true,attributionControl:false}).setView([41.3851,2.1734],13);L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);map.on('click',function(e){if(!editMode)return;const lat=e.latlng.lat.toFixed(6),lng=e.latlng.lng.toFixed(6);L.popup().setLatLng(e.latlng).setContent(`<div style="text-align:center"><div style="font-size:10px;color:#94a3b8;margin-bottom:4px">${lat}, ${lng}</div><button onclick="openAddModalWithCoords(${lat},${lng})" style="padding:5px 14px;border-radius:8px;border:none;background:rgba(16,185,129,.2);color:#34d399;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">+ 일정 추가</button></div>`).openOn(map)})}
+function initMap(){map=L.map('map',{zoomControl:true,attributionControl:true}).setView([41.3851,2.1734],13);map.attributionControl.setPrefix(false);
+// CARTO 무료 베이스맵이 API 키 필수로 바뀌어 "API KEY REQUIRED" 워터마크가 뜸 → OSM 표준 타일로 교체 (키 불필요)
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);map.on('click',function(e){if(!editMode)return;const lat=e.latlng.lat.toFixed(6),lng=e.latlng.lng.toFixed(6);L.popup().setLatLng(e.latlng).setContent(`<div style="text-align:center"><div style="font-size:10px;color:#94a3b8;margin-bottom:4px">${lat}, ${lng}</div><button onclick="openAddModalWithCoords(${lat},${lng})" style="padding:5px 14px;border-radius:8px;border:none;background:rgba(16,185,129,.2);color:#34d399;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">+ 일정 추가</button></div>`).openOn(map)})}
 function setMapMode(m){mapMode=m;document.getElementById('mapDayToggle').classList.toggle('active',m==='day');document.getElementById('mapAllToggle').classList.toggle('active',m==='all');document.getElementById('daySelector').style.display=m==='all'?'none':'';updateMap()}
 function updateMap(){if(!map)return;mapMarkers.forEach(m=>map.removeLayer(m));mapMarkers=[];mapRoutes.forEach(r=>map.removeLayer(r));mapRoutes=[];
 if(mapMode==='day'){const day=DAYS[currentDay];const coords=[];let num=1;day.schedule.forEach(item=>{if(!item.coords)return;const[lat,lng]=item.coords;coords.push([lat,lng]);const t=TYPE_STYLES[item.type]||TYPE_STYLES.etc;const icon=L.divIcon({className:'',html:`<div class="custom-marker" style="background:${t.dot}">${num}</div>`,iconSize:[26,26],iconAnchor:[13,13]});const mk=L.marker([lat,lng],{icon}).bindPopup(`<strong>${esc(item.title)}</strong><div class="popup-type">${t.label}</div><div class="popup-time">${item.time!=='—'?item.time:''}</div><div style="margin-top:3px;color:#94a3b8;font-size:10px;white-space:pre-line">${esc(item.desc)}</div>${item.coords?`<div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap"><a href="${gmapsUrl(item.coords,extractPlaceName(item,day))}" target="_blank" style="color:#60a5fa;font-size:10px;font-weight:700">⭐ 리뷰 보기</a><a href="${gmapsDirUrl(item.coords,extractPlaceName(item,day))}" target="_blank" style="color:#34d399;font-size:10px;font-weight:700">🧭 길찾기</a></div>`:''}`,{maxWidth:230}).addTo(map);mapMarkers.push(mk);num++});if(coords.length>=2){// Show dashed line immediately, then overlay real route
@@ -170,7 +175,52 @@ const dashed=L.polyline(coords,{color:day.color,weight:2,opacity:.3,dashArray:'8
 fetchRealRoute(coords,day.color,geom=>{if(geom.length){const real=L.polyline(geom,{color:day.color,weight:4,opacity:.8}).addTo(map);mapRoutes.push(real)}})}if(coords.length)map.fitBounds(L.latLngBounds(coords),{padding:[40,40],maxZoom:15});document.getElementById('mapDayInfo').innerHTML=`<strong>DAY ${currentDay+1} — ${day.date}</strong><br><span style="color:#94a3b8">${esc(day.region)}</span><br><span style="color:${day.color}">📍 ${coords.length}곳</span>`
 }else{// all days
 const allCoords=[];const DAY_COLORS=['#E8725A','#E8725A','#E8725A','#2E86AB','#2E86AB','#2E86AB','#2E86AB','#F5A623','#F5A623','#F5A623','#F5A623','#E8725A','#888','#888'];
-DAYS.forEach((day,di)=>{const coords=[];day.schedule.forEach(item=>{if(!item.coords)return;const[lat,lng]=item.coords;coords.push([lat,lng]);allCoords.push([lat,lng])});if(coords.length>=2){const route=L.polyline(coords,{color:day.color,weight:2.5,opacity:.5,dashArray:'6,6'}).addTo(map);mapRoutes.push(route)}if(coords.length){const first=coords[0];const icon=L.divIcon({className:'',html:`<div class="custom-marker" style="background:${day.color};font-size:9px">D${di+1}</div>`,iconSize:[26,26],iconAnchor:[13,13]});const mk=L.marker(first,{icon}).bindPopup(`<strong>DAY ${di+1}</strong><br>${esc(day.region)}<br><span style="color:#64748b">${day.date}</span>`).addTo(map);mapMarkers.push(mk)}});if(allCoords.length)map.fitBounds(L.latLngBounds(allCoords),{padding:[30,30],maxZoom:8});document.getElementById('mapDayInfo').innerHTML=`<strong>전체 여정</strong><br><span style="color:#94a3b8">14일 · 3개국</span>`}}
+DAYS.forEach((day,di)=>{const coords=[];day.schedule.forEach(item=>{if(!item.coords)return;const[lat,lng]=item.coords;coords.push([lat,lng]);allCoords.push([lat,lng])});if(coords.length>=2){const route=L.polyline(coords,{color:day.color,weight:2.5,opacity:.5,dashArray:'6,6'}).addTo(map);mapRoutes.push(route)}if(coords.length){const first=coords[0];const icon=L.divIcon({className:'',html:`<div class="custom-marker" style="background:${day.color};font-size:9px">D${di+1}</div>`,iconSize:[26,26],iconAnchor:[13,13]});const mk=L.marker(first,{icon}).bindPopup(`<strong>DAY ${di+1}</strong><br>${esc(day.region)}<br><span style="color:#64748b">${day.date}</span>`).addTo(map);mapMarkers.push(mk)}});if(allCoords.length)map.fitBounds(L.latLngBounds(allCoords),{padding:[30,30],maxZoom:8});document.getElementById('mapDayInfo').innerHTML=`<strong>전체 여정</strong><br><span style="color:#94a3b8">14일 · 3개국</span>`}
+rebuildNavStops()}
+
+// ══════════ MAP NAV (동선 이전/다음 + 이동 애니메이션) ══════════
+let navIndex=-1,navStops=[],navTraveler=null,navTrail=null,navAnimId=null;const navLegCache=new Map();
+function rebuildNavStops(){stopNavAnim();navStops=[];if(mapMode==='day'){const day=DAYS[currentDay];day.schedule.forEach(item=>{if(item.coords)navStops.push(item)})}navIndex=navStops.length?0:-1;updateNavBar()}
+function updateNavBar(){const bar=document.getElementById('mapNavBar');if(!bar)return;const on=mapMode==='day'&&navStops.length>0;bar.classList.toggle('visible',on);if(!on)return;
+const s=navStops[navIndex];document.getElementById('mapNavStatus').innerHTML=`<span class="map-nav-idx">${navIndex+1}/${navStops.length}</span><span class="map-nav-name">${esc(s.title)}</span><span class="map-nav-time">${s.time&&s.time!=='—'?s.time:''}</span>`;
+document.getElementById('mapNavPrev').disabled=navIndex<=0;
+document.getElementById('mapNavNext').disabled=navIndex>=navStops.length-1}
+function mapNavFocus(){if(navIndex<0||!map)return;const s=navStops[navIndex];map.flyTo(s.coords,15,{duration:.8});const mk=mapMarkers[navIndex];if(mk)setTimeout(()=>mk.openPopup(),850)}
+function mapNavStep(dir){if(!navStops.length||!map)return;const ni=navIndex+dir;if(ni<0||ni>=navStops.length)return;
+const from=navStops[navIndex].coords,to=navStops[ni].coords;navIndex=ni;updateNavBar();
+animateTravel(from,to,()=>{const mk=mapMarkers[navIndex];if(mk)mk.openPopup()})}
+function stopNavAnim(){if(navAnimId){cancelAnimationFrame(navAnimId);navAnimId=null}if(navTraveler&&map){map.removeLayer(navTraveler)}navTraveler=null;if(navTrail&&map){map.removeLayer(navTrail)}navTrail=null}
+function travelerEmoji(km){return km>80?'✈️':km>=1.5?'🚗':'🚶'}
+let navSeq=0;
+function animateTravel(from,to,done){stopNavAnim();map.closePopup();
+const seq=++navSeq;
+const straight=haversine(from[0],from[1],to[0],to[1]);
+const key=from.join(',')+'>'+to.join(',');
+const run=path=>{if(seq!==navSeq)return;if(path.length<2)path=[from,to];
+ map.fitBounds(L.latLngBounds(path),{padding:[70,70],maxZoom:15});
+ const segs=[];let total=0;for(let i=1;i<path.length;i++){const d=haversine(path[i-1][0],path[i-1][1],path[i][0],path[i][1]);segs.push(d);total+=d}
+ if(!total){map.flyTo(to,15,{duration:.6});if(done)setTimeout(done,650);return}
+ const dur=Math.min(2800,Math.max(1200,total*250));
+ const icon=L.divIcon({className:'',html:`<div class="nav-traveler">${travelerEmoji(straight)}</div>`,iconSize:[34,34],iconAnchor:[17,17]});
+ navTraveler=L.marker(path[0],{icon,zIndexOffset:1500}).addTo(map);
+ navTrail=L.polyline([path[0]],{color:'#F5A623',weight:4,opacity:.95}).addTo(map);
+ const t0=performance.now();const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+ const step=now=>{const p=Math.min(1,(now-t0)/dur);const target=ease(p)*total;
+  let acc=0,pos=path[path.length-1],cut=path.length;
+  for(let i=0;i<segs.length;i++){if(acc+segs[i]>=target){const f=segs[i]?(target-acc)/segs[i]:0;pos=[path[i][0]+(path[i+1][0]-path[i][0])*f,path[i][1]+(path[i+1][1]-path[i][1])*f];cut=i+1;break}acc+=segs[i]}
+  if(navTraveler)navTraveler.setLatLng(pos);
+  if(navTrail)navTrail.setLatLngs(path.slice(0,cut).concat([pos]));
+  if(p<1){navAnimId=requestAnimationFrame(step)}
+  else{navAnimId=null;setTimeout(()=>{if(seq!==navSeq)return;stopNavAnim();map.flyTo(to,15,{duration:.6});if(done)setTimeout(()=>{if(seq===navSeq)done()},650)},300)}};
+ navAnimId=requestAnimationFrame(step)};
+if(navLegCache.has(key)){run(navLegCache.get(key));return}
+if(straight>80){// 항공 등 장거리 — 완만한 곡선 경로
+ const path=[];for(let i=0;i<=48;i++){const t=i/48;const lift=Math.sin(t*Math.PI)*straight*.0006;path.push([from[0]+(to[0]-from[0])*t+lift,from[1]+(to[1]-from[1])*t])}
+ navLegCache.set(key,path);run(path);return}
+const prof=straight<1.5?'foot':'driving';
+fetch(`https://router.project-osrm.org/route/v1/${prof}/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`)
+ .then(r=>r.json()).then(d=>{const geom=d.routes&&d.routes[0]?d.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]):[from,to];navLegCache.set(key,geom);run(geom)})
+ .catch(()=>run([from,to]))}
 
 // ══════════ ROUTE + OPTIMIZE ══════════
 function optimizeRoute(items){const wc=items.filter(i=>i.coords);if(wc.length<3)return null;
@@ -730,9 +780,7 @@ PREFETCH_ZOOMS.forEach(z=>{
 const x1=lonToTileX(area.lng-area.radius,z),x2=lonToTileX(area.lng+area.radius,z);
 const y1=latToTileY(area.lat+area.radius,z),y2=latToTileY(area.lat-area.radius,z);
 for(let x=Math.min(x1,x2);x<=Math.max(x1,x2);x++)for(let y=Math.min(y1,y2);y<=Math.max(y1,y2);y++){
-// 다크/라이트 두 테마 모두 캐싱
-tiles.push(`https://a.basemaps.cartocdn.com/dark_all/${z}/${x}/${y}.png`);
-tiles.push(`https://a.basemaps.cartocdn.com/light_all/${z}/${x}/${y}.png`)
+tiles.push(`https://tile.openstreetmap.org/${z}/${x}/${y}.png`)
 }})});
 btn.disabled=true;btn.textContent='⏳';
 let done=0,failed=0;const total=tiles.length;
@@ -791,6 +839,10 @@ window.addEventListener('offline',()=>{showToast('오프라인 모드 — 로컬
 // ══════════ 🎫 VOUCHER (예약·바우처 통합 확인) ══════════
 const VSTATUS={confirmed:{label:'✅ 확정',cls:'v-ok'},pending:{label:'🟡 확인필요',cls:'v-pending'},unbooked:{label:'❗미예약',cls:'v-no'}};
 let voucherTab='flight';
+// 바우처는 예민한 정보(예약번호·계정·바우처 사진) — 이 계정으로 구글 로그인해야만 열람 가능
+const VOUCHER_ALLOWED=['3hosungo@gmail.com'];
+function voucherAuthed(){return !!(fbUser&&fbUser.email&&VOUCHER_ALLOWED.includes(fbUser.email))}
+function voucherLockHtml(){return`<div class="v-lock"><div class="v-lock-icon">🔒</div><div class="v-lock-title">잠긴 화면입니다</div><div class="v-lock-sub">예약번호 · 계정 · 바우처 사진은 예민한 정보라<br><strong>3hosungo@gmail.com</strong> 구글 로그인 시에만 볼 수 있습니다${fbUser&&fbUser.email?`<br><br><span style="color:#f87171">현재 로그인: ${esc(fbUser.email)} — 열람 권한 없음</span>`:''}</div><button class="v-lock-btn" onclick="signIn()">🔑 Google 계정으로 로그인</button></div>`}
 
 function switchVoucherTab(t){voucherTab=t;renderVoucherView()}
 
@@ -803,6 +855,7 @@ function vRefChip(ref,label){if(!ref||ref==='—'||ref==='미예약')return`<spa
 return`<button class="v-ref" onclick="event.stopPropagation();copyText('${esc(ref)}','${esc(label||'예약번호')}')" title="탭하면 복사">${esc(ref)} <span class="v-copy">복사</span></button>`}
 
 function renderVoucherView(){const el=document.getElementById('voucherView');const V=window.VOUCHER_DATA;
+if(!voucherAuthed()){el.innerHTML='<div class="prep-title">🎫 예약 · 바우처</div>'+voucherLockHtml();return}
 if(!V){el.innerHTML='<div class="prep-title">🎫 바우처</div><div style="color:#64748b;font-size:12px">바우처 데이터가 없습니다</div>';return}
 const tabs=[['flight','✈️ 항공'],['hotel','🏨 숙소'],['booking','🎫 예약·투어'],['cash','💵 현금·현장결제'],['doc','📄 필수서류']];
 const nav=`<div class="v-tabs">${tabs.map(([k,l])=>`<button class="v-tab ${voucherTab===k?'active':''}" onclick="switchVoucherTab('${k}')">${l}</button>`).join('')}</div>`;
@@ -825,6 +878,7 @@ if(voucherTab==='flight'){
  ${f.account?`<div class="v-sub-block"><div class="v-sub-title">계정</div><div class="v-row"><span class="v-key">아이디</span><span class="v-val">${vRefChip(f.account[0],'아이디')}</span></div><div class="v-row"><span class="v-key">비밀번호</span><span class="v-val"><span class="v-secret" id="sec-f${f.no}" data-val="${esc(f.account[1])}" data-shown="0">••••••••</span> <button class="v-eye" onclick="toggleSecret('sec-f${f.no}')">👁 표시</button> <button class="v-eye" onclick="copyText('${esc(f.account[1])}','비밀번호')">복사</button></span></div></div>`:''}
  ${f.note?`<div class="v-note">💡 ${esc(f.note)}</div>`:''}
  ${f.url?`<a class="v-link" href="${esc(f.url)}" target="_blank">🔗 예약·조회 페이지 열기</a>`:''}
+ ${vImgBlock('f'+f.no)}
  </div>`}).join('');
 }
 
@@ -847,13 +901,14 @@ else if(voucherTab==='hotel'){
   ${h.url?`<a class="v-link" href="${esc(h.url)}" target="_blank">🔗 예약 페이지</a>`:''}
   ${h.coords?`<a class="v-link" href="${gmapsDirUrl(h.coords,h.name2.split(' · ')[0])}" target="_blank">🧭 길찾기</a>`:''}
  </div>
+ ${vImgBlock('h'+h.no)}
  </div>`).join('');
 }
 
 else if(voucherTab==='booking'){
  const left=V.bookings.filter(b=>b.status!=='confirmed').length;
  bodyHtml=(left?`<div class="v-alert">아직 확정되지 않은 항목 <strong>${left}건</strong> — 예약 시 '무료취소 가능' 옵션인지 확인하세요</div>`:'')
- +V.bookings.map(b=>{const st=VSTATUS[b.status]||VSTATUS.pending;
+ +V.bookings.map((b,bi)=>{const st=VSTATUS[b.status]||VSTATUS.pending;
  return`<div class="v-card ${st.cls}">
  <div class="v-card-head"><div><div class="v-card-title">${esc(b.name)}</div><div class="v-card-sub">${esc(b.kind)} · ${esc(b.when)}</div></div><span class="v-badge ${st.cls}">${st.label}</span></div>
  <div class="v-grid">
@@ -862,6 +917,7 @@ else if(voucherTab==='booking'){
  </div>
  ${b.note?`<div class="v-note">${esc(b.note)}</div>`:''}
  ${b.url?`<a class="v-link" href="${esc(b.url)}" target="_blank">🔗 예약 페이지 열기</a>`:''}
+ ${vImgBlock('b'+bi)}
  </div>`}).join('');
 }
 
@@ -882,5 +938,91 @@ else if(voucherTab==='doc'){
 }
 
 el.innerHTML=`<div class="prep-title">🎫 예약 · 바우처</div>
-<div class="v-intro">예약번호를 탭하면 클립보드에 복사됩니다. 이 화면은 오프라인에서도 그대로 열립니다.</div>
-${nav}<div class="v-body">${bodyHtml}</div>`}
+<div class="v-intro">예약번호를 탭하면 클립보드에 복사됩니다. 📷 버튼으로 바우처 사진(JPG)을 저장하면 오프라인에서도 바로 열립니다.</div>
+${nav}<div class="v-body">${bodyHtml}</div>`;
+hydrateVoucherImages()}
+
+// ══════════ 📷 바우처 이미지 (IndexedDB 저장 — 오프라인 열람) ══════════
+let vimgDbP=null,vimgPendingVid=null,vvState={vid:null,imgs:[],idx:0,url:null};
+function vimgOpenDb(){if(vimgDbP)return vimgDbP;vimgDbP=new Promise((res,rej)=>{const rq=indexedDB.open('voucher_images',1);
+rq.onupgradeneeded=()=>{const st=rq.result.createObjectStore('imgs',{keyPath:'id',autoIncrement:true});st.createIndex('vid','vid')};
+rq.onsuccess=()=>res(rq.result);rq.onerror=()=>{vimgDbP=null;rej(rq.error)}});return vimgDbP}
+function vimgList(vid){return vimgOpenDb().then(db=>new Promise((res,rej)=>{const out=[];const rq=db.transaction('imgs').objectStore('imgs').index('vid').openCursor(IDBKeyRange.only(vid));
+rq.onsuccess=()=>{const c=rq.result;if(c){out.push(c.value);c.continue()}else res(out)};rq.onerror=()=>rej(rq.error)}))}
+function vimgAdd(vid,blob,name){return vimgOpenDb().then(db=>new Promise((res,rej)=>{const tx=db.transaction('imgs','readwrite');tx.objectStore('imgs').add({vid,blob,name:name||'voucher.jpg',ts:Date.now()});tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error)}))}
+function vimgDelete(id){return vimgOpenDb().then(db=>new Promise((res,rej)=>{const tx=db.transaction('imgs','readwrite');tx.objectStore('imgs').delete(id);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error)}))}
+
+function vImgBlock(vid){return`<div class="vimg-block" data-vid="${vid}"><button class="vimg-add" onclick="addVoucherImage('${vid}')">📷 바우처 사진(JPG) 추가</button></div>`}
+function hydrateVoucherImages(){if(!voucherAuthed())return;document.querySelectorAll('.vimg-block').forEach(el=>{const vid=el.dataset.vid;
+vimgList(vid).then(imgs=>{el.innerHTML=`<div class="vimg-thumbs">${imgs.map((im,i)=>`<img class="vimg-thumb" src="${URL.createObjectURL(im.blob)}" onload="window.URL.revokeObjectURL(this.src)" onclick="openVoucherViewer('${vid}',${i})" alt="바우처">`).join('')}<button class="vimg-add ${imgs.length?'vimg-add-mini':''}" onclick="addVoucherImage('${vid}')">📷 ${imgs.length?'+':'바우처 사진(JPG) 추가'}</button></div>`}).catch(()=>{})})}
+
+function voucherTitleFor(vid){const V=window.VOUCHER_DATA;if(!V)return'바우처';const t=vid[0],n=vid.slice(1);
+if(t==='f'){const f=V.flights.find(x=>String(x.no)===n);return f?'✈️ '+f.leg:'바우처'}
+if(t==='h'){const h=V.hotels.find(x=>String(x.no)===n);return h?'🏨 '+h.name:'바우처'}
+if(t==='b'){const b=V.bookings[+n];return b?'🎫 '+b.name:'바우처'}
+return'바우처'}
+
+// 일정 항목 → 바우처 id 매칭 (제목·메모의 예약번호/키워드 기반, 저장 데이터에도 그대로 동작)
+function voucherIdFor(item){const title=item.title||'';const s=title+' '+(item.memo||'')+' '+(item.desc||'');
+if(item.type==='hotel'){
+ if(/3508557|머큐어/.test(s))return'h1';
+ if(/1694479710|레전드/.test(s))return'h2';
+ if(/1694459164|엘리오스/.test(s))return'h3';
+ if(/3510267|그란 ?호텔/.test(s))return'h4';
+ if(/1694841847|H10|메트로폴리탄/.test(s))return'h5'}
+if(item.type==='flight'){
+ if(/OZ0511/.test(s))return'f1';
+ if(/OZ0512/.test(s))return'f5';
+ if(/부엘링|IHHNHP/.test(s))return'f4';
+ if(/포르투 ?→ ?팔마/.test(s))return'f3';
+ if(/바르셀로나 ?→ ?포르투/.test(s))return'f2'}
+if(/가우디투어|EXP-20260705/.test(s))return'b0';
+if(/사그라다파밀리아 입장|102753344/.test(s))return'b1';
+if(/웨딩스냅|스냅 촬영/.test(title))return'b2';
+if(/렌터카|Wiber|165001403/.test(s))return'b3';
+if(/크루즈/.test(title))return'b4';
+if(/나무 트램/.test(title))return'b5';
+if(/라로카빌리지 셔틀/.test(title))return'b6';
+if(/엘글롭/.test(title))return'b7';
+if(/Antigua/.test(title))return'b8';
+if(/Nautilus/.test(title))return'b9';
+if(/렐루서점/.test(title))return'b10';
+return null}
+
+function openVoucherFromCard(vid){
+if(!voucherAuthed()){showToast('🔒 바우처는 3hosungo@gmail.com 로그인 시에만 열람 가능');switchView('voucher');return}
+vimgList(vid).then(imgs=>{if(imgs.length){openVoucherViewer(vid,0)}else{showToast('저장된 바우처 사진 없음 — 사진을 선택해 추가하세요');addVoucherImage(vid)}}).catch(()=>showToast('바우처 저장소 오류'))}
+
+function addVoucherImage(vid){
+if(!voucherAuthed()){showToast('🔒 바우처는 3hosungo@gmail.com 로그인 시에만 저장 가능');switchView('voucher');return}
+vimgPendingVid=vid;const inp=document.getElementById('vimgInput');inp.value='';inp.click()}
+document.getElementById('vimgInput').addEventListener('change',async e=>{
+const vid=vimgPendingVid;const files=Array.from(e.target.files||[]).filter(f=>/^image\//.test(f.type));
+if(!vid||!files.length)return;
+try{for(const f of files)await vimgAdd(vid,f,f.name);
+showToast(`바우처 사진 ${files.length}장 저장됨 (오프라인 열람 가능)`);
+if(currentView==='voucher')hydrateVoucherImages()}catch(err){showToast('저장 실패 — 저장 공간 확인')}
+vimgPendingVid=null});
+
+function openVoucherViewer(vid,idx){
+if(!voucherAuthed()){showToast('🔒 바우처는 3hosungo@gmail.com 로그인 시에만 열람 가능');return}
+vimgList(vid).then(imgs=>{if(!imgs.length){showToast('저장된 바우처 사진이 없습니다');return}
+vvState={vid,imgs,idx:Math.min(idx||0,imgs.length-1),url:null};
+renderVoucherViewer();document.getElementById('vimgViewer').classList.add('visible')})}
+function renderVoucherViewer(){const im=vvState.imgs[vvState.idx];if(!im)return;
+if(vvState.url)URL.revokeObjectURL(vvState.url);vvState.url=URL.createObjectURL(im.blob);
+document.getElementById('vimgImg').src=vvState.url;
+document.getElementById('vimgTitle').textContent=voucherTitleFor(vvState.vid);
+document.getElementById('vimgCount').textContent=(vvState.idx+1)+' / '+vvState.imgs.length;
+document.getElementById('vimgPrev').disabled=vvState.idx<=0;
+document.getElementById('vimgNext').disabled=vvState.idx>=vvState.imgs.length-1}
+function voucherViewerStep(d){const ni=vvState.idx+d;if(ni<0||ni>=vvState.imgs.length)return;vvState.idx=ni;renderVoucherViewer()}
+function closeVoucherViewer(){document.getElementById('vimgViewer').classList.remove('visible');document.getElementById('vimgImg').src='';if(vvState.url){URL.revokeObjectURL(vvState.url);vvState.url=null}}
+function deleteCurrentVoucherImage(){const im=vvState.imgs[vvState.idx];if(!im)return;
+if(!confirm('이 바우처 사진을 삭제할까요?'))return;
+vimgDelete(im.id).then(()=>{vvState.imgs.splice(vvState.idx,1);
+if(!vvState.imgs.length)closeVoucherViewer();
+else{vvState.idx=Math.min(vvState.idx,vvState.imgs.length-1);renderVoucherViewer()}
+if(currentView==='voucher')hydrateVoucherImages();showToast('삭제됨')})}
+document.addEventListener('keydown',e=>{if(!document.getElementById('vimgViewer').classList.contains('visible'))return;
+if(e.key==='Escape')closeVoucherViewer();else if(e.key==='ArrowLeft')voucherViewerStep(-1);else if(e.key==='ArrowRight')voucherViewerStep(1)});

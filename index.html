@@ -81,6 +81,11 @@
   </div>
   <div id="map"></div>
   <div class="map-day-info" id="mapDayInfo"></div>
+  <div class="map-nav-bar" id="mapNavBar">
+    <button class="map-nav-btn" id="mapNavPrev" onclick="mapNavStep(-1)">◀ 이전</button>
+    <div class="map-nav-status" id="mapNavStatus" onclick="mapNavFocus()">동선 탐색</div>
+    <button class="map-nav-btn" id="mapNavNext" onclick="mapNavStep(1)">다음 ▶</button>
+  </div>
   <div class="map-action-stack">
     <button class="map-action-btn" id="mapGpsBtn" onclick="locateGPS()" title="내 위치">📍</button>
     <button class="map-action-btn" id="mapPrefetchBtn" onclick="prefetchOfflineTiles()" title="오프라인 지도 다운로드">📥</button>
@@ -96,7 +101,7 @@
 <div class="tips" id="tipsSection">
   <div class="tips-title">💡 여행 꿀팁</div>
   <div class="tips-body">
-    • <span class="hl-y">아직 미예약</span>: 라이언에어 2건 (9/16 BCN→OPO · 9/20 OPO→PMI) — 직항 편수 적어 서둘러야 함<br>
+    • <span class="hl-g">항공 5건 전부 예약 완료</span> — 라이언에어 2건(9/16·9/20) 예약번호는 앱/메일 확인 후 바우처 탭에 기록<br>
     • <span class="hl-p">현금 필수</span>: 포르투 스냅 잔금 €150 · 팔마 A2 공항버스 €5 (카드 태그 안 되는 경우)<br>
     • <span class="hl-g">렌터카 3종 실물</span>: 한국 면허증 + 국제(영문) 면허증 + 여권 — 캡처·복사본 불가<br>
     • <span class="hl-o">포르투 숙소</span>: 실내화 없음 → 다이소 욕실화 지참 · 구시가지 계단 많아 운동화<br>
@@ -174,6 +179,21 @@
   </div>
 </div>
 <div class="photo-modal" id="photoModal" onclick="this.classList.remove('visible')"><img src=""></div>
+<!-- 바우처 이미지 뷰어 -->
+<div class="vimg-viewer" id="vimgViewer">
+  <div class="vimg-topbar">
+    <div class="vimg-title" id="vimgTitle"></div>
+    <button class="vimg-close" onclick="closeVoucherViewer()">✕</button>
+  </div>
+  <div class="vimg-stage" id="vimgStage" onclick="if(event.target===this)closeVoucherViewer()"><img id="vimgImg" src="" alt="바우처"></div>
+  <div class="vimg-bottombar" id="vimgBottom">
+    <button class="vimg-nav" id="vimgPrev" onclick="voucherViewerStep(-1)">◀</button>
+    <div class="vimg-count" id="vimgCount"></div>
+    <button class="vimg-nav" id="vimgNext" onclick="voucherViewerStep(1)">▶</button>
+    <button class="vimg-del" id="vimgDel" onclick="deleteCurrentVoucherImage()">🗑 삭제</button>
+  </div>
+</div>
+<input type="file" id="vimgInput" accept="image/*" multiple style="display:none">
 <div class="swipe-indicator" id="swipeIndicator"></div>
 <div class="toast" id="toast"></div>
 <script src="trip-data.js"></script>
