@@ -137,40 +137,43 @@ window.DEFAULT_TRIP_DAYS=[
 ]},
 
 // ─────────────────────────────── D9
-{date:"9/21 (월)",region:"마요르카 — 렌터카 & 칼로데스모로 🏖️",color:"#F5A623",hotel:"엘리오스 마요르카 (2/2박)\n🕐 익일 체크아웃",schedule:[
+{date:"9/21 (월)",region:"마요르카 — 렌터카 & 남동부 해변 드라이브 🏖️",color:"#F5A623",rev:"mallorca-v2",hotel:"엘리오스 마요르카 (2/2박)\n🕐 익일 체크아웃\n🅿️ 호텔 주차 €10/일 — 팔마 시내는 차 두고 버스",schedule:[
 {time:"07:30",title:"🍳 기상 / 호텔 조식",placeName:"Helios Mallorca Hotel & Apartments",desc:"조식 맛있다는 현지 후기",type:"food",warn:"조식 시작 시간 확인 필요",coords:[39.5550,2.7350]},
 {time:"09:00",title:"★ 렌터카 픽업 — Wiber Rent",placeName:"Palma de Mallorca Airport",desc:"B3 아우디 A1\n대여 9/21 09:00 ~ 반납 9/24 15:00\n숙소→공항 A1 버스 또는 도보 25분",type:"move",status:"confirmed",warn:"필수 실물서류 3종: 한국 운전면허증 + 국제(영문)면허증 + 여권 — 캡처·복사본 절대 불가",memo:"예약번호 165001403",url:"https://blog.naver.com/inmo_o/224338081096",coords:[39.5517,2.7388]},
-{time:"10:00",title:"🌊 칼로 데스 모로 (Caló des Moro)",placeName:"Caló des Moro Mallorca",desc:"늦게 가면 사람 많음\n주차장 → 해변 도보 15~20분",type:"spot",warn:"화장실·매점 없음 — 돗자리·모자·양산·물·간식 챙기기",coords:[39.3340,3.1190]},
-{time:"13:00",title:"💡 점심 — 산타니(Santanyí) 마을",placeName:"Santanyí Mallorca",desc:"칼로데스모로에서 차로 약 15분\n지난 여행 방문 · 마을 구경 + 식사 한번에",type:"food",cost:50000,coords:[39.3552,3.1276]},
-{time:"15:00",title:"💡 숙소 복귀 — 호텔 수영장 / 해변",placeName:"Helios Mallorca Hotel & Apartments",desc:"수영장 잘 구비되어 있음\n도보 2분 해변은 '마요르카 해변' 느낌은 아니라는 후기",type:"etc",memo:"팔마 시내 갈 때는 차 두고 버스 이용",coords:[39.5550,2.7350]},
-{time:"16:00",title:"🚌 팔마 시내 구경",placeName:"Palma de Mallorca",desc:"차는 숙소에 두고 호텔 뒤에서 버스로 30분",type:"spot",warn:"팔마 주차난 심함 — 렌터카 두고 버스로",coords:[39.5696,2.6502]},
-{time:"17:00",title:"💡 간식 — born8 or 리바레노 젤라또",placeName:"born8 Palma",desc:"born8 야외테이블 햄버거 / 리바레노 젤라또\n지난 여행 검증",type:"food",cost:20000,coords:[39.5700,2.6480]},
-{time:"18:00",title:"🏖️ 칼라 마요르 해변 + 편집샵",placeName:"Cala Major Palma",desc:"주변 편집샵 구경",type:"spot",coords:[39.5546,2.6046]},
-{time:"19:00",title:"🛍️ 자라 / 로에베 쇼핑",placeName:"Zara Palma de Mallorca",type:"shopping",coords:[39.5710,2.6510]},
-{time:"20:00",title:"⛪ 팔마 대성당 + 플리마켓",placeName:"Cathedral of Palma de Mallorca",desc:"야경도 좋음",type:"spot",coords:[39.5674,2.6486]},
+{time:"09:40",title:"🌊 에스 트렌크 (Es Trenc) 해변",placeName:"Playa de es Trenc",desc:"'마요르카의 카리브' ⭐4.5 · 공항에서 차 35분\nSes Covetes 대형 유료주차장 → 평지 도보 5~10분",type:"spot",memo:"칼로데스모로보다 주차 쉽고 덜 붐빔 · 선베드/파라솔 대여 가능",warn:"그늘 거의 없음 — 모자·물·선크림 필수",coords:[39.3586,2.9871]},
+{time:"12:30",title:"💡 대안 — 칼로 데스 모로 (시간·체력 되면)",placeName:"Caló des Moro Mallorca",desc:"사진은 최고지만 주차 어렵고\n주차장 → 해변 도보 15~20분 · 화장실·매점 없음",type:"spot",memo:"오전 일찍 아니면 만차 잦음 — Es Trenc로 충분하면 패스",coords:[39.3340,3.1190]},
+{time:"13:00",title:"🍽️ 점심 — 산타니(Santanyí) 마을",placeName:"Santanyí Mallorca",desc:"Es Trenc에서 차 20분 · 지난 여행 방문\n골목 예쁜 내륙 마을 — 구경 + 식사 한번에",type:"food",cost:50000,coords:[39.3552,3.1276]},
+{time:"14:30",title:"📸 칼라 피게라 (Cala Figuera) 어촌",placeName:"Cala Figuera Santanyí",desc:"절벽 사이 그림같은 어촌 포토스팟 ⭐4.5\n산타니에서 차 10분 · 마을 초입 주차 여유",type:"spot",memo:"30분~1시간 가벼운 산책 코스",coords:[39.3320,3.1660]},
+{time:"16:00",title:"🏊 숙소 복귀 — 수영장 / 휴식",placeName:"Helios Mallorca Hotel & Apartments",desc:"차는 호텔 주차(€10/일)에 두기\n수영장 잘 구비 (현지 후기)",type:"etc",memo:"팔마 시내는 주차난 심함 — 차 두고 버스가 정답",coords:[39.5550,2.7350]},
+{time:"17:30",title:"🚌 버스로 팔마 시내",placeName:"Palma de Mallorca",desc:"호텔 뒤에서 버스 30분",type:"move",coords:[39.5696,2.6502]},
+{time:"18:00",title:"⛪ 팔마 대성당 + 구시가지 골목",placeName:"Cathedral of Palma de Mallorca",desc:"야경까지 ⭐4.7 — 팔마 필수 코스",type:"spot",coords:[39.5674,2.6486]},
+{time:"19:00",title:"💡 간식 — born8 or 리바레노 젤라또",placeName:"born8 Palma",desc:"born8 야외테이블 햄버거 / 리바레노 젤라또\n지난 여행 검증",type:"food",cost:20000,coords:[39.5700,2.6480]},
+{time:"19:30",title:"🛍️ 보른 거리 쇼핑 (자라/로에베)",placeName:"Passeig del Born Palma",desc:"명품·SPA 몰린 팔마 중심 거리",type:"shopping",coords:[39.5710,2.6510]},
 {time:"21:00",title:"🍽️ 저녁 — 타파스",placeName:"Alchemy Restaurante Palma",desc:"💡 Alchemy Restaurante (지난 여행 방문지)",type:"food",cost:55000,coords:[39.5705,2.6490]},
-{time:"22:30",title:"💡 호텔 바에서 한 잔",placeName:"Helios Mallorca Hotel & Apartments",desc:"현지 후기 — 음료 가격 합리적이고 맛있음",type:"etc",cost:20000,coords:[39.5550,2.7350]}
+{time:"22:30",title:"💡 호텔 바에서 한 잔",placeName:"Helios Mallorca Hotel & Apartments",desc:"버스로 복귀 후\n현지 후기 — 음료 가격 합리적이고 맛있음",type:"etc",cost:20000,coords:[39.5550,2.7350]}
 ]},
 
 // ─────────────────────────────── D10
-{date:"9/22 (화)",region:"마요르카 — 발데모사·데이아·소예르 🏔️",color:"#F5A623",hotel:"그란 호텔 소예르 ⭐⭐⭐⭐⭐\nGran Hotel Sóller\n📋 트립비토즈 #3510267\n🕐 체크인 15시 / 체크아웃 12시 (1/2박)\n💰 2박 622,354원 (앱할인)\n🍳 조식 + 스파 포함 · 무료취소 가능\n📍 주차 €18/일\n💵 현장결제 30,131원",schedule:[
+{date:"9/22 (화)",region:"마요르카 — 트라문타나 드라이브 🏔️",color:"#F5A623",rev:"mallorca-v2",hotel:"그란 호텔 소예르 ⭐⭐⭐⭐⭐\nGran Hotel Sóller\n📋 트립비토즈 #3510267\n🕐 체크인 15시 / 체크아웃 12시 (1/2박)\n💰 2박 622,354원 (앱할인)\n🍳 조식 + 스파 포함 · 무료취소 가능\n📍 주차 €18/일\n💵 현장결제 30,131원",schedule:[
 {time:"08:00",title:"🍳 기상 및 조식",placeName:"Helios Mallorca Hotel & Apartments",type:"food",coords:[39.5550,2.7350]},
 {time:"09:00",title:"🏨 엘리오스 마요르카 체크아웃",placeName:"Helios Mallorca Hotel & Apartments",type:"hotel",coords:[39.5550,2.7350]},
-{time:"09:30",title:"🚗 북부 소도시 드라이브 시작",desc:"발데모사 → 데이아 → 소예르\n트라문타나 산길",type:"move",warn:"산길 커브 많음 — 멀미약 챙기기",url:"https://blog.naver.com/djgy5405/224211584710",coords:[39.5550,2.7350]},
-{time:"10:00",title:"⛪ 발데모사 구경",placeName:"Valldemossa Mallorca",desc:"쇼팽이 머문 수도원 마을",type:"spot",coords:[39.7108,2.6224]},
+{time:"09:30",title:"🚗 트라문타나 드라이브 시작",desc:"발데모사 → 손 마로치 → 데이아 → 소예르\n구간별 15~20분 · 총 차량 1시간 남짓",type:"move",warn:"산길 커브 많음 — 멀미약 챙기기",url:"https://blog.naver.com/djgy5405/224211584710",coords:[39.5550,2.7350]},
+{time:"10:00",title:"⛪ 발데모사 구경",placeName:"Valldemossa Mallorca",desc:"쇼팽이 머문 카르투하 수도원 마을 ⭐4.5\n마을 입구 공영주차장 넉넉 (유료)",type:"spot",memo:"골목 안 차량 진입 금지 — 입구에 주차 후 도보",coords:[39.7108,2.6224]},
 {time:"10:45",title:"💡 Forn i Pastisseria Can Molinas",placeName:"Forn i Pastisseria Can Molinas Valldemossa",desc:"마을 대표 빵집 (지난 여행 검증)\n엔사이마다",type:"food",cost:15000,coords:[39.7100,2.6216]},
-{time:"11:30",title:"🏘️ 데이아 구경",placeName:"Deià Mallorca",desc:"예술가의 마을\n💡 Terra Origens 등 편집샵 · 공방 많고 기념품 사기 좋음",type:"spot",coords:[39.7482,2.6494]},
+{time:"11:45",title:"🌅 손 마로치 (Son Marroig) 전망대",placeName:"Son Marroig",desc:"사 포라다다 절벽 뷰 ⭐4.6\nMa-10 도로변 주차장 바로 앞 — 15분 정차 코스",type:"spot",memo:"발데모사→데이아 가는 길에 자연스럽게 들르는 위치",coords:[39.7452,2.6215]},
+{time:"12:15",title:"🏘️ 데이아 구경",placeName:"Deià Mallorca",desc:"예술가의 마을 ⭐4.4\n💡 Terra Origens 등 편집샵 · 공방 많고 기념품 사기 좋음",type:"spot",warn:"주차 타이트 — 마을 초입 주차장 만차면 무리 말고 차창 뷰로 패스",coords:[39.7482,2.6494]},
 {time:"13:00",title:"🍽️ 점심 — 데이아 / 소예르 인근",placeName:"Sa Font Fresca Deià",desc:"💡 Sa Font Fresca (데이아) or La Posada\n지난 여행 방문",type:"food",cost:50000,coords:[39.7490,2.6480]},
 {time:"15:00",title:"🏨 그란 호텔 소예르 체크인 (15시)",placeName:"Gran Hotel Sóller",desc:"5성급 · 조식 + 스파 포함",type:"hotel",status:"confirmed",memo:"예약번호 3510267 · 주차 €18/일 · 현장결제 30,131원",cost:622354,coords:[39.7660,2.7155]},
 {time:"16:00",title:"💡 호텔 스파 이용 시간 예약",placeName:"Gran Hotel Sóller",desc:"요금 포함 · 인기 시간대 미리 잡아두기",type:"etc",coords:[39.7660,2.7155]},
 {time:"17:00",title:"🍊 소예르 시내 산책",placeName:"Plaça Constitució Sóller",desc:"오렌지 광장 · 소예르 성당",type:"spot",coords:[39.7655,2.7148]},
-{time:"20:00",title:"🥘 저녁 — 호텔 or 소예르 시내",placeName:"Brises del Mar Port de Sóller",desc:"💡 Brises del Mar — 소예르 빠에야 맛집 (지난 여행 검증)",type:"food",cost:55000,coords:[39.7952,2.6908]}
+{time:"20:00",title:"🥘 저녁 — 호텔 or 소예르 시내",placeName:"Brises del Mar Port de Sóller",desc:"💡 Brises del Mar — 소예르 빠에야 맛집 (지난 여행 검증)",type:"food",memo:"항구까지 차 10분 — 스파 일정 보고 시내/항구 결정",cost:55000,coords:[39.7952,2.6908]}
 ]},
 
 // ─────────────────────────────── D11
-{date:"9/23 (수)",region:"마요르카 — 소예르 트램 & 스파 🚃",color:"#F5A623",hotel:"그란 호텔 소예르 (2/2박)\n🕐 익일 체크아웃 12시",schedule:[
+{date:"9/23 (수)",region:"마요르카 — 소예르 트램 & 스파 🚃",color:"#F5A623",rev:"mallorca-v2",hotel:"그란 호텔 소예르 (2/2박)\n🕐 익일 체크아웃 12시\n🅿️ 오늘은 차 놔두고 트램으로",schedule:[
 {time:"09:00",title:"🍳 호텔 조식 (포함)",placeName:"Gran Hotel Sóller",desc:"트라문타나 뷰",type:"food",coords:[39.7660,2.7155]},
-{time:"10:00",title:"⛪ 소예르 성당",placeName:"Església de Sant Bartomeu Sóller",desc:"오렌지 광장 앞",type:"spot",coords:[39.7656,2.7147]},
+{time:"09:45",title:"💡 포르날루치 (Fornalutx) 아침 드라이브",placeName:"Fornalutx Mallorca",desc:"'스페인에서 가장 예쁜 마을' ⭐4.6 · 차 10분\n돌담 골목 + 오렌지밭 — 아침엔 주차 여유",type:"spot",memo:"선택 코스 — 30~40분이면 충분, 트램 시간 전에 복귀",coords:[39.7830,2.7400]},
+{time:"10:30",title:"⛪ 소예르 성당",placeName:"Església de Sant Bartomeu Sóller",desc:"오렌지 광장 앞",type:"spot",coords:[39.7656,2.7147]},
 {time:"11:00",title:"🚃 소예르 나무 트램",placeName:"Tranvía de Sóller",desc:"성당 앞 ↔ 항구 · 오렌지밭 뷰",type:"spot",status:"pending",warn:"예약 필요 여부 확인",cost:20000,coords:[39.7655,2.7148]},
 {time:"11:30",title:"⛵ 소예르 항구 도착",placeName:"Port de Sóller",desc:"항구 산책",type:"spot",coords:[39.7952,2.6908]},
 {time:"12:00",title:"💡 Ocea 카페 (항구)",placeName:"Ocea Port de Sóller",desc:"지난 여행 방문 · 항구 걸으면서",type:"food",cost:15000,coords:[39.7960,2.6920]},
@@ -182,11 +185,11 @@ window.DEFAULT_TRIP_DAYS=[
 ]},
 
 // ─────────────────────────────── D12
-{date:"9/24 (목)",region:"마요르카 → 바르셀로나 🍷",color:"#E8725A",hotel:"H10 메트로폴리탄 호텔\nH10 Metropolitan Hotel\n📋 아고다 #1694841847\n🕐 체크인 15시 / 체크아웃 12시 (1/1박)\n💰 1박 394,984원 (앱할인)\n🍳 조식 미포함\n⚠️ 무료취소 9/21 23:59(현지시간)까지\n💵 도시세 18,660원 (현장)\n📦 체크아웃 후 짐보관 가능",schedule:[
+{date:"9/24 (목)",region:"마요르카 → 바르셀로나 🍷",color:"#E8725A",rev:"mallorca-v2",hotel:"H10 메트로폴리탄 호텔\nH10 Metropolitan Hotel\n📋 아고다 #1694841847\n🕐 체크인 15시 / 체크아웃 12시 (1/1박)\n💰 1박 394,984원 (앱할인)\n🍳 조식 미포함\n⚠️ 무료취소 9/21 23:59(현지시간)까지\n💵 도시세 18,660원 (현장)\n📦 체크아웃 후 짐보관 가능",schedule:[
 {time:"09:00",title:"🍳 호텔 조식",placeName:"Gran Hotel Sóller",type:"food",coords:[39.7660,2.7155]},
 {time:"10:00",title:"💡 마지막 소예르 산책 / 기념품",placeName:"Plaça Constitució Sóller",desc:"공방·편집샵 많음 · 체크아웃 전 여유시간",type:"shopping",coords:[39.7655,2.7148]},
 {time:"12:00",title:"🏨 그란 호텔 소예르 체크아웃 (12시)",placeName:"Gran Hotel Sóller",type:"hotel",coords:[39.7660,2.7155]},
-{time:"13:00",title:"⛽ 렌터카 주유 후 팔마 공항 반납",placeName:"Palma de Mallorca Airport",desc:"15:00까지 반납",type:"move",warn:"주유/반납 절차 사전 확인 — 참고 블로그",url:"https://blog.naver.com/inmo_o/224338081096",coords:[39.5517,2.7388]},
+{time:"13:00",title:"⛽ 렌터카 주유 후 팔마 공항 반납",placeName:"Palma de Mallorca Airport",desc:"소예르 터널 경유 공항까지 차 35분\n15:00까지 반납",type:"move",warn:"주유/반납 절차 사전 확인 — 참고 블로그",memo:"주유는 공항 5분 거리 Can Pastilla 쪽 주유소에서 가득 채우기 (풀탱크 반납 조건 확인)",url:"https://blog.naver.com/inmo_o/224338081096",coords:[39.5517,2.7388]},
 {time:"14:00",title:"🛄 팔마 공항 도착",placeName:"Palma de Mallorca Airport",type:"move",coords:[39.5517,2.7388]},
 {time:"16:30",title:"✈️ 부엘링 팔마 → 바르셀로나",placeName:"Palma de Mallorca Airport",desc:"약 1시간 · 수하물 25kg(유료)\n2인 196,945원",type:"flight",status:"confirmed",memo:"예약번호 IHHNHP · 계정 rachel506wnsgk@gmail.com",bookingUrl:"https://tickets.vueling.com/ChangeItinerary.aspx",cost:196945,coords:[39.5517,2.7388]},
 {time:"17:30",title:"🛬 바르셀로나 도착",placeName:"Barcelona El Prat Airport",type:"flight",coords:[41.2971,2.0785]},
